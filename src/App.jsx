@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Activity, Trophy, Calendar, Flame, TrendingUp, RotateCcw } from 'lucide-react';
 import Button from './components/Button';
 import Card from './components/Card';
-import ProgressBar from './components/ProgressBar';
 import ContributionCalendar from './components/ContributionCalendar';
 import { useAuth } from './hooks/useAuth';
 import { useUserData } from './hooks/useUserData';
@@ -76,12 +75,6 @@ export default function App() {
     setUsernameInput('');
   };
 
-  const viewLabel = useMemo(() => {
-    if (view === VIEWS.DASHBOARD) return 'Log';
-    if (view === VIEWS.STATS) return 'Stats';
-    return 'Rank';
-  }, [view]);
-
   if (authError) {
     return (
       <div className="min-h-screen bg-neutral-white flex items-center justify-center p-4">
@@ -153,9 +146,20 @@ export default function App() {
   }
 
   const { training_reps = 0, official_reps = 0 } = userData;
+  const DAILY_GOAL = 87;
+  const CHALLENGE_GOAL = 2000;
+  const heroLabel = isTraining ? "Today's Effort" : 'Challenge Total';
+  const heroCurrent = isTraining ? todayReps : official_reps;
+  const heroGoal = isTraining ? DAILY_GOAL : CHALLENGE_GOAL;
+  const heroProgress = heroGoal ? Math.min(heroCurrent / heroGoal, 1) : 0;
+  const footerLabel = isTraining ? 'Challenge Total' : 'Remaining';
+  const footerValue = isTraining ? official_reps : Math.max(CHALLENGE_GOAL - official_reps, 0);
+  const footerProgress = isTraining
+    ? Math.min(official_reps / CHALLENGE_GOAL, 1)
+    : Math.min((CHALLENGE_GOAL - official_reps) / CHALLENGE_GOAL, 1);
 
   return (
-    <div className="min-h-screen bg-neutral-white pb-24 relative max-w-lg mx-auto shadow-2xl">
+    <div className="min-h-screen bg-neutral-white pb-8 relative max-w-lg mx-auto shadow-2xl">
       {showCelebration && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
           <div className="bg-brand-orange text-white px-6 py-4 rounded-lg shadow-lg text-center">
@@ -164,7 +168,7 @@ export default function App() {
           </div>
         </div>
       )}
-      <div className="bg-neutral-gray-light pt-12 pb-20 px-6 rounded-b-leaf relative overflow-hidden">
+      <div className="bg-[radial-gradient(circle_at_50%_0%,_#F0F2F5_0%,_#D1D5DB_100%)] pt-12 pb-20 px-6 rounded-b-leaf relative overflow-hidden">
         <div className="relative">
           <div className="flex justify-between items-start mb-6">
             <div>
@@ -192,48 +196,58 @@ export default function App() {
             </button>
           </div>
 
-          <Card variant="standard">
-            {isTraining ? (
-              <div className="space-y-6">
-                <ProgressBar
-                  current={todayReps}
-                  total={87}
-                  label="Done Today"
-                  subLabel="Target: 87"
-                  colorClass="bg-neutral-gray-mid"
-                />
-                <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-4">
-                  <span className="text-neutral-gray-mid text-sm font-medium">Training Total</span>
-                  <span className="text-xl font-bold">{training_reps}</span>
+          <div className="rounded-[28px] bg-white/65 backdrop-blur-xl border border-white/80 p-7 shadow-[0_4px_6px_rgba(0,0,0,0.02),0_12px_24px_rgba(0,0,0,0.05),inset_0_0_0_1px_rgba(255,255,255,0.5)]">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8E8E93] block mb-3">
+              {heroLabel}
+            </span>
+
+            <div className="flex items-end justify-between mb-6">
+              <span className="text-[68px] font-extrabold leading-[0.85] tracking-[-0.03em] bg-gradient-to-br from-[#FF5500] via-[#FF9F0A] to-[#FF5500] bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(255,85,0,0.15)]">
+                {heroCurrent}
+              </span>
+              <span className="text-[15px] font-semibold text-[#636366]/80">/ {heroGoal} reps</span>
+            </div>
+
+            <div className="h-2.5 rounded-full bg-black/5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] mb-7">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#FF9F0A] to-[#FF5500] shadow-[0_4px_12px_rgba(255,85,0,0.4)]"
+                style={{ width: `${Math.round(heroProgress * 100)}%` }}
+              />
+            </div>
+
+            <div className="border-t border-black/5 pt-4 flex items-center justify-between">
+              <span className="text-[13px] font-semibold text-[#8E8E93] tracking-[0.02em]">
+                {footerLabel}
+              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-[13px] font-semibold text-[#333]">{footerValue}</span>
+                <div className="w-20 h-1.5 rounded-full bg-black/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#AEAEB2]"
+                    style={{ width: `${Math.round(footerProgress * 100)}%` }}
+                  />
                 </div>
               </div>
-            ) : (
-              <div>
-                <ProgressBar
-                  current={official_reps}
-                  total={2000}
-                  label="Total Reps"
-                  subLabel="Goal: 2000"
-                  colorClass="bg-brand-orange"
-                />
-                <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-6">
-                  <div className="text-center">
-                    <span className="block text-2xl font-bold text-black">
-                      {2000 - official_reps}
-                    </span>
-                    <span className="text-xs text-neutral-gray-mid">Remaining</span>
-                  </div>
-                  <div className="h-8 w-[1px] bg-gray-200" />
-                  <div className="text-center">
-                    <span className="block text-2xl font-bold text-black">
-                      {Math.ceil((2000 - official_reps) / 23)}
-                    </span>
-                    <span className="text-xs text-neutral-gray-mid">Daily Avg Needed</span>
-                  </div>
-                </div>
+            </div>
+          </div>
+
+          {!isTraining && (
+            <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-6">
+              <div className="text-center">
+                <span className="block text-2xl font-bold text-black">
+                  {CHALLENGE_GOAL - official_reps}
+                </span>
+                <span className="text-xs text-neutral-gray-mid">Remaining</span>
               </div>
-            )}
-          </Card>
+              <div className="h-8 w-[1px] bg-gray-200" />
+              <div className="text-center">
+                <span className="block text-2xl font-bold text-black">
+                  {Math.ceil((CHALLENGE_GOAL - official_reps) / 23)}
+                </span>
+                <span className="text-xs text-neutral-gray-mid">Daily Avg Needed</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -427,11 +441,11 @@ export default function App() {
         )}
       </div>
 
-      <div className="text-center mt-12 mb-4">
-        <p className="text-xs text-neutral-gray-mid">
-          PushUp Challenge • 2026
-          <span className="ml-2">•</span>
-          <span className="ml-2">{viewLabel}</span>
+      <div className="mt-12 mb-8 h-px w-full bg-neutral-gray-light mx-6" />
+
+      <div className="text-center mt-12 mb-6">
+        <p className="text-xs text-[#858585] font-bold tracking-widest uppercase">
+          App Version 4.2.0
         </p>
       </div>
 
