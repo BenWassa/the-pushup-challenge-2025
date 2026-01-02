@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Activity, Trophy, Calendar, Flame, TrendingUp, RotateCcw } from 'lucide-react';
 import Button from './components/Button';
 import Card from './components/Card';
@@ -22,6 +22,8 @@ export default function App() {
 
   const [usernameInput, setUsernameInput] = useState('');
   const [view, setView] = useState(VIEWS.DASHBOARD);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const prevTodayRepsRef = useRef(0);
 
   const {
     userData,
@@ -44,6 +46,17 @@ export default function App() {
     const storedName = localStorage.getItem('pushup_username');
     if (storedName) loadUserProfile(storedName);
   }, [loadUserProfile, user]);
+
+  // Detect when daily goal (71) is reached
+  useEffect(() => {
+    const DAILY_GOAL = 71;
+    if (isTraining && todayReps >= DAILY_GOAL && prevTodayRepsRef.current < DAILY_GOAL) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 3000);
+    }
+    prevTodayRepsRef.current = todayReps;
+  }, [todayReps, isTraining]);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -138,6 +151,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-white pb-24 relative max-w-lg mx-auto shadow-2xl">
+      {showCelebration && (
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
+          <div className="bg-brand-orange text-white px-6 py-4 rounded-lg shadow-lg text-center">
+            <p className="font-bold text-lg">🎉 Daily Goal Crushed! 🎉</p>
+            <p className="text-sm opacity-90 mt-1">You hit 71 reps today!</p>
+          </div>
+        </div>
+      )}
       <div className="bg-neutral-gray-light pt-12 pb-20 px-6 rounded-b-leaf relative overflow-hidden">
         <div className="relative">
           <div className="flex justify-between items-start mb-6">
