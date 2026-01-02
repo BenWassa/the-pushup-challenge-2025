@@ -15,16 +15,16 @@ const ProgressBar = ({
       <div className="flex justify-between items-end mb-2">
         <div>
           <span className="text-4xl font-bold block leading-none">{current}</span>
-          <span className="text-xs text-neutral-grayText uppercase tracking-wider font-semibold">
+          <span className="text-xs text-neutral-gray-text uppercase tracking-wider font-semibold">
             {label}
           </span>
         </div>
         <div className="text-right">
-          <span className="text-lg font-bold text-neutral-grayText block">{total}</span>
-          <span className="text-xs text-neutral-grayText">{subLabel}</span>
+          <span className="text-lg font-bold text-neutral-gray-text block">{total}</span>
+          <span className="text-xs text-neutral-gray-text">{subLabel}</span>
         </div>
       </div>
-      <div className="h-4 w-full bg-neutral-grayLight rounded-full overflow-hidden relative">
+      <div className="h-4 w-full bg-neutral-gray-light rounded-full overflow-hidden relative">
         <div
           className={`h-full ${colorClass} transition-all duration-1000 ease-out rounded-full`}
           style={{ width: `${percentage}%` }}

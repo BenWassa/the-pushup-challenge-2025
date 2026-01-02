@@ -66,7 +66,7 @@ export default function App() {
 
   if (authError) {
     return (
-      <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-neutral-white flex items-center justify-center p-4">
         <Card className="error-card">
           <div className="text-center">
             <h2 className="error-title">Setup Required</h2>
@@ -83,10 +83,10 @@ export default function App() {
 
   if (loadingAuth || loadingProfile) {
     return (
-      <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-neutral-white flex items-center justify-center p-4">
         <div className="animate-pulse flex flex-col items-center">
-          <div className="w-16 h-16 bg-neutral-grayLight rounded-full mb-4" />
-          <div className="h-4 w-32 bg-neutral-grayLight rounded" />
+          <div className="w-16 h-16 bg-neutral-gray-light rounded-full mb-4" />
+          <div className="h-4 w-32 bg-neutral-gray-light rounded" />
         </div>
       </div>
     );
@@ -94,8 +94,8 @@ export default function App() {
 
   if (!userData) {
     return (
-      <div className="min-h-screen bg-[#FFFFFF] flex flex-col relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-grayLight rounded-bl-[100px] -z-10 translate-x-20 -translate-y-20 opacity-50" />
+      <div className="min-h-screen bg-neutral-white flex flex-col relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-gray-light rounded-bl-[100px] -z-10 translate-x-20 -translate-y-20 opacity-50" />
         <div className="flex-1 flex flex-col justify-center px-8 max-w-md mx-auto w-full">
           <div className="mb-12">
             <h1 className="text-[60px] font-bold leading-[1.05] mb-4">
@@ -103,7 +103,7 @@ export default function App() {
               <br />
               <span className="text-brand-orange">Up</span>
             </h1>
-            <p className="text-neutral-grayText text-lg">
+            <p className="text-neutral-gray-text text-lg">
               Join the 2,000 rep challenge.
               <br />
               Start training today.
@@ -127,7 +127,7 @@ export default function App() {
               </Button>
             </form>
           </Card>
-          <p className="text-center text-sm text-neutral-grayMid">
+          <p className="text-center text-sm text-neutral-gray-mid">
             Already using it? Enter your name again.
           </p>
         </div>
@@ -138,8 +138,8 @@ export default function App() {
   const { training_reps = 0, official_reps = 0 } = userData;
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] pb-24 relative max-w-lg mx-auto shadow-2xl">
-      <div className="bg-neutral-grayLight pt-12 pb-20 px-6 rounded-b-leaf relative overflow-hidden">
+    <div className="min-h-screen bg-neutral-white pb-24 relative max-w-lg mx-auto shadow-2xl">
+      <div className="bg-neutral-gray-light pt-12 pb-20 px-6 rounded-b-leaf relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
           <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-brand-orange rounded-bl-[100px]" />
         </div>
@@ -147,17 +147,17 @@ export default function App() {
         <div className="relative z-10">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-neutral-grayMid text-sm font-bold uppercase tracking-widest mb-1">
+              <h2 className="text-neutral-gray-mid text-sm font-bold uppercase tracking-widest mb-1">
                 Current Season
               </h2>
               <div className="flex items-center gap-2">
                 {isTraining ? (
-                  <Activity className="w-5 h-5 text-neutral-grayText" />
+                  <Activity className="w-5 h-5 text-neutral-gray-text" />
                 ) : (
                   <Trophy className="w-5 h-5 text-brand-orange" />
                 )}
                 <h1
-                  className={`text-2xl font-bold ${isTraining ? 'text-neutral-black' : 'text-brand-orange'}`}
+                  className={`text-2xl font-bold ${isTraining ? 'text-black' : 'text-brand-orange'}`}
                 >
                   {isTraining ? 'Training Camp' : 'The Challenge'}
                 </h1>
@@ -165,7 +165,7 @@ export default function App() {
             </div>
             <button
               onClick={handleLogout}
-              className="text-xs font-bold text-neutral-grayMid underline"
+              className="text-xs font-bold text-neutral-gray-mid underline"
             >
               Sign Out
             </button>
@@ -179,10 +179,10 @@ export default function App() {
                   total={71}
                   label="Done Today"
                   subLabel="Target: 71"
-                  colorClass="bg-neutral-grayMid"
+                  colorClass="bg-neutral-gray-mid"
                 />
                 <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-4">
-                  <span className="text-neutral-grayMid text-sm font-medium">Training Total</span>
+                  <span className="text-neutral-gray-mid text-sm font-medium">Training Total</span>
                   <span className="text-xl font-bold">{training_reps}</span>
                 </div>
               </div>
@@ -197,17 +197,17 @@ export default function App() {
                 />
                 <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-6">
                   <div className="text-center">
-                    <span className="block text-2xl font-bold text-[#000000]">
+                    <span className="block text-2xl font-bold text-black">
                       {2000 - official_reps}
                     </span>
-                    <span className="text-xs text-neutral-grayMid">Remaining</span>
+                    <span className="text-xs text-neutral-gray-mid">Remaining</span>
                   </div>
                   <div className="h-8 w-[1px] bg-gray-200" />
                   <div className="text-center">
-                    <span className="block text-2xl font-bold text-[#000000]">
+                    <span className="block text-2xl font-bold text-black">
                       {Math.ceil((2000 - official_reps) / 28)}
                     </span>
-                    <span className="text-xs text-neutral-grayMid">Daily Avg Needed</span>
+                    <span className="text-xs text-neutral-gray-mid">Daily Avg Needed</span>
                   </div>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-bold text-black">Quick Add</h3>
-              <span className="text-xs text-neutral-grayMid font-medium bg-neutral-grayLighter px-3 py-1 rounded-full">
+              <span className="text-xs text-neutral-gray-mid font-medium bg-neutral-gray-lighter px-3 py-1 rounded-full">
                 {isTraining ? 'Training Mode' : 'Official Mode'}
               </span>
             </div>
@@ -328,7 +328,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-bold text-black">Consistency</h3>
-              <div className="flex gap-1 text-[10px] text-neutral-grayMid font-bold uppercase items-center">
+              <div className="flex gap-1 text-[10px] text-neutral-gray-mid font-bold uppercase items-center">
                 <span>Jan 2026</span>
                 <Calendar className="w-3 h-3 ml-1" />
               </div>
@@ -339,15 +339,15 @@ export default function App() {
               <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-orange-100" />
-                  <span className="text-xs text-neutral-grayMid">Some</span>
+                  <span className="text-xs text-neutral-gray-mid">Some</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-orange-200" />
-                  <span className="text-xs text-neutral-grayMid">Good</span>
+                  <span className="text-xs text-neutral-gray-mid">Good</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-brand-orange" />
-                  <span className="text-xs text-neutral-grayMid">Great</span>
+                  <span className="text-xs text-neutral-gray-mid">Great</span>
                 </div>
               </div>
             </Card>
@@ -379,7 +379,7 @@ export default function App() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-bold text-black">Rankings</h3>
-              <span className="text-xs text-neutral-grayMid">
+              <span className="text-xs text-neutral-gray-mid">
                 {isTraining ? 'Training' : 'Official'} Phase
               </span>
             </div>
@@ -407,8 +407,8 @@ export default function App() {
       </div>
 
       <div className="text-center mt-12 mb-4">
-        <p className="text-xs text-neutral-grayMid">PushUp Challenge • 2026</p>
-        <p className="text-[10px] text-neutral-grayMid mt-1">{viewLabel}</p>
+        <p className="text-xs text-neutral-gray-mid">PushUp Challenge • 2026</p>
+        <p className="text-[10px] text-neutral-gray-mid mt-1">{viewLabel}</p>
       </div>
 
       <style>{`

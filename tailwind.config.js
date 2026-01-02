@@ -2,22 +2,21 @@
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
+    colors: {
+      transparent: 'transparent',
+      current: 'currentColor',
+      white: '#FFFFFF',
+      black: '#000000',
+      'brand-orange': '#FFA400',
+      'brand-orange-soft': '#FAA92B',
+      'neutral-white': '#FFFFFF',
+      'neutral-black': '#000000',
+      'neutral-gray-light': '#F2F2F2',
+      'neutral-gray-lighter': '#F3F6F8',
+      'neutral-gray-mid': '#858585',
+      'neutral-gray-text': '#5C5C5C',
+    },
     extend: {
-      colors: {
-        brand: {
-          orange: '#FFA400',
-          orangeSoft: '#FAA92B',
-        },
-        neutral: {
-          black: '#000000',
-          white: '#FFFFFF',
-          grayLight: '#F2F2F2',
-          grayLighter: '#F3F6F8',
-          grayMid: '#858585',
-          grayText: '#5C5C5C',
-        },
-      },
-
       borderRadius: {
         leaf: '48px',
         leafSm: '30px',

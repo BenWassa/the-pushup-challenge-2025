@@ -15,7 +15,7 @@ const Button = ({
     primary: 'btn-primary',
     secondary: 'btn-secondary',
     outline: 'btn-outline',
-    ghost: 'bg-transparent text-neutral-grayText hover:bg-gray-100',
+    ghost: 'bg-transparent text-neutral-gray-text hover:bg-gray-100',
     danger: 'bg-red-50 text-red-500 border border-red-200 hover:bg-red-100',
   };
 
