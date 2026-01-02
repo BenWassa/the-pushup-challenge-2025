@@ -146,16 +146,16 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
   const isUndoable = Boolean(userData?.logs?.length);
 
   return {
-    userData,
-    todayReps,
-    loadingProfile,
-    loadUserProfile,
-    clearProfile,
-    addReps,
-    undoLastAction,
-    calculateStreak,
-    recentLogs,
-    lastLogAmount,
-    isUndoable,
+    userData: db ? userData : null,
+    todayReps: db ? todayReps : 0,
+    loadingProfile: db ? loadingProfile : false,
+    loadUserProfile: db ? loadUserProfile : () => {},
+    clearProfile: db ? clearProfile : () => {},
+    addReps: db ? addReps : () => {},
+    undoLastAction: db ? undoLastAction : () => {},
+    calculateStreak: db ? calculateStreak : () => 0,
+    recentLogs: db ? recentLogs : [],
+    lastLogAmount: db ? lastLogAmount : null,
+    isUndoable: db ? isUndoable : false,
   };
 };

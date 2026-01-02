@@ -152,6 +152,30 @@ The app supports two environments:
 
 ---
 
+### Local Development Setup
+
+1. **Create a Firebase project** at https://console.firebase.google.com/
+2. **Enable services:**
+   - Go to Authentication > Sign-in method > Enable "Anonymous"
+   - Go to Firestore Database > Create database (start in test mode)
+3. **Get your config:**
+   - Go to Project Settings > General > Your apps
+   - Click "Add app" > Web app (</>) if you haven't already
+   - Copy the config object from the SDK setup
+4. **Create `.env.local`** in the project root with your Firebase config:
+
+```bash
+# Copy these values from Firebase Console
+VITE_FIREBASE_API_KEY=your-api-key-here
+VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+```
+
+---
+
 ### Runtime Variables
 
 The app can receive the following injected variables when hosted:

@@ -16,7 +16,7 @@ const VIEWS = {
 };
 
 export default function App() {
-  const { user, loading: loadingAuth, db, appId } = useAuth();
+  const { user, loading: loadingAuth, db, appId, error: authError } = useAuth();
   const season = getSeason();
   const isTraining = season === 'TRAINING';
 
@@ -63,6 +63,25 @@ export default function App() {
     if (view === VIEWS.STATS) return 'Stats';
     return 'Rank';
   }, [view]);
+
+  if (authError) {
+    return (
+      <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-[#1A1A1A] mb-4">Setup Required</h2>
+            <p className="text-[#666666] mb-6">
+              Firebase is not configured. Please set up your Firebase project and update the
+              `.env.local` file with your credentials.
+            </p>
+            <div className="text-sm text-[#999999] bg-[#F8F8F8] p-3 rounded-lg">
+              Check the README.md for setup instructions.
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   if (loadingAuth || loadingProfile) {
     return (
