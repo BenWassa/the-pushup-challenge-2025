@@ -14,6 +14,20 @@ const VIEWS = {
   LEADERBOARD: 'leaderboard',
 };
 
+const UpdateBanner = ({ onRefresh, refreshing }) => (
+  <div className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">
+    <div className="card-soft flex items-center justify-between gap-3">
+      <div>
+        <p className="text-sm font-bold text-black">Update available</p>
+        <p className="text-xs text-neutral-gray-text">Tap refresh to get the latest version.</p>
+      </div>
+      <Button variant="primary" size="sm" onClick={onRefresh} disabled={refreshing}>
+        {refreshing ? 'Refreshing...' : 'Refresh'}
+      </Button>
+    </div>
+  </div>
+);
+
 export default function App() {
   const { user, loading: loadingAuth, db, appId, error: authError } = useAuth();
   const season = getSeason();
@@ -22,6 +36,8 @@ export default function App() {
   const [usernameInput, setUsernameInput] = useState('');
   const [view, setView] = useState(VIEWS.DASHBOARD);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [refreshingUpdate, setRefreshingUpdate] = useState(false);
   const prevTodayRepsRef = useRef(0);
 
   const {
@@ -62,6 +78,32 @@ export default function App() {
     };
   }, [todayReps, isTraining]);
 
+  useEffect(() => {
+    const handleUpdate = () => setUpdateAvailable(true);
+    window.addEventListener('sw-update', handleUpdate);
+    return () => window.removeEventListener('sw-update', handleUpdate);
+  }, []);
+
+  const handleRefreshUpdate = () => {
+    const registration = window.__swRegistration;
+    if (!registration || !navigator.serviceWorker) {
+      window.location.reload();
+      return;
+    }
+
+    const onControllerChange = () => window.location.reload();
+    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange, {
+      once: true,
+    });
+
+    if (registration.waiting) {
+      setRefreshingUpdate(true);
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      window.location.reload();
+    }
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
     if (!usernameInput.trim()) return;
@@ -78,6 +120,9 @@ export default function App() {
   if (authError) {
     return (
       <div className="min-h-screen bg-neutral-white flex items-center justify-center p-4">
+        {updateAvailable && (
+          <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
+        )}
         <Card className="error-card">
           <div className="text-center">
             <h2 className="error-title">Setup Required</h2>
@@ -95,6 +140,9 @@ export default function App() {
   if (loadingAuth || loadingProfile) {
     return (
       <div className="min-h-screen bg-neutral-white flex items-center justify-center p-4">
+        {updateAvailable && (
+          <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
+        )}
         <div className="animate-pulse flex flex-col items-center">
           <div className="w-16 h-16 bg-neutral-gray-light rounded-full mb-4" />
           <div className="h-4 w-32 bg-neutral-gray-light rounded" />
@@ -106,6 +154,9 @@ export default function App() {
   if (!userData) {
     return (
       <div className="min-h-screen bg-neutral-white flex flex-col relative overflow-hidden">
+        {updateAvailable && (
+          <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
+        )}
         <div className="flex-1 flex flex-col justify-center px-8 max-w-md mx-auto w-full">
           <div className="mb-6">
             <h1 className="text-4xl font-bold leading-[1.05] mb-2">
@@ -160,6 +211,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-white pb-8 relative max-w-lg mx-auto shadow-2xl">
+      {updateAvailable && (
+        <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
+      )}
       {showCelebration && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
           <div className="bg-brand-orange text-white px-6 py-4 rounded-lg shadow-lg text-center">
