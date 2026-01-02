@@ -1,4 +1,3 @@
-```md
 # PushUp
 
 A lightweight, mobile-first app for tracking daily pushups during the PushUp Challenge.
@@ -25,54 +24,6 @@ The app focuses on momentum and clarity rather than gamification.
 - Streak and average stats
 - Live leaderboard with real-time sync
 - Training vs Official phase logic
-
----
-
-## Tech Stack
-
-- **React** – Single Page App
-- **Firebase Auth** – Anonymous authentication
-- **Firestore** – Real-time database
-- **Tailwind CSS** – Utility-first styling
-- **Lucide Icons** – Clean SVG icons
-
----
-# PushUp
-
-A lightweight, mobile-first app for tracking daily pushups during the PushUp Challenge.
-
-Built to be fast, motivating, and simple. No accounts, no noise, no friction.
-
----
-
-## What It Does
-
-PushUp helps participants log daily pushups across two phases of the challenge:
-
-- **Training Camp** (pre-challenge)
-- **Official Challenge** (2000 reps goal)
-
-The app focuses on momentum and clarity rather than gamification.
-
-### Core Features
-- Anonymous login using a simple username
-- One-tap rep logging (+1, +10, +20, +25)
-- Undo last action safely
-- Daily progress tracking
-- Monthly contribution calendar
-- Streak and average stats
-- Live leaderboard with real-time sync
-- Training vs Official phase logic
-
----
-
-## Tech Stack
-
-- **React** – Single Page App
-- **Firebase Auth** – Anonymous authentication
-- **Firestore** – Real-time database
-- **Tailwind CSS** – Utility-first styling
-- **Lucide Icons** – Clean SVG icons
 
 ---
 
@@ -93,24 +44,27 @@ If it does not, make it quiet.
 ## Project Structure
 
 /src
-	/components
-		Card.jsx
-		Button.jsx
-		ProgressBar.jsx
-		ContributionCalendar.jsx
-	/hooks
-		useAuth.js
-		useUserData.js
-		useLeaderboard.js
-	/utils
-		date.js
-		season.js
-		format.js
-	App.jsx
-	main.jsx
+  /components
+    Card.jsx
+    Button.jsx
+    ProgressBar.jsx
+    ContributionCalendar.jsx
+  /hooks
+    useAuth.js
+    useUserData.js
+    useLeaderboard.js
+  /utils
+    date.js
+    season.js
+    format.js
+    index.js
+  App.jsx
+  main.jsx
+  index.css
 /public
-	tailwind.config.js
-	styles.css
+  vite.svg
+tailwind.config.js
+postcss.config.js
 README.md
 
 ---
@@ -166,6 +120,12 @@ This setup is compatible with Firebase Hosting and embedded environments.
 npm run dev
 
 The app is optimized for mobile screens but works on desktop.
+
+### Building for Production
+
+npm run build
+
+This creates a `dist/` folder with the production build.
 
 ---
 
