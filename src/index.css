@@ -50,6 +50,11 @@ body {
 html,
 body {
   touch-action: manipulation;
+  overflow-x: hidden;
+}
+
+#root {
+  overflow-x: hidden;
 }
 
 /* =========================
