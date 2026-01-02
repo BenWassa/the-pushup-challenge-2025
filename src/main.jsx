@@ -3,11 +3,22 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
 
+const preventZoom = (event) => {
+  if (event.touches && event.touches.length > 1) {
+    event.preventDefault();
+  }
+};
+
+document.addEventListener('gesturestart', preventZoom, { passive: false });
+document.addEventListener('gesturechange', preventZoom, { passive: false });
+document.addEventListener('gestureend', preventZoom, { passive: false });
+document.addEventListener('touchmove', preventZoom, { passive: false });
+
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     const swUrl = `${import.meta.env.BASE_URL}sw.js`;
     navigator.serviceWorker
-      .register(swUrl)
+      .register(swUrl, { updateViaCache: 'none' })
       .then((registration) => {
         window.__swRegistration = registration;
 

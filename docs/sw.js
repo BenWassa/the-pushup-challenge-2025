@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pushup-pwa-v1';
+const CACHE_NAME = 'pushup-pwa-v4.2.0';
 const SCOPE_URL = self.registration ? self.registration.scope : self.location.origin;
 const PRECACHE_URLS = [
   '',

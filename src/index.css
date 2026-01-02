@@ -47,6 +47,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html,
+body {
+  touch-action: manipulation;
+}
+
 /* =========================
    Glassmorphic Cards
 ========================= */
@@ -285,13 +290,19 @@ body {
   flex: 1;
   padding: 0.625rem 1rem;
   border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: 0.875rem;
   font-weight: 700;
+  line-height: 1;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   border: none;
   background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .nav-tab.active {
