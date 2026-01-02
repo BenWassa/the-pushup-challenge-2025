@@ -53,13 +53,12 @@ const isValidConfig = (config) => {
   );
 };
 
-const getFirebase = () => {
+const getFirebase = (config) => {
   const existing = getApps();
   if (existing.length) {
     const app = existing[0];
     return { app, auth: getAuth(app), db: getFirestore(app) };
   }
-  const config = parseConfig();
   if (!isValidConfig(config)) {
     throw new Error('Firebase config not properly set up. Please check your .env.local file.');
   }
@@ -71,8 +70,8 @@ export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
 
-  const config = parseConfig();
-  const isConfigured = isValidConfig(config);
+  const config = useMemo(() => parseConfig(), []);
+  const isConfigured = useMemo(() => isValidConfig(config), [config]);
 
   // Calculate error and loading states
   const error = useMemo(() => {
@@ -89,12 +88,12 @@ export const useAuth = () => {
   const firebaseInstance = useMemo(() => {
     if (!isConfigured) return null;
     try {
-      return getFirebase();
+      return getFirebase(config);
     } catch (e) {
       console.warn('Firebase initialization failed:', e.message);
       return null;
     }
-  }, [isConfigured]);
+  }, [config, isConfigured]);
 
   const loading = !error && !authReady;
 
