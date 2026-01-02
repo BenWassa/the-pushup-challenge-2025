@@ -47,9 +47,9 @@ export default function App() {
     if (storedName) loadUserProfile(storedName);
   }, [loadUserProfile, user]);
 
-  // Detect when daily goal (71) is reached
+  // Detect when daily goal (87) is reached
   useEffect(() => {
-    const DAILY_GOAL = 71;
+    const DAILY_GOAL = 87;
     if (isTraining && todayReps >= DAILY_GOAL && prevTodayRepsRef.current < DAILY_GOAL) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       setShowCelebration(true);
@@ -155,7 +155,7 @@ export default function App() {
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
           <div className="bg-brand-orange text-white px-6 py-4 rounded-lg shadow-lg text-center">
             <p className="font-bold text-lg">🎉 Daily Goal Crushed! 🎉</p>
-            <p className="text-sm opacity-90 mt-1">You hit 71 reps today!</p>
+            <p className="text-sm opacity-90 mt-1">You hit 87 reps today!</p>
           </div>
         </div>
       )}
@@ -192,9 +192,9 @@ export default function App() {
               <div className="space-y-6">
                 <ProgressBar
                   current={todayReps}
-                  total={71}
+                  total={87}
                   label="Done Today"
-                  subLabel="Target: 71"
+                  subLabel="Target: 87"
                   colorClass="bg-neutral-gray-mid"
                 />
                 <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-4">
@@ -221,7 +221,7 @@ export default function App() {
                   <div className="h-8 w-[1px] bg-gray-200" />
                   <div className="text-center">
                     <span className="block text-2xl font-bold text-black">
-                      {Math.ceil((2000 - official_reps) / 28)}
+                      {Math.ceil((2000 - official_reps) / 23)}
                     </span>
                     <span className="text-xs text-neutral-gray-mid">Daily Avg Needed</span>
                   </div>
