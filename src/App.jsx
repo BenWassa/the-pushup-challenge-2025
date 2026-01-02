@@ -390,7 +390,7 @@ export default function App() {
                     </span>
                     <div>
                       <span className="leaderboard-name">{buddy.displayName}</span>
-                      {isMe && <span className="block mt-1 text-xs opacity-75">That's you!</span>}
+                      {isMe && <span className="ml-2 text-xs opacity-75">That's you!</span>}
                     </div>
                   </div>
                   <span className="text-2xl font-bold">{score || 0}</span>
