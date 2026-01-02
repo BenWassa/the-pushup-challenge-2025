@@ -14,11 +14,11 @@ const Button = ({
     'font-bold transition-all duration-250 flex items-center justify-center gap-2 active:scale-95';
 
   const variants = {
-    primary: 'bg-[#FFA400] text-white hover:shadow-[0px_10px_20px_rgba(255,164,0,0.2)]',
-    secondary: 'bg-white text-black shadow-[0px_4px_25px_rgba(128,128,128,0.15)] hover:bg-gray-50',
+    primary: 'bg-brand-orange text-white hover:shadow-active',
+    secondary: 'bg-white text-black shadow-soft hover:bg-gray-50',
     outline:
-      'border-2 border-[#FFA400] text-[#FFA400] bg-transparent hover:bg-[#FFA400] hover:text-white',
-    ghost: 'bg-transparent text-[#5C5C5C] hover:bg-gray-100',
+      'border-2 border-brand-orange text-brand-orange bg-transparent hover:bg-brand-orange hover:text-white',
+    ghost: 'bg-transparent text-neutral-grayText hover:bg-gray-100',
     danger: 'bg-red-50 text-red-500 border border-red-200 hover:bg-red-100',
   };
 

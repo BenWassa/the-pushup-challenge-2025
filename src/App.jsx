@@ -87,8 +87,8 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center p-4">
         <div className="animate-pulse flex flex-col items-center">
-          <div className="w-16 h-16 bg-[#F2F2F2] rounded-full mb-4" />
-          <div className="h-4 w-32 bg-[#F2F2F2] rounded" />
+          <div className="w-16 h-16 bg-neutral-grayLight rounded-full mb-4" />
+          <div className="h-4 w-32 bg-neutral-grayLight rounded" />
         </div>
       </div>
     );
@@ -97,15 +97,15 @@ export default function App() {
   if (!userData) {
     return (
       <div className="min-h-screen bg-[#FFFFFF] flex flex-col relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#F2F2F2] rounded-bl-[100px] -z-10 translate-x-20 -translate-y-20 opacity-50" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-grayLight rounded-bl-[100px] -z-10 translate-x-20 -translate-y-20 opacity-50" />
         <div className="flex-1 flex flex-col justify-center px-8 max-w-md mx-auto w-full">
           <div className="mb-12">
             <h1 className="text-[60px] font-bold leading-[1.05] mb-4">
               Push
               <br />
-              <span className="text-[#FFA400]">Up</span>
+              <span className="text-brand-orange">Up</span>
             </h1>
-            <p className="text-[#5C5C5C] text-lg">
+            <p className="text-neutral-grayText text-lg">
               Join the 2,000 rep challenge.
               <br />
               Start training today.
@@ -114,13 +114,15 @@ export default function App() {
           <Card variant="standard" className="mb-8">
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-[#5C5C5C] mb-2">WHO ARE YOU?</label>
+                <label className="block text-sm font-bold text-neutral-grayText mb-2">
+                  WHO ARE YOU?
+                </label>
                 <input
                   type="text"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
                   placeholder="e.g. Dave"
-                  className="w-full bg-[#F3F6F8] p-4 rounded-[15px] border-none outline-none focus:ring-2 focus:ring-[#FFA400] text-lg font-bold text-black placeholder-gray-400 transition-all"
+                  className="w-full bg-neutral-grayLighter p-4 rounded-card border-none outline-none focus:ring-2 focus:ring-brand-orange text-lg font-bold text-black placeholder-gray-400 transition-all"
                   autoFocus
                 />
               </div>
@@ -129,7 +131,7 @@ export default function App() {
               </Button>
             </form>
           </Card>
-          <p className="text-center text-sm text-[#858585]">
+          <p className="text-center text-sm text-neutral-grayMid">
             Already using it? Enter your name again.
           </p>
         </div>
@@ -141,31 +143,34 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] pb-24 relative max-w-lg mx-auto shadow-2xl">
-      <div className="bg-[#F2F2F2] pt-12 pb-20 px-6 rounded-b-[48px] relative overflow-hidden">
+      <div className="bg-neutral-grayLight pt-12 pb-20 px-6 rounded-b-leaf relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-[#FFA400] rounded-bl-[100px]" />
+          <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-brand-orange rounded-bl-[100px]" />
         </div>
 
         <div className="relative z-10">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-[#858585] text-sm font-bold uppercase tracking-widest mb-1">
+              <h2 className="text-neutral-grayMid text-sm font-bold uppercase tracking-widest mb-1">
                 Current Season
               </h2>
               <div className="flex items-center gap-2">
                 {isTraining ? (
-                  <Activity className="w-5 h-5 text-[#5C5C5C]" />
+                  <Activity className="w-5 h-5 text-neutral-grayText" />
                 ) : (
-                  <Trophy className="w-5 h-5 text-[#FFA400]" />
+                  <Trophy className="w-5 h-5 text-brand-orange" />
                 )}
                 <h1
-                  className={`text-2xl font-bold ${isTraining ? 'text-[#000000]' : 'text-[#FFA400]'}`}
+                  className={`text-2xl font-bold ${isTraining ? 'text-neutral-black' : 'text-brand-orange'}`}
                 >
                   {isTraining ? 'Training Camp' : 'The Challenge'}
                 </h1>
               </div>
             </div>
-            <button onClick={handleLogout} className="text-xs font-bold text-[#858585] underline">
+            <button
+              onClick={handleLogout}
+              className="text-xs font-bold text-neutral-grayMid underline"
+            >
               Sign Out
             </button>
           </div>
@@ -178,10 +183,10 @@ export default function App() {
                   total={71}
                   label="Done Today"
                   subLabel="Target: 71"
-                  colorClass="bg-[#5C5C5C]"
+                  colorClass="bg-neutral-grayMid"
                 />
                 <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-4">
-                  <span className="text-[#858585] text-sm font-medium">Training Total</span>
+                  <span className="text-neutral-grayMid text-sm font-medium">Training Total</span>
                   <span className="text-xl font-bold">{training_reps}</span>
                 </div>
               </div>
@@ -192,21 +197,21 @@ export default function App() {
                   total={2000}
                   label="Total Reps"
                   subLabel="Goal: 2000"
-                  colorClass="bg-[#FFA400]"
+                  colorClass="bg-brand-orange"
                 />
                 <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-6">
                   <div className="text-center">
                     <span className="block text-2xl font-bold text-[#000000]">
                       {2000 - official_reps}
                     </span>
-                    <span className="text-xs text-[#858585]">Remaining</span>
+                    <span className="text-xs text-neutral-grayMid">Remaining</span>
                   </div>
                   <div className="h-8 w-[1px] bg-gray-200" />
                   <div className="text-center">
                     <span className="block text-2xl font-bold text-[#000000]">
                       {Math.ceil((2000 - official_reps) / 28)}
                     </span>
-                    <span className="text-xs text-[#858585]">Daily Avg Needed</span>
+                    <span className="text-xs text-neutral-grayMid">Daily Avg Needed</span>
                   </div>
                 </div>
               </div>
@@ -221,8 +226,8 @@ export default function App() {
             onClick={() => setView(VIEWS.DASHBOARD)}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
               view === VIEWS.DASHBOARD
-                ? 'bg-[#FFA400] text-white shadow-md'
-                : 'text-[#5C5C5C] hover:bg-gray-50'
+                ? 'bg-brand-orange text-white shadow-md'
+                : 'text-neutral-grayText hover:bg-gray-50'
             }`}
           >
             Log
@@ -231,8 +236,8 @@ export default function App() {
             onClick={() => setView(VIEWS.STATS)}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
               view === VIEWS.STATS
-                ? 'bg-[#FFA400] text-white shadow-md'
-                : 'text-[#5C5C5C] hover:bg-gray-50'
+                ? 'bg-brand-orange text-white shadow-md'
+                : 'text-neutral-grayText hover:bg-gray-50'
             }`}
           >
             Stats
@@ -241,8 +246,8 @@ export default function App() {
             onClick={() => setView(VIEWS.LEADERBOARD)}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
               view === VIEWS.LEADERBOARD
-                ? 'bg-[#FFA400] text-white shadow-md'
-                : 'text-[#5C5C5C] hover:bg-gray-50'
+                ? 'bg-brand-orange text-white shadow-md'
+                : 'text-neutral-grayText hover:bg-gray-50'
             }`}
           >
             Rank
@@ -255,7 +260,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-bold text-black">Quick Add</h3>
-              <span className="text-xs text-[#858585] font-medium bg-[#F3F6F8] px-3 py-1 rounded-full">
+              <span className="text-xs text-neutral-grayMid font-medium bg-neutral-grayLighter px-3 py-1 rounded-full">
                 {isTraining ? 'Training Mode' : 'Official Mode'}
               </span>
             </div>
@@ -268,7 +273,7 @@ export default function App() {
                 className="h-32 flex flex-col gap-2"
               >
                 <span className="text-3xl font-bold text-black">+1</span>
-                <span className="text-xs text-[#858585]">Single</span>
+                <span className="text-xs text-neutral-grayMid">Single</span>
               </Button>
               <Button
                 variant="secondary"
@@ -276,8 +281,8 @@ export default function App() {
                 onClick={() => addReps(10)}
                 className="h-32 flex flex-col gap-2"
               >
-                <span className="text-3xl font-bold text-[#FFA400]">+10</span>
-                <span className="text-xs text-[#858585]">Set</span>
+                <span className="text-3xl font-bold text-brand-orange">+10</span>
+                <span className="text-xs text-neutral-grayMid">Set</span>
               </Button>
               <Button
                 variant="secondary"
@@ -285,17 +290,17 @@ export default function App() {
                 onClick={() => addReps(20)}
                 className="h-32 flex flex-col gap-2"
               >
-                <span className="text-3xl font-bold text-[#FFA400]">+20</span>
-                <span className="text-xs text-[#858585]">Push</span>
+                <span className="text-3xl font-bold text-brand-orange">+20</span>
+                <span className="text-xs text-neutral-grayMid">Push</span>
               </Button>
               <Button
                 variant="secondary"
                 size="xl"
                 onClick={() => addReps(25)}
-                className="h-32 flex flex-col gap-2 bg-[#F3F6F8]"
+                className="h-32 flex flex-col gap-2 bg-neutral-grayLighter"
               >
-                <span className="text-3xl font-bold text-[#FFA400]">+25</span>
-                <span className="text-xs text-[#858585]">Big Set</span>
+                <span className="text-3xl font-bold text-brand-orange">+25</span>
+                <span className="text-xs text-neutral-grayMid">Big Set</span>
               </Button>
             </div>
 
@@ -314,14 +319,14 @@ export default function App() {
               </Button>
 
               {recentLogs.length > 0 && (
-                <div className="bg-[#F3F6F8] rounded-[15px] p-4">
-                  <h4 className="text-xs font-bold text-[#858585] uppercase tracking-wider mb-3">
+                <div className="bg-neutral-grayLighter rounded-card p-4">
+                  <h4 className="text-xs font-bold text-neutral-grayMid uppercase tracking-wider mb-3">
                     Recent Activity
                   </h4>
                   <div className="space-y-2">
                     {recentLogs.map((log, i) => (
                       <div key={i} className="flex justify-between items-center text-sm">
-                        <span className="text-[#5C5C5C]">{formatTime(log.timestamp)}</span>
+                        <span className="text-neutral-grayText">{formatTime(log.timestamp)}</span>
                         <span
                           className={`font-bold ${log.amount > 0 ? 'text-black' : 'text-red-500'}`}
                         >
@@ -341,7 +346,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-bold text-black">Consistency</h3>
-              <div className="flex gap-1 text-[10px] text-[#858585] font-bold uppercase items-center">
+              <div className="flex gap-1 text-[10px] text-neutral-grayMid font-bold uppercase items-center">
                 <span>Jan 2026</span>
                 <Calendar className="w-3 h-3 ml-1" />
               </div>
@@ -351,31 +356,31 @@ export default function App() {
               <ContributionCalendar logs={userData.logs} />
               <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#FFE4B3]" />
-                  <span className="text-xs text-[#858585]">Some</span>
+                  <div className="w-3 h-3 rounded-full bg-orange-100" />
+                  <span className="text-xs text-neutral-grayMid">Some</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#FFC966]" />
-                  <span className="text-xs text-[#858585]">Good</span>
+                  <div className="w-3 h-3 rounded-full bg-orange-200" />
+                  <span className="text-xs text-neutral-grayMid">Good</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#FFA400]" />
-                  <span className="text-xs text-[#858585]">Great</span>
+                  <div className="w-3 h-3 rounded-full bg-brand-orange" />
+                  <span className="text-xs text-neutral-grayMid">Great</span>
                 </div>
               </div>
             </Card>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#F3F6F8] p-5 rounded-[20px] flex flex-col justify-between h-28">
-                <div className="flex items-center gap-2 text-[#5C5C5C] font-bold text-sm">
-                  <Flame className="w-4 h-4 text-[#FFA400]" />
+              <div className="bg-neutral-grayLighter p-5 rounded-[20px] flex flex-col justify-between h-28">
+                <div className="flex items-center gap-2 text-neutral-grayText font-bold text-sm">
+                  <Flame className="w-4 h-4 text-brand-orange" />
                   Active Days
                 </div>
                 <span className="text-3xl font-bold text-black">{calculateStreak()}</span>
               </div>
-              <div className="bg-[#F3F6F8] p-5 rounded-[20px] flex flex-col justify-between h-28">
-                <div className="flex items-center gap-2 text-[#5C5C5C] font-bold text-sm">
-                  <TrendingUp className="w-4 h-4 text-[#FFA400]" />
+              <div className="bg-neutral-grayLighter p-5 rounded-[20px] flex flex-col justify-between h-28">
+                <div className="flex items-center gap-2 text-neutral-grayText font-bold text-sm">
+                  <TrendingUp className="w-4 h-4 text-brand-orange" />
                   Avg Reps
                 </div>
                 <span className="text-3xl font-bold text-black">
@@ -392,7 +397,7 @@ export default function App() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-bold text-black">Rankings</h3>
-              <span className="text-xs text-[#858585]">
+              <span className="text-xs text-neutral-grayMid">
                 {isTraining ? 'Training' : 'Official'} Phase
               </span>
             </div>
@@ -404,12 +409,12 @@ export default function App() {
                 <div
                   key={buddy.id}
                   className={`p-4 rounded-2xl flex items-center justify-between transition-all ${
-                    isMe ? 'bg-[#FFA400] text-white shadow-lg scale-105' : 'bg-white shadow-sm'
+                    isMe ? 'bg-brand-orange text-white shadow-lg scale-105' : 'bg-white shadow-sm'
                   }`}
                 >
                   <div className="flex items-center gap-4">
                     <span
-                      className={`font-bold text-xl w-8 ${isMe ? 'text-white/80' : 'text-[#FFA400]'}`}
+                      className={`font-bold text-xl w-8 ${isMe ? 'text-white/80' : 'text-brand-orange'}`}
                     >
                       #{index + 1}
                     </span>
@@ -429,8 +434,8 @@ export default function App() {
       </div>
 
       <div className="text-center mt-12 mb-4">
-        <p className="text-xs text-[#858585]">PushUp Challenge • 2026</p>
-        <p className="text-[10px] text-[#858585] mt-1">{viewLabel}</p>
+        <p className="text-xs text-neutral-grayMid">PushUp Challenge • 2026</p>
+        <p className="text-[10px] text-neutral-grayMid mt-1">{viewLabel}</p>
       </div>
 
       <style>{`
