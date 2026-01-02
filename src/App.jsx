@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Activity, Trophy, Calendar, Flame, TrendingUp, RotateCcw } from 'lucide-react';
 import Button from './components/Button';
 import Card from './components/Card';
