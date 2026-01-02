@@ -67,16 +67,14 @@ export default function App() {
   if (authError) {
     return (
       <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
+        <Card className="error-card">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-[#1A1A1A] mb-4">Setup Required</h2>
-            <p className="text-[#666666] mb-6">
+            <h2 className="error-title">Setup Required</h2>
+            <p className="error-message">
               Firebase is not configured. Please set up your Firebase project and update the
               `.env.local` file with your credentials.
             </p>
-            <div className="text-sm text-[#999999] bg-[#F8F8F8] p-3 rounded-lg">
-              Check the README.md for setup instructions.
-            </div>
+            <div className="error-hint">Check the README.md for setup instructions.</div>
           </div>
         </Card>
       </div>
@@ -114,15 +112,13 @@ export default function App() {
           <Card variant="standard" className="mb-8">
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-neutral-grayText mb-2">
-                  WHO ARE YOU?
-                </label>
+                <label className="form-label">WHO ARE YOU?</label>
                 <input
                   type="text"
                   value={usernameInput}
                   onChange={(e) => setUsernameInput(e.target.value)}
                   placeholder="e.g. Dave"
-                  className="w-full bg-neutral-grayLighter p-4 rounded-card border-none outline-none focus:ring-2 focus:ring-brand-orange text-lg font-bold text-black placeholder-gray-400 transition-all"
+                  className="form-input"
                   autoFocus
                 />
               </div>
@@ -221,34 +217,22 @@ export default function App() {
       </div>
 
       <div className="flex justify-center -mt-6 relative z-30 mb-8 px-4">
-        <div className="bg-white p-1 rounded-full shadow-lg flex w-full max-w-sm justify-between">
+        <div className="nav-tabs">
           <button
             onClick={() => setView(VIEWS.DASHBOARD)}
-            className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-              view === VIEWS.DASHBOARD
-                ? 'bg-brand-orange text-white shadow-md'
-                : 'text-neutral-grayText hover:bg-gray-50'
-            }`}
+            className={`nav-tab ${view === VIEWS.DASHBOARD ? 'active' : ''}`}
           >
             Log
           </button>
           <button
             onClick={() => setView(VIEWS.STATS)}
-            className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-              view === VIEWS.STATS
-                ? 'bg-brand-orange text-white shadow-md'
-                : 'text-neutral-grayText hover:bg-gray-50'
-            }`}
+            className={`nav-tab ${view === VIEWS.STATS ? 'active' : ''}`}
           >
             Stats
           </button>
           <button
             onClick={() => setView(VIEWS.LEADERBOARD)}
-            className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-              view === VIEWS.LEADERBOARD
-                ? 'bg-brand-orange text-white shadow-md'
-                : 'text-neutral-grayText hover:bg-gray-50'
-            }`}
+            className={`nav-tab ${view === VIEWS.LEADERBOARD ? 'active' : ''}`}
           >
             Rank
           </button>
@@ -265,42 +249,42 @@ export default function App() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="logging-grid">
               <Button
                 variant="secondary"
                 size="xl"
                 onClick={() => addReps(1)}
-                className="h-32 flex flex-col gap-2"
+                className="logging-btn"
               >
-                <span className="text-3xl font-bold text-black">+1</span>
-                <span className="text-xs text-neutral-grayMid">Single</span>
+                <span className="logging-number text-black">+1</span>
+                <span className="logging-label">Single</span>
               </Button>
               <Button
                 variant="secondary"
                 size="xl"
                 onClick={() => addReps(10)}
-                className="h-32 flex flex-col gap-2"
+                className="logging-btn"
               >
-                <span className="text-3xl font-bold text-brand-orange">+10</span>
-                <span className="text-xs text-neutral-grayMid">Set</span>
+                <span className="logging-number">+10</span>
+                <span className="logging-label">Set</span>
               </Button>
               <Button
                 variant="secondary"
                 size="xl"
                 onClick={() => addReps(20)}
-                className="h-32 flex flex-col gap-2"
+                className="logging-btn"
               >
-                <span className="text-3xl font-bold text-brand-orange">+20</span>
-                <span className="text-xs text-neutral-grayMid">Push</span>
+                <span className="logging-number">+20</span>
+                <span className="logging-label">Push</span>
               </Button>
               <Button
                 variant="secondary"
                 size="xl"
                 onClick={() => addReps(25)}
-                className="h-32 flex flex-col gap-2 bg-neutral-grayLighter"
+                className="logging-btn"
               >
-                <span className="text-3xl font-bold text-brand-orange">+25</span>
-                <span className="text-xs text-neutral-grayMid">Big Set</span>
+                <span className="logging-number">+25</span>
+                <span className="logging-label">Big Set</span>
               </Button>
             </div>
 
@@ -319,16 +303,14 @@ export default function App() {
               </Button>
 
               {recentLogs.length > 0 && (
-                <div className="bg-neutral-grayLighter rounded-card p-4">
-                  <h4 className="text-xs font-bold text-neutral-grayMid uppercase tracking-wider mb-3">
-                    Recent Activity
-                  </h4>
+                <div className="activity-card">
+                  <h4 className="activity-title">Recent Activity</h4>
                   <div className="space-y-2">
                     {recentLogs.map((log, i) => (
-                      <div key={i} className="flex justify-between items-center text-sm">
-                        <span className="text-neutral-grayText">{formatTime(log.timestamp)}</span>
+                      <div key={i} className="activity-item">
+                        <span className="activity-time">{formatTime(log.timestamp)}</span>
                         <span
-                          className={`font-bold ${log.amount > 0 ? 'text-black' : 'text-red-500'}`}
+                          className={`activity-amount ${log.amount > 0 ? 'positive' : 'negative'}`}
                         >
                           {log.amount > 0 ? '+' : ''}
                           {log.amount} reps
@@ -370,20 +352,20 @@ export default function App() {
               </div>
             </Card>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-neutral-grayLighter p-5 rounded-[20px] flex flex-col justify-between h-28">
-                <div className="flex items-center gap-2 text-neutral-grayText font-bold text-sm">
+            <div className="stats-grid">
+              <div className="stats-card">
+                <div className="stats-header">
                   <Flame className="w-4 h-4 text-brand-orange" />
                   Active Days
                 </div>
-                <span className="text-3xl font-bold text-black">{calculateStreak()}</span>
+                <span className="stats-value">{calculateStreak()}</span>
               </div>
-              <div className="bg-neutral-grayLighter p-5 rounded-[20px] flex flex-col justify-between h-28">
-                <div className="flex items-center gap-2 text-neutral-grayText font-bold text-sm">
+              <div className="stats-card">
+                <div className="stats-header">
                   <TrendingUp className="w-4 h-4 text-brand-orange" />
                   Avg Reps
                 </div>
-                <span className="text-3xl font-bold text-black">
+                <span className="stats-value">
                   {calculateStreak() > 0
                     ? Math.round((isTraining ? training_reps : official_reps) / calculateStreak())
                     : 0}
@@ -406,22 +388,13 @@ export default function App() {
               const isMe = buddy.id === userData.id;
               const score = isTraining ? buddy.training_reps : buddy.official_reps;
               return (
-                <div
-                  key={buddy.id}
-                  className={`p-4 rounded-2xl flex items-center justify-between transition-all ${
-                    isMe ? 'bg-brand-orange text-white shadow-lg scale-105' : 'bg-white shadow-sm'
-                  }`}
-                >
+                <div key={buddy.id} className={`leaderboard-item ${isMe ? 'current-user' : ''}`}>
                   <div className="flex items-center gap-4">
-                    <span
-                      className={`font-bold text-xl w-8 ${isMe ? 'text-white/80' : 'text-brand-orange'}`}
-                    >
+                    <span className={`leaderboard-rank ${isMe ? 'current-user' : ''}`}>
                       #{index + 1}
                     </span>
                     <div>
-                      <span className="block font-bold text-lg capitalize">
-                        {buddy.displayName}
-                      </span>
+                      <span className="leaderboard-name">{buddy.displayName}</span>
                       {isMe && <span className="text-xs opacity-75">That's you!</span>}
                     </div>
                   </div>

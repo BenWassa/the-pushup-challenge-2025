@@ -31,18 +31,14 @@ const ContributionCalendar = ({ logs }) => {
 
   for (let d = 1; d <= daysInMonth; d += 1) {
     const count = dailyData[d] || 0;
-    let bgClass = 'bg-neutral-grayLight text-neutral-grayMid';
-
-    if (count > 0) bgClass = 'bg-orange-100 text-brand-orange font-bold';
-    if (count >= 30) bgClass = 'bg-orange-200 text-white font-bold';
-    if (count >= 70) bgClass = 'bg-brand-orange text-white font-bold shadow-md transform scale-105';
+    let level = 0;
+    if (count > 0) level = 1;
+    if (count >= 30) level = 2;
+    if (count >= 70) level = 3;
 
     days.push(
       <div key={d} className="flex flex-col items-center justify-center mb-2">
-        <div
-          className={`h-10 w-10 rounded-full flex items-center justify-center text-xs transition-all duration-300 ${bgClass}`}
-          title={`${count} reps`}
-        >
+        <div className={`calendar-day calendar-day-${level}`} title={`${count} reps`}>
           {d}
         </div>
       </div>
@@ -50,15 +46,15 @@ const ContributionCalendar = ({ logs }) => {
   }
 
   return (
-    <div className="w-full">
-      <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+    <div className="calendar">
+      <div className="calendar-labels">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-          <span key={i} className="text-[10px] font-bold text-neutral-grayMid">
+          <span key={i} className="calendar-label">
             {d}
           </span>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">{days}</div>
+      <div className="calendar-grid">{days}</div>
     </div>
   );
 };

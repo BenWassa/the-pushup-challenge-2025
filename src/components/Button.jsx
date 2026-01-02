@@ -10,14 +10,11 @@ const Button = ({
   disabled = false,
   type = 'button',
 }) => {
-  const base =
-    'font-bold transition-all duration-250 flex items-center justify-center gap-2 active:scale-95';
-
+  const baseClasses = 'btn';
   const variants = {
-    primary: 'bg-brand-orange text-white hover:shadow-active',
-    secondary: 'bg-white text-black shadow-soft hover:bg-gray-50',
-    outline:
-      'border-2 border-brand-orange text-brand-orange bg-transparent hover:bg-brand-orange hover:text-white',
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    outline: 'btn-outline',
     ghost: 'bg-transparent text-neutral-grayText hover:bg-gray-100',
     danger: 'bg-red-50 text-red-500 border border-red-200 hover:bg-red-100',
   };
@@ -35,7 +32,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${base} ${variants[variant]} ${sizes[size]} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       {children}
     </button>
