@@ -8,6 +8,12 @@ import {
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+// Move appId outside hook to avoid recalculating on every render
+export const APP_ID =
+  typeof __app_id !== 'undefined' && __app_id
+    ? __app_id
+    : 'pushup-challenge-default';
+
 const parseConfig = () => {
   try {
     // Check for injected runtime variable first (production)
@@ -63,6 +69,7 @@ const getFirebase = () => {
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
 
   const config = parseConfig();
   const isConfigured = isValidConfig(config);
@@ -70,7 +77,10 @@ export const useAuth = () => {
   // Calculate error and loading states
   const error = useMemo(() => {
     if (!isConfigured) {
-      return 'Firebase not configured. Please set up your .env.local file with valid Firebase credentials.';
+      return {
+        type: 'CONFIG',
+        message: 'Firebase not configured. Please set up your .env.local file with valid Firebase credentials.'
+      };
     }
     return null;
   }, [isConfigured]);
@@ -86,14 +96,10 @@ export const useAuth = () => {
     }
   }, [isConfigured]);
 
-  const loading = useMemo(() => {
-    if (error) return false;
-    if (!firebaseInstance) return true;
-    return user === null; // Still loading if we have Firebase but no user state yet
-  }, [error, firebaseInstance, user]);
+  const loading = !error && !authReady;
 
   const { auth, db } = firebaseInstance || { auth: null, db: null };
-  const appId = typeof __app_id !== 'undefined' && __app_id ? __app_id : 'pushup-challenge-default';
+  const appId = APP_ID;
 
   useEffect(() => {
     if (!auth) return;
@@ -113,11 +119,15 @@ export const useAuth = () => {
           await signInAnonymously(auth);
         } catch (err) {
           console.error('Anonymous auth failed', err);
+          // If we hit an auth failure, mark authReady so UI doesn't stay loading forever
+          setAuthReady(true);
+          return;
         }
       }
 
       unsubAuth = onAuthStateChanged(auth, (u) => {
         setUser(u || null);
+        setAuthReady(true);
       });
     };
 
