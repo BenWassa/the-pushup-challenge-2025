@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.card {
+  background: #FFFFFF;
+  box-shadow: 0px 4px 50px rgba(128,128,128,0.15);
+  border-top-right-radius: 48px;
+  border-bottom-left-radius: 48px;
+}
+
+.card-inverse {
+  border-top-left-radius: 48px;
+  border-bottom-right-radius: 48px;
+}
+
+.section-light {
+  background-color: #F2F2F2;
+}
+
+.section-lighter {
+  background-color: #F3F6F8;
+}
+
+.text-muted {
+  color: #5C5C5C;
+}
+
+.text-accent {
+  color: #FFA400;
+}
