@@ -95,7 +95,6 @@ export default function App() {
   if (!userData) {
     return (
       <div className="min-h-screen bg-neutral-white flex flex-col relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-neutral-gray-light rounded-bl-[100px] -z-10 translate-x-20 -translate-y-20 opacity-50" />
         <div className="flex-1 flex flex-col justify-center px-8 max-w-md mx-auto w-full">
           <div className="mb-12">
             <h1 className="text-[60px] font-bold leading-[1.05] mb-4">
@@ -140,11 +139,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-neutral-white pb-24 relative max-w-lg mx-auto shadow-2xl">
       <div className="bg-neutral-gray-light pt-12 pb-20 px-6 rounded-b-leaf relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-brand-orange rounded-bl-[100px]" />
-        </div>
-
-        <div className="relative z-10">
+        <div className="relative">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="text-neutral-gray-mid text-sm font-bold uppercase tracking-widest mb-1">
@@ -171,7 +166,7 @@ export default function App() {
             </button>
           </div>
 
-          <Card variant="standard" className="relative z-20">
+          <Card variant="standard">
             {isTraining ? (
               <div className="space-y-6">
                 <ProgressBar
