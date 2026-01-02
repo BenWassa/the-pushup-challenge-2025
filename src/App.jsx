@@ -402,8 +402,11 @@ export default function App() {
       </div>
 
       <div className="text-center mt-12 mb-4">
-        <p className="text-xs text-neutral-gray-mid">PushUp Challenge • 2026</p>
-        <p className="text-[10px] text-neutral-gray-mid mt-1">{viewLabel}</p>
+        <p className="text-xs text-neutral-gray-mid">
+          PushUp Challenge • 2026
+          <span className="ml-2">•</span>
+          <span className="ml-2">{viewLabel}</span>
+        </p>
       </div>
 
       <style>{`
