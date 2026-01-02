@@ -50,12 +50,17 @@ export default function App() {
   // Detect when daily goal (87) is reached
   useEffect(() => {
     const DAILY_GOAL = 87;
-    if (isTraining && todayReps >= DAILY_GOAL && prevTodayRepsRef.current < DAILY_GOAL) {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 3000);
-    }
+    const shouldCelebrate =
+      isTraining && todayReps >= DAILY_GOAL && prevTodayRepsRef.current < DAILY_GOAL;
     prevTodayRepsRef.current = todayReps;
+    if (!shouldCelebrate) return;
+
+    const showTimer = setTimeout(() => setShowCelebration(true), 0);
+    const hideTimer = setTimeout(() => setShowCelebration(false), 3000);
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
   }, [todayReps, isTraining]);
 
   const handleLogin = (e) => {

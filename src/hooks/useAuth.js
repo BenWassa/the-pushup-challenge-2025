@@ -10,9 +10,7 @@ import { getFirestore } from 'firebase/firestore';
 
 // Move appId outside hook to avoid recalculating on every render
 export const APP_ID =
-  typeof __app_id !== 'undefined' && __app_id
-    ? __app_id
-    : 'pushup-challenge-default';
+  typeof __app_id !== 'undefined' && __app_id ? __app_id : 'pushup-challenge-default';
 
 const parseConfig = () => {
   try {
@@ -78,7 +76,8 @@ export const useAuth = () => {
     if (!isConfigured) {
       return {
         type: 'CONFIG',
-        message: 'Firebase not configured. Please set up your .env.local file with valid Firebase credentials.'
+        message:
+          'Firebase not configured. Please set up your .env.local file with valid Firebase credentials.',
       };
     }
     return null;
