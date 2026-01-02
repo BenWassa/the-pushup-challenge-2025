@@ -96,13 +96,13 @@ export default function App() {
     return (
       <div className="min-h-screen bg-neutral-white flex flex-col relative overflow-hidden">
         <div className="flex-1 flex flex-col justify-center px-8 max-w-md mx-auto w-full">
-          <div className="mb-12">
-            <h1 className="text-[60px] font-bold leading-[1.05] mb-4">
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold leading-[1.05] mb-2">
               Push
               <br />
               <span className="text-brand-orange">Up</span>
             </h1>
-            <p className="text-neutral-gray-text text-lg">
+            <p className="text-neutral-gray-text text-sm">
               Join the 2,000 rep challenge.
               <br />
               Start training today.
