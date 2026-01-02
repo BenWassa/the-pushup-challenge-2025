@@ -1,33 +1,26 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  Activity,
-  Trophy,
-  Calendar,
-  Flame,
-  TrendingUp,
-  RotateCcw,
-} from "lucide-react";
-import Button from "./components/Button";
-import Card from "./components/Card";
-import ProgressBar from "./components/ProgressBar";
-import ContributionCalendar from "./components/ContributionCalendar";
-import { useAuth } from "./hooks/useAuth";
-import { useUserData } from "./hooks/useUserData";
-import { useLeaderboard } from "./hooks/useLeaderboard";
-import { formatTime, getSeason } from "./utils";
+import React, { useEffect, useMemo, useState } from 'react';
+import { Activity, Trophy, Calendar, Flame, TrendingUp, RotateCcw } from 'lucide-react';
+import Button from './components/Button';
+import Card from './components/Card';
+import ProgressBar from './components/ProgressBar';
+import ContributionCalendar from './components/ContributionCalendar';
+import { useAuth } from './hooks/useAuth';
+import { useUserData } from './hooks/useUserData';
+import { useLeaderboard } from './hooks/useLeaderboard';
+import { formatTime, getSeason } from './utils';
 
 const VIEWS = {
-  DASHBOARD: "dashboard",
-  STATS: "stats",
-  LEADERBOARD: "leaderboard",
+  DASHBOARD: 'dashboard',
+  STATS: 'stats',
+  LEADERBOARD: 'leaderboard',
 };
 
 export default function App() {
   const { user, loading: loadingAuth, db, appId } = useAuth();
   const season = getSeason();
-  const isTraining = season === "TRAINING";
+  const isTraining = season === 'TRAINING';
 
-  const [usernameInput, setUsernameInput] = useState("");
+  const [usernameInput, setUsernameInput] = useState('');
   const [view, setView] = useState(VIEWS.DASHBOARD);
 
   const {
@@ -48,27 +41,27 @@ export default function App() {
 
   useEffect(() => {
     if (!user) return;
-    const storedName = localStorage.getItem("pushup_username");
+    const storedName = localStorage.getItem('pushup_username');
     if (storedName) loadUserProfile(storedName);
   }, [loadUserProfile, user]);
 
   const handleLogin = (e) => {
     e.preventDefault();
     if (!usernameInput.trim()) return;
-    localStorage.setItem("pushup_username", usernameInput);
+    localStorage.setItem('pushup_username', usernameInput);
     loadUserProfile(usernameInput);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("pushup_username");
+    localStorage.removeItem('pushup_username');
     clearProfile();
-    setUsernameInput("");
+    setUsernameInput('');
   };
 
   const viewLabel = useMemo(() => {
-    if (view === VIEWS.DASHBOARD) return "Log";
-    if (view === VIEWS.STATS) return "Stats";
-    return "Rank";
+    if (view === VIEWS.DASHBOARD) return 'Log';
+    if (view === VIEWS.STATS) return 'Stats';
+    return 'Rank';
   }, [view]);
 
   if (loadingAuth || loadingProfile) {
@@ -117,7 +110,9 @@ export default function App() {
               </Button>
             </form>
           </Card>
-          <p className="text-center text-sm text-[#858585]">Already using it? Enter your name again.</p>
+          <p className="text-center text-sm text-[#858585]">
+            Already using it? Enter your name again.
+          </p>
         </div>
       </div>
     );
@@ -135,11 +130,19 @@ export default function App() {
         <div className="relative z-10">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-[#858585] text-sm font-bold uppercase tracking-widest mb-1">Current Season</h2>
+              <h2 className="text-[#858585] text-sm font-bold uppercase tracking-widest mb-1">
+                Current Season
+              </h2>
               <div className="flex items-center gap-2">
-                {isTraining ? <Activity className="w-5 h-5 text-[#5C5C5C]" /> : <Trophy className="w-5 h-5 text-[#FFA400]" />}
-                <h1 className={`text-2xl font-bold ${isTraining ? "text-[#000000]" : "text-[#FFA400]"}`}>
-                  {isTraining ? "Training Camp" : "The Challenge"}
+                {isTraining ? (
+                  <Activity className="w-5 h-5 text-[#5C5C5C]" />
+                ) : (
+                  <Trophy className="w-5 h-5 text-[#FFA400]" />
+                )}
+                <h1
+                  className={`text-2xl font-bold ${isTraining ? 'text-[#000000]' : 'text-[#FFA400]'}`}
+                >
+                  {isTraining ? 'Training Camp' : 'The Challenge'}
                 </h1>
               </div>
             </div>
@@ -151,7 +154,13 @@ export default function App() {
           <Card variant="standard" className="relative z-20">
             {isTraining ? (
               <div className="space-y-6">
-                <ProgressBar current={todayReps} total={71} label="Done Today" subLabel="Target: 71" colorClass="bg-[#5C5C5C]" />
+                <ProgressBar
+                  current={todayReps}
+                  total={71}
+                  label="Done Today"
+                  subLabel="Target: 71"
+                  colorClass="bg-[#5C5C5C]"
+                />
                 <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-4">
                   <span className="text-[#858585] text-sm font-medium">Training Total</span>
                   <span className="text-xl font-bold">{training_reps}</span>
@@ -159,15 +168,25 @@ export default function App() {
               </div>
             ) : (
               <div>
-                <ProgressBar current={official_reps} total={2000} label="Total Reps" subLabel="Goal: 2000" colorClass="bg-[#FFA400]" />
+                <ProgressBar
+                  current={official_reps}
+                  total={2000}
+                  label="Total Reps"
+                  subLabel="Goal: 2000"
+                  colorClass="bg-[#FFA400]"
+                />
                 <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-6">
                   <div className="text-center">
-                    <span className="block text-2xl font-bold text-[#000000]">{2000 - official_reps}</span>
+                    <span className="block text-2xl font-bold text-[#000000]">
+                      {2000 - official_reps}
+                    </span>
                     <span className="text-xs text-[#858585]">Remaining</span>
                   </div>
                   <div className="h-8 w-[1px] bg-gray-200" />
                   <div className="text-center">
-                    <span className="block text-2xl font-bold text-[#000000]">{Math.ceil((2000 - official_reps) / 28)}</span>
+                    <span className="block text-2xl font-bold text-[#000000]">
+                      {Math.ceil((2000 - official_reps) / 28)}
+                    </span>
                     <span className="text-xs text-[#858585]">Daily Avg Needed</span>
                   </div>
                 </div>
@@ -182,7 +201,9 @@ export default function App() {
           <button
             onClick={() => setView(VIEWS.DASHBOARD)}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-              view === VIEWS.DASHBOARD ? "bg-[#FFA400] text-white shadow-md" : "text-[#5C5C5C] hover:bg-gray-50"
+              view === VIEWS.DASHBOARD
+                ? 'bg-[#FFA400] text-white shadow-md'
+                : 'text-[#5C5C5C] hover:bg-gray-50'
             }`}
           >
             Log
@@ -190,7 +211,9 @@ export default function App() {
           <button
             onClick={() => setView(VIEWS.STATS)}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-              view === VIEWS.STATS ? "bg-[#FFA400] text-white shadow-md" : "text-[#5C5C5C] hover:bg-gray-50"
+              view === VIEWS.STATS
+                ? 'bg-[#FFA400] text-white shadow-md'
+                : 'text-[#5C5C5C] hover:bg-gray-50'
             }`}
           >
             Stats
@@ -198,7 +221,9 @@ export default function App() {
           <button
             onClick={() => setView(VIEWS.LEADERBOARD)}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-              view === VIEWS.LEADERBOARD ? "bg-[#FFA400] text-white shadow-md" : "text-[#5C5C5C] hover:bg-gray-50"
+              view === VIEWS.LEADERBOARD
+                ? 'bg-[#FFA400] text-white shadow-md'
+                : 'text-[#5C5C5C] hover:bg-gray-50'
             }`}
           >
             Rank
@@ -212,24 +237,44 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-bold text-black">Quick Add</h3>
               <span className="text-xs text-[#858585] font-medium bg-[#F3F6F8] px-3 py-1 rounded-full">
-                {isTraining ? "Training Mode" : "Official Mode"}
+                {isTraining ? 'Training Mode' : 'Official Mode'}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="secondary" size="xl" onClick={() => addReps(1)} className="h-32 flex flex-col gap-2">
+              <Button
+                variant="secondary"
+                size="xl"
+                onClick={() => addReps(1)}
+                className="h-32 flex flex-col gap-2"
+              >
                 <span className="text-3xl font-bold text-black">+1</span>
                 <span className="text-xs text-[#858585]">Single</span>
               </Button>
-              <Button variant="secondary" size="xl" onClick={() => addReps(10)} className="h-32 flex flex-col gap-2">
+              <Button
+                variant="secondary"
+                size="xl"
+                onClick={() => addReps(10)}
+                className="h-32 flex flex-col gap-2"
+              >
                 <span className="text-3xl font-bold text-[#FFA400]">+10</span>
                 <span className="text-xs text-[#858585]">Set</span>
               </Button>
-              <Button variant="secondary" size="xl" onClick={() => addReps(20)} className="h-32 flex flex-col gap-2">
+              <Button
+                variant="secondary"
+                size="xl"
+                onClick={() => addReps(20)}
+                className="h-32 flex flex-col gap-2"
+              >
                 <span className="text-3xl font-bold text-[#FFA400]">+20</span>
                 <span className="text-xs text-[#858585]">Push</span>
               </Button>
-              <Button variant="secondary" size="xl" onClick={() => addReps(25)} className="h-32 flex flex-col gap-2 bg-[#F3F6F8]">
+              <Button
+                variant="secondary"
+                size="xl"
+                onClick={() => addReps(25)}
+                className="h-32 flex flex-col gap-2 bg-[#F3F6F8]"
+              >
                 <span className="text-3xl font-bold text-[#FFA400]">+25</span>
                 <span className="text-xs text-[#858585]">Big Set</span>
               </Button>
@@ -237,25 +282,31 @@ export default function App() {
 
             <div className="space-y-4 pt-4 border-t border-gray-100">
               <Button
-                variant={isUndoable ? "danger" : "ghost"}
+                variant={isUndoable ? 'danger' : 'ghost'}
                 size="sm"
                 onClick={undoLastAction}
                 disabled={!isUndoable}
                 className="w-full flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
-                {isUndoable ? `Undo Last (${lastLogAmount > 0 ? "+" : ""}${lastLogAmount})` : "Nothing to Undo"}
+                {isUndoable
+                  ? `Undo Last (${lastLogAmount > 0 ? '+' : ''}${lastLogAmount})`
+                  : 'Nothing to Undo'}
               </Button>
 
               {recentLogs.length > 0 && (
                 <div className="bg-[#F3F6F8] rounded-[15px] p-4">
-                  <h4 className="text-xs font-bold text-[#858585] uppercase tracking-wider mb-3">Recent Activity</h4>
+                  <h4 className="text-xs font-bold text-[#858585] uppercase tracking-wider mb-3">
+                    Recent Activity
+                  </h4>
                   <div className="space-y-2">
                     {recentLogs.map((log, i) => (
                       <div key={i} className="flex justify-between items-center text-sm">
                         <span className="text-[#5C5C5C]">{formatTime(log.timestamp)}</span>
-                        <span className={`font-bold ${log.amount > 0 ? "text-black" : "text-red-500"}`}>
-                          {log.amount > 0 ? "+" : ""}
+                        <span
+                          className={`font-bold ${log.amount > 0 ? 'text-black' : 'text-red-500'}`}
+                        >
+                          {log.amount > 0 ? '+' : ''}
                           {log.amount} reps
                         </span>
                       </div>
@@ -309,7 +360,9 @@ export default function App() {
                   Avg Reps
                 </div>
                 <span className="text-3xl font-bold text-black">
-                  {calculateStreak() > 0 ? Math.round((isTraining ? training_reps : official_reps) / calculateStreak()) : 0}
+                  {calculateStreak() > 0
+                    ? Math.round((isTraining ? training_reps : official_reps) / calculateStreak())
+                    : 0}
                 </span>
               </div>
             </div>
@@ -320,7 +373,9 @@ export default function App() {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-bold text-black">Rankings</h3>
-              <span className="text-xs text-[#858585]">{isTraining ? "Training" : "Official"} Phase</span>
+              <span className="text-xs text-[#858585]">
+                {isTraining ? 'Training' : 'Official'} Phase
+              </span>
             </div>
 
             {leaderboardData.map((buddy, index) => {
@@ -330,13 +385,19 @@ export default function App() {
                 <div
                   key={buddy.id}
                   className={`p-4 rounded-2xl flex items-center justify-between transition-all ${
-                    isMe ? "bg-[#FFA400] text-white shadow-lg scale-105" : "bg-white shadow-sm"
+                    isMe ? 'bg-[#FFA400] text-white shadow-lg scale-105' : 'bg-white shadow-sm'
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <span className={`font-bold text-xl w-8 ${isMe ? "text-white/80" : "text-[#FFA400]"}`}>#{index + 1}</span>
+                    <span
+                      className={`font-bold text-xl w-8 ${isMe ? 'text-white/80' : 'text-[#FFA400]'}`}
+                    >
+                      #{index + 1}
+                    </span>
                     <div>
-                      <span className="block font-bold text-lg capitalize">{buddy.displayName}</span>
+                      <span className="block font-bold text-lg capitalize">
+                        {buddy.displayName}
+                      </span>
                       {isMe && <span className="text-xs opacity-75">That's you!</span>}
                     </div>
                   </div>

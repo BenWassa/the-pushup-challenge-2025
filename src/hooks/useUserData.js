@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   arrayUnion,
-  collection,
   doc,
-  getDoc,
   increment,
   onSnapshot,
   serverTimestamp,
   setDoc,
   updateDoc,
-} from "firebase/firestore";
+} from 'firebase/firestore';
+
+/* eslint-disable react-hooks/preserve-manual-memoization */
 
 // Handles user profile, logging reps, undo, and derived stats.
 export const useUserData = ({ db, appId, season, isTraining }) => {
@@ -33,7 +33,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
 
       if (profileUnsub.current) profileUnsub.current();
 
-      const userRef = doc(db, "artifacts", appId, "public", "data", "users", cleanName);
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', cleanName);
       profileUnsub.current = onSnapshot(
         userRef,
         (docSnap) => {
@@ -45,7 +45,9 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
               const today = new Date().toDateString();
               const todayTotal = data.logs
                 .filter((log) => {
-                  const d = log.timestamp?.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+                  const d = log.timestamp?.toDate
+                    ? log.timestamp.toDate()
+                    : new Date(log.timestamp);
                   return d.toDateString() === today;
                 })
                 .reduce((acc, curr) => acc + curr.amount, 0);
@@ -59,13 +61,13 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
               created_at: serverTimestamp(),
               logs: [],
             };
-            setDoc(userRef, newUser).catch((err) => console.error("Error creating user:", err));
+            setDoc(userRef, newUser).catch((err) => console.error('Error creating user:', err));
             setUserData({ id: cleanName, ...newUser });
           }
           setLoadingProfile(false);
         },
         (error) => {
-          console.error("Error fetching user data:", error);
+          console.error('Error fetching user data:', error);
           setLoadingProfile(false);
         }
       );
@@ -82,8 +84,8 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
   const addReps = useCallback(
     async (amount) => {
       if (!userData?.id || !db) return;
-      const userRef = doc(db, "artifacts", appId, "public", "data", "users", userData.id);
-      const fieldToUpdate = isTraining ? "training_reps" : "official_reps";
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
+      const fieldToUpdate = isTraining ? 'training_reps' : 'official_reps';
 
       try {
         await updateDoc(userRef, {
@@ -96,7 +98,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
           }),
         });
       } catch (err) {
-        console.error("Error adding reps:", err);
+        console.error('Error adding reps:', err);
       }
     },
     [appId, db, isTraining, season, userData?.id]
@@ -106,10 +108,10 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
     if (!userData?.logs?.length || !db) return;
     const logs = [...userData.logs];
     const lastLog = logs.pop();
-    const userRef = doc(db, "artifacts", appId, "public", "data", "users", userData.id);
+    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
 
-    const logSeason = lastLog.season || (isTraining ? "TRAINING" : "OFFICIAL");
-    const fieldToUpdate = logSeason === "TRAINING" ? "training_reps" : "official_reps";
+    const logSeason = lastLog.season || (isTraining ? 'TRAINING' : 'OFFICIAL');
+    const fieldToUpdate = logSeason === 'TRAINING' ? 'training_reps' : 'official_reps';
 
     try {
       await updateDoc(userRef, {
@@ -117,7 +119,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         logs,
       });
     } catch (err) {
-      console.error("Error undoing:", err);
+      console.error('Error undoing:', err);
     }
   }, [appId, db, isTraining, userData?.id, userData?.logs]);
 
@@ -132,8 +134,14 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
     return uniqueDays.size;
   }, [userData?.logs]);
 
-  const recentLogs = useMemo(() => (userData?.logs ? [...userData.logs].reverse().slice(0, 3) : []), [userData?.logs]);
-  const lastLog = useMemo(() => (userData?.logs?.length ? userData.logs[userData.logs.length - 1] : null), [userData?.logs]);
+  const recentLogs = useMemo(
+    () => (userData?.logs ? [...userData.logs].reverse().slice(0, 3) : []),
+    [userData?.logs]
+  );
+  const lastLog = useMemo(
+    () => (userData?.logs?.length ? userData.logs[userData.logs.length - 1] : null),
+    [userData?.logs]
+  );
   const lastLogAmount = lastLog ? lastLog.amount : 0;
   const isUndoable = Boolean(userData?.logs?.length);
 

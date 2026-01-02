@@ -1,15 +1,20 @@
-import { useEffect, useState } from "react";
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { useEffect, useState } from 'react';
+import { initializeApp, getApps } from 'firebase/app';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInAnonymously,
+  signInWithCustomToken,
+} from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 const parseConfig = () => {
   try {
-    // eslint-disable-next-line no-undef
-    const cfg = typeof __firebase_config !== "undefined" ? JSON.parse(__firebase_config || "{}") : {};
+    const cfg =
+      typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config || '{}') : {};
     return cfg;
   } catch (e) {
-    console.error("Failed to parse firebase config", e);
+    console.error('Failed to parse firebase config', e);
     return {};
   }
 };
@@ -29,14 +34,12 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   const { auth, db } = getFirebase();
-  // eslint-disable-next-line no-undef
-  const appId = typeof __app_id !== "undefined" && __app_id ? __app_id : "pushup-challenge-default";
+  const appId = typeof __app_id !== 'undefined' && __app_id ? __app_id : 'pushup-challenge-default';
 
   useEffect(() => {
     let unsubAuth;
     const initAuth = async () => {
-      // eslint-disable-next-line no-undef
-      const token = typeof __initial_auth_token !== "undefined" ? __initial_auth_token : null;
+      const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
       try {
         if (token) {
           await signInWithCustomToken(auth, token);
@@ -44,11 +47,11 @@ export const useAuth = () => {
           await signInAnonymously(auth);
         }
       } catch (e) {
-        console.error("Auth init failed, falling back to anonymous", e);
+        console.error('Auth init failed, falling back to anonymous', e);
         try {
           await signInAnonymously(auth);
         } catch (err) {
-          console.error("Anonymous auth failed", err);
+          console.error('Anonymous auth failed', err);
         }
       }
 
