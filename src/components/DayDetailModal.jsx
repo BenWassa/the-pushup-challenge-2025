@@ -9,11 +9,14 @@ const DayDetailModal = ({ isOpen, selectedDate, logs, onClose, onAddHistorical, 
   if (!isOpen || !selectedDate) return null;
 
   const dateStr = getDateString(selectedDate);
+  // For historical logs, we need YYYY-MM-DD format
+  const dateIsoStr = selectedDate.toISOString().split('T')[0];
+
   const dayLogs = logs.filter((log) => {
     // Handle both real-time (timestamp) and historical (submitted_date) logs
     if (log.source === 'historical' && log.submitted_date) {
       // submitted_date is already in YYYY-MM-DD format
-      return log.submitted_date === dateStr;
+      return log.submitted_date === dateIsoStr;
     }
     // Handle real-time logs with Firestore Timestamp
     if (log.timestamp) {
@@ -55,7 +58,7 @@ const DayDetailModal = ({ isOpen, selectedDate, logs, onClose, onAddHistorical, 
         // Find the index of this log in the full logs array
         const logIndex = logs.findIndex((log) => {
           if (log.source === 'historical' && log.submitted_date) {
-            return log.submitted_date === dateStr && log.amount === logAmount;
+            return log.submitted_date === dateIsoStr && log.amount === logAmount;
           }
           if (log.timestamp) {
             const logDate = log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp;
