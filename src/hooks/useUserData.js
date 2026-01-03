@@ -93,7 +93,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
           last_active: serverTimestamp(),
           logs: arrayUnion({
             amount,
-            timestamp: new Date(),
+            timestamp: serverTimestamp(),
             season,
           }),
         });
