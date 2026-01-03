@@ -8,6 +8,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
+import { getDateString, isValidTimestamp } from '../utils/timestamp';
 
 /* eslint-disable react-hooks/preserve-manual-memoization */
 
@@ -43,15 +44,24 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
 
             if (data.logs) {
               const today = new Date().toDateString();
-              const todayTotal = data.logs
-                .filter((log) => {
-                  const d = log.timestamp?.toDate
-                    ? log.timestamp.toDate()
-                    : new Date(log.timestamp);
-                  return d.toDateString() === today;
-                })
-                .reduce((acc, curr) => acc + curr.amount, 0);
+              // Filter logs by today's date, with validation of timestamps
+              const validLogs = data.logs.filter((log) => {
+                if (!log.timestamp || !isValidTimestamp(log.timestamp)) {
+                  console.warn('Invalid or missing timestamp in log:', log);
+                  return false;
+                }
+                return getDateString(log.timestamp) === today;
+              });
+              const todayTotal = validLogs.reduce((acc, curr) => acc + curr.amount, 0);
               setTodayReps(todayTotal);
+
+              // Data integrity check: warn if any logs are invalid
+              const invalidCount = data.logs.filter(
+                (log) => !isValidTimestamp(log.timestamp)
+              ).length;
+              if (invalidCount > 0) {
+                console.warn(`Data integrity issue: ${invalidCount} logs have invalid timestamps`);
+              }
             }
           } else {
             const newUser = {
@@ -126,10 +136,10 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
   const calculateStreak = useCallback(() => {
     if (!userData?.logs) return 0;
     const uniqueDays = new Set(
-      userData.logs.map((l) => {
-        const d = l.timestamp?.toDate ? l.timestamp.toDate() : new Date(l.timestamp);
-        return d.toDateString();
-      })
+      userData.logs
+        .filter((l) => isValidTimestamp(l.timestamp))
+        .map((l) => getDateString(l.timestamp))
+        .filter(Boolean)
     );
     return uniqueDays.size;
   }, [userData?.logs]);
