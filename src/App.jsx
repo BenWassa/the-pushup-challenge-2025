@@ -3,6 +3,7 @@ import { Activity, Trophy, Calendar, Flame, TrendingUp, RotateCcw } from 'lucide
 import Button from './components/Button';
 import Card from './components/Card';
 import ContributionCalendar from './components/ContributionCalendar';
+import DayDetailModal from './components/DayDetailModal';
 import { useAuth } from './hooks/useAuth';
 import { useUserData } from './hooks/useUserData';
 import { useLeaderboard } from './hooks/useLeaderboard';
@@ -38,6 +39,8 @@ export default function App() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [refreshingUpdate, setRefreshingUpdate] = useState(false);
+  const [dayDetailModalOpen, setDayDetailModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
   const prevTodayRepsRef = useRef(0);
 
   const {
@@ -48,6 +51,8 @@ export default function App() {
     clearProfile,
     addReps,
     undoLastAction,
+    deleteLogByIndex,
+    addHistoricalReps,
     calculateStreak,
     recentLogs,
     lastLogAmount,
@@ -423,7 +428,13 @@ export default function App() {
             </div>
 
             <Card variant="soft" className="bg-white">
-              <ContributionCalendar logs={userData.logs} />
+              <ContributionCalendar
+                logs={userData.logs}
+                onDateClick={(date) => {
+                  setSelectedDate(date);
+                  setDayDetailModalOpen(true);
+                }}
+              />
               <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-orange-100" />
@@ -507,6 +518,18 @@ export default function App() {
         @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .animate-in { animation: slide-up 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
       `}</style>
+
+      <DayDetailModal
+        isOpen={dayDetailModalOpen}
+        selectedDate={selectedDate}
+        logs={userData?.logs || []}
+        onClose={() => {
+          setDayDetailModalOpen(false);
+          setSelectedDate(null);
+        }}
+        onAddHistorical={addHistoricalReps}
+        onDeleteLog={deleteLogByIndex}
+      />
     </div>
   );
 }

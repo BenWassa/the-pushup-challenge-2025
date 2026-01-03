@@ -133,6 +133,55 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
     }
   }, [appId, db, isTraining, userData?.id, userData?.logs]);
 
+  const deleteLogByIndex = useCallback(
+    async (logIndex) => {
+      if (!userData?.logs || logIndex < 0 || logIndex >= userData.logs.length || !db) return;
+      const logs = [...userData.logs];
+      const logToDelete = logs[logIndex];
+      logs.splice(logIndex, 1);
+
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
+      const logSeason = logToDelete.season || (isTraining ? 'TRAINING' : 'OFFICIAL');
+      const fieldToUpdate = logSeason === 'TRAINING' ? 'training_reps' : 'official_reps';
+
+      try {
+        await updateDoc(userRef, {
+          [fieldToUpdate]: increment(-logToDelete.amount),
+          logs,
+        });
+      } catch (err) {
+        console.error('Error deleting log:', err);
+        throw err;
+      }
+    },
+    [appId, db, isTraining, userData?.id, userData?.logs]
+  );
+
+  const addHistoricalReps = useCallback(
+    async (date, amount) => {
+      if (!userData?.id || !db || !amount || amount <= 0) return;
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
+      const fieldToUpdate = isTraining ? 'training_reps' : 'official_reps';
+
+      try {
+        await updateDoc(userRef, {
+          [fieldToUpdate]: increment(amount),
+          last_active: serverTimestamp(),
+          logs: arrayUnion({
+            amount,
+            submitted_date: date.toISOString().split('T')[0], // YYYY-MM-DD
+            source: 'historical',
+            season,
+          }),
+        });
+      } catch (err) {
+        console.error('Error adding historical reps:', err);
+        throw err;
+      }
+    },
+    [appId, db, isTraining, season, userData?.id]
+  );
+
   const calculateStreak = useCallback(() => {
     if (!userData?.logs) return 0;
     const uniqueDays = new Set(
@@ -163,6 +212,8 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
     clearProfile: db ? clearProfile : () => {},
     addReps: db ? addReps : () => {},
     undoLastAction: db ? undoLastAction : () => {},
+    deleteLogByIndex: db ? deleteLogByIndex : () => {},
+    addHistoricalReps: db ? addHistoricalReps : () => {},
     calculateStreak: db ? calculateStreak : () => 0,
     recentLogs: db ? recentLogs : [],
     lastLogAmount: db ? lastLogAmount : null,

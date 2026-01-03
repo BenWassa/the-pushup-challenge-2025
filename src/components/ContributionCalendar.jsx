@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { getDaysInMonth, getFirstDayOfMonth } from '../utils/date';
 
 // Monthly contribution calendar for the current month.
-const ContributionCalendar = ({ logs }) => {
+const ContributionCalendar = ({ logs, onDateClick }) => {
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
@@ -36,9 +36,22 @@ const ContributionCalendar = ({ logs }) => {
     if (count >= 30) level = 2;
     if (count >= 70) level = 3;
 
+    const clickDate = new Date(currentYear, currentMonth, d);
+
     days.push(
       <div key={d} className="flex flex-col items-center justify-center mb-2">
-        <div className={`calendar-day calendar-day-${level}`} title={`${count} reps`}>
+        <div
+          onClick={() => onDateClick?.(clickDate)}
+          className={`calendar-day calendar-day-${level} cursor-pointer hover:ring-2 hover:ring-brand-orange transition-all`}
+          title={`${count} reps`}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              onDateClick?.(clickDate);
+            }
+          }}
+        >
           {d}
         </div>
       </div>
