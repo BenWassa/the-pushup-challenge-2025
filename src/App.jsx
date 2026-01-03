@@ -401,7 +401,11 @@ export default function App() {
                   <div className="space-y-2">
                     {recentLogs.map((log, i) => (
                       <div key={i} className="activity-item">
-                        <span className="activity-time">{formatTime(log.timestamp)}</span>
+                        <span className="activity-time">
+                          {log.source === 'historical'
+                            ? `${log.submitted_date} (Historical)`
+                            : formatTime(log.timestamp)}
+                        </span>
                         <span
                           className={`activity-amount ${log.amount > 0 ? 'positive' : 'negative'}`}
                         >

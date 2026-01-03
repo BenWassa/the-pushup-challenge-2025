@@ -43,21 +43,27 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
             setUserData({ id: cleanName, ...data });
 
             if (data.logs) {
-              const today = new Date().toDateString();
-              // Filter logs by today's date, with validation of timestamps
+              const todayDateStr = new Date().toDateString();
+              const todayIsoStr = new Date().toISOString().split('T')[0];
+
+              // Filter logs by today's date, handling both real-time and historical
               const validLogs = data.logs.filter((log) => {
-                if (!log.timestamp || !isValidTimestamp(log.timestamp)) {
-                  console.warn('Invalid or missing timestamp in log:', log);
-                  return false;
+                // Historical logs use submitted_date
+                if (log.source === 'historical' && log.submitted_date) {
+                  return log.submitted_date === todayIsoStr;
                 }
-                return getDateString(log.timestamp) === today;
+                // Real-time logs use timestamp
+                if (log.timestamp && isValidTimestamp(log.timestamp)) {
+                  return getDateString(log.timestamp) === todayDateStr;
+                }
+                return false;
               });
               const todayTotal = validLogs.reduce((acc, curr) => acc + curr.amount, 0);
               setTodayReps(todayTotal);
 
-              // Data integrity check: warn if any logs are invalid
+              // Data integrity check: warn if any logs are invalid (excluding historical)
               const invalidCount = data.logs.filter(
-                (log) => !isValidTimestamp(log.timestamp)
+                (log) => log.source !== 'historical' && !isValidTimestamp(log.timestamp)
               ).length;
               if (invalidCount > 0) {
                 console.warn(`Data integrity issue: ${invalidCount} logs have invalid timestamps`);
@@ -184,12 +190,22 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
 
   const calculateStreak = useCallback(() => {
     if (!userData?.logs) return 0;
-    const uniqueDays = new Set(
-      userData.logs
-        .filter((l) => isValidTimestamp(l.timestamp))
-        .map((l) => getDateString(l.timestamp))
-        .filter(Boolean)
-    );
+    const uniqueDays = new Set();
+
+    userData.logs.forEach((log) => {
+      // Historical logs use submitted_date (YYYY-MM-DD)
+      if (log.source === 'historical' && log.submitted_date) {
+        uniqueDays.add(log.submitted_date);
+      }
+      // Real-time logs use timestamp
+      else if (log.timestamp && isValidTimestamp(log.timestamp)) {
+        // Convert to YYYY-MM-DD for consistent comparison
+        const date = log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp;
+        const dateStr = date.toISOString().split('T')[0];
+        uniqueDays.add(dateStr);
+      }
+    });
+
     return uniqueDays.size;
   }, [userData?.logs]);
 
