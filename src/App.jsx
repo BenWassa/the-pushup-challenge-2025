@@ -174,6 +174,21 @@ export default function App() {
               Start training today.
             </p>
           </div>
+
+          <Card variant="soft" className="mb-6 bg-gradient-to-br from-orange-50 to-white">
+            <div className="space-y-3">
+              <h2 className="text-lg font-bold text-gray-900">About This Challenge</h2>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Take on <span className="font-bold text-brand-orange">2,000 push-ups</span> for the{' '}
+                <span className="font-bold">2,000 lives</span> lost to suicide each day, worldwide.
+              </p>
+              <p className="text-xs text-gray-600">
+                Every rep is a tribute. Every day is progress. Together, we raise awareness and
+                remember those we've lost.
+              </p>
+            </div>
+          </Card>
+
           <Card variant="standard" className="mb-8">
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
