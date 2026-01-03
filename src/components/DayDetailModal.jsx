@@ -12,10 +12,15 @@ const DayDetailModal = ({ isOpen, selectedDate, logs, onClose, onAddHistorical, 
   const dayLogs = logs.filter((log) => {
     // Handle both real-time (timestamp) and historical (submitted_date) logs
     if (log.source === 'historical' && log.submitted_date) {
+      // submitted_date is already in YYYY-MM-DD format
       return log.submitted_date === dateStr;
     }
-    const logDate = log.timestamp?.toDate ? log.timestamp.toDate() : log.timestamp;
-    return logDate && getDateString(logDate) === dateStr;
+    // Handle real-time logs with Firestore Timestamp
+    if (log.timestamp) {
+      const logDate = log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp;
+      return logDate && getDateString(logDate) === dateStr;
+    }
+    return false;
   });
 
   const totalReps = dayLogs.reduce((sum, log) => sum + log.amount, 0);
@@ -44,10 +49,23 @@ const DayDetailModal = ({ isOpen, selectedDate, logs, onClose, onAddHistorical, 
     }
   };
 
-  const handleDeleteLog = async (logId, logAmount) => {
+  const handleDeleteLog = async (logAmount) => {
     if (window.confirm(`Delete ${logAmount} reps? This can't be undone.`)) {
       try {
-        await onDeleteLog(logId);
+        // Find the index of this log in the full logs array
+        const logIndex = logs.findIndex((log) => {
+          if (log.source === 'historical' && log.submitted_date) {
+            return log.submitted_date === dateStr && log.amount === logAmount;
+          }
+          if (log.timestamp) {
+            const logDate = log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp;
+            return logDate && getDateString(logDate) === dateStr && log.amount === logAmount;
+          }
+          return false;
+        });
+        if (logIndex !== -1) {
+          await onDeleteLog(logIndex);
+        }
       } catch (err) {
         setError(err.message || 'Failed to delete log');
       }
@@ -116,7 +134,7 @@ const DayDetailModal = ({ isOpen, selectedDate, logs, onClose, onAddHistorical, 
                           </p>
                         </div>
                         <button
-                          onClick={() => handleDeleteLog(idx, log.amount)}
+                          onClick={() => handleDeleteLog(log.amount)}
                           className="p-1.5 hover:bg-red-100 rounded-lg transition-colors text-red-600"
                           aria-label="Delete log"
                         >
@@ -145,7 +163,7 @@ const DayDetailModal = ({ isOpen, selectedDate, logs, onClose, onAddHistorical, 
                           <p className="text-xs text-gray-500">Historical entry</p>
                         </div>
                         <button
-                          onClick={() => handleDeleteLog(idx, log.amount)}
+                          onClick={() => handleDeleteLog(log.amount)}
                           className="p-1.5 hover:bg-red-100 rounded-lg transition-colors text-red-600"
                           aria-label="Delete log"
                         >

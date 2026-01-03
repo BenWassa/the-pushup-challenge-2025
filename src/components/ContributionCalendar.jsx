@@ -14,8 +14,18 @@ const ContributionCalendar = ({ logs, onDateClick }) => {
     if (!logs) return data;
 
     logs.forEach((log) => {
-      if (!log.timestamp) return;
-      const date = new Date(log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp);
+      let date;
+
+      // Handle historical logs with submitted_date
+      if (log.source === 'historical' && log.submitted_date) {
+        date = new Date(log.submitted_date);
+      } else if (log.timestamp) {
+        // Handle real-time logs with timestamp
+        date = new Date(log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp);
+      } else {
+        return;
+      }
+
       if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
         const day = date.getDate();
         data[day] = (data[day] || 0) + log.amount;
