@@ -171,12 +171,11 @@ export default function App() {
         <div className="flex-1 flex flex-col justify-center px-6 max-w-md mx-auto w-full relative z-10 py-12">
           {/* Logo/Title */}
           <div className="mb-8 text-center">
-            <h1 className="text-5xl font-bold leading-[1.05] mb-3 tracking-tight">
-              Push
-              <br />
-              <span className="text-brand-orange">Up</span>
+            <h1 className="text-5xl font-bold leading-[1.05] tracking-tight">
+              Push<span className="text-brand-orange">Up</span>
             </h1>
-            <div className="w-12 h-1 bg-brand-orange mx-auto rounded-full" />
+            <div className="w-16 h-0.5 bg-brand-orange mx-auto my-2" />
+            <div className="text-sm font-bold text-neutral-gray-mid tracking-wider">2026</div>
           </div>
 
           {/* About Card */}
