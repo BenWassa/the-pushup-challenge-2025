@@ -127,8 +127,7 @@ export default function App() {
           <div className="text-center">
             <h2 className="error-title">Setup Required</h2>
             <p className="error-message">
-              Firebase is not configured. Please set up your Firebase project and update the
-              `.env.local` file with your credentials.
+              {authError.message || 'An error occurred. Please try again.'}
             </p>
             <div className="error-hint">Check the README.md for setup instructions.</div>
           </div>
