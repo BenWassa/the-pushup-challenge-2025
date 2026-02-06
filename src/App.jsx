@@ -324,23 +324,6 @@ export default function App() {
             </div>
           </div>
 
-          {!isTraining && (
-            <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-6">
-              <div className="text-center">
-                <span className="block text-2xl font-bold text-black">
-                  {CHALLENGE_GOAL - official_reps}
-                </span>
-                <span className="text-xs text-neutral-gray-mid">Remaining</span>
-              </div>
-              <div className="h-8 w-[1px] bg-gray-200" />
-              <div className="text-center">
-                <span className="block text-2xl font-bold text-black">
-                  {Math.ceil((CHALLENGE_GOAL - official_reps) / 23)}
-                </span>
-                <span className="text-xs text-neutral-gray-mid">Daily Avg Needed</span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
