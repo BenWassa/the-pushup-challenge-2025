@@ -112,7 +112,7 @@ season: "TRAINING" | "OFFICIAL"
 created_at: timestamp
 last_active: timestamp
 
-````
+```
 
 ---
 
@@ -123,7 +123,7 @@ last_active: timestamp
 ```bash
 git clone https://github.com/your-username/the-pushup-challenge-2025.git
 cd the-pushup-challenge-2025
-````
+```
 
 ---
 
@@ -139,16 +139,16 @@ npm install
 
 Create a Firebase project and enable:
 
-* **Firestore**
-* **Anonymous Authentication**
+- **Firestore**
+- **Anonymous Authentication**
 
 This app is intended for a very small number of users (≈5 people).
 For this scale, Firebase provides more than enough performance and safety.
 
 The app supports two environments:
 
-* Injected runtime variables (Firebase Hosting or embedded environments)
-* Local development using environment variables
+- Injected runtime variables (Firebase Hosting or embedded environments)
+- Local development using environment variables
 
 ---
 
@@ -180,9 +180,9 @@ VITE_FIREBASE_APP_ID=your-app-id
 
 The app can receive the following injected variables when hosted:
 
-* `__firebase_config`
-* `__app_id`
-* `__initial_auth_token` (optional)
+- `__firebase_config`
+- `__app_id`
+- `__initial_auth_token` (optional)
 
 For local development, these values are typically supplied via `.env.local` using `VITE_*` variables.
 
@@ -206,7 +206,7 @@ The app is optimized for mobile screens but works on desktop.
 npm run build
 ```
 
-This creates a `dist/` folder containing the production build.
+This creates a `docs/` folder containing the production build (ready to publish to GitHub Pages).
 
 ---
 
@@ -214,9 +214,9 @@ This creates a `dist/` folder containing the production build.
 
 The app is designed to be PWA-compatible and works well when added to a phone home screen.
 
-* Mobile-first layout
-* Offline-tolerant UI patterns
-* No reliance on desktop-only interactions
+- Mobile-first layout
+- Offline-tolerant UI patterns
+- No reliance on desktop-only interactions
 
 Full offline write support is not guaranteed.
 
@@ -224,12 +224,12 @@ Full offline write support is not guaranteed.
 
 ## Architecture Rules
 
-* Firebase logic lives in hooks only
-* UI components are dumb and reusable
-* App-level state lives in `App.jsx`
-* Tailwind first, CSS only for shapes and animations
-* No premature abstraction
-* Keep dependencies minimal
+- Firebase logic lives in hooks only
+- UI components are dumb and reusable
+- App-level state lives in `App.jsx`
+- Tailwind first, CSS only for shapes and animations
+- No premature abstraction
+- Keep dependencies minimal
 
 ---
 
@@ -237,21 +237,21 @@ Full offline write support is not guaranteed.
 
 Included:
 
-* Rep logging
-* Undo
-* Progress bars
-* Calendar heatmap
-* Leaderboards
-* Stats
+- Rep logging
+- Undo
+- Progress bars
+- Calendar heatmap
+- Leaderboards
+- Stats
 
 Explicitly excluded:
 
-* Accounts or passwords
-* Notifications
-* Social feeds
-* Complex gamification
-* Overdesigned UI
-* Admin dashboards
+- Accounts or passwords
+- Notifications
+- Social feeds
+- Complex gamification
+- Overdesigned UI
+- Admin dashboards
 
 ---
 
@@ -259,8 +259,8 @@ Explicitly excluded:
 
 Recommended:
 
-* **Firebase Hosting**
-* **Vercel**
+- **Firebase Hosting**
+- **Vercel**
 
 Single environment only until stable.
 No CI/CD until the app settles.

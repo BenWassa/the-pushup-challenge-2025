@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "preview": "vite preview",
-    "build:pages": "npm run build && rm -rf docs && cp -R dist docs && touch docs/.nojekyll"
+    "build:pages": "rm -rf docs && npm run build && touch docs/.nojekyll"
   },
   "dependencies": {
     "firebase": "^12.7.0",

@@ -9,6 +9,9 @@ export default defineConfig(({ command }) => {
   const cfg = {
     plugins: [react()],
     base: '/the-pushup-challenge-2025/',
+    build: {
+      outDir: 'docs',
+    },
   };
 
   // During dev, ensure requests for manifest.webmanifest (even at nested paths)
