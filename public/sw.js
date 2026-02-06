@@ -7,6 +7,10 @@ const PRECACHE_URLS = [
   'manifest.webmanifest',
   'icon-192.png',
   'icon-512.png',
+  'icon-192-maskable.png',
+  'icon-512-maskable.png',
+  'icon-32.png',
+  'icon-16.png',
   'apple-touch-icon.png',
 ].map((path) => new URL(path, SCOPE_URL).toString());
 
