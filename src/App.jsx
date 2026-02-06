@@ -153,7 +153,6 @@ export default function App() {
   const heroLabel = "Today's Effort";
   const heroCurrent = todayReps;
   const heroGoal = DAILY_GOAL;
-  const heroProgress = heroGoal ? Math.min(heroCurrent / heroGoal, 1) : 0;
 
   const currentMonthLabel = new Date().toLocaleDateString('en-US', {
     month: 'short',
@@ -171,7 +170,6 @@ export default function App() {
         heroLabel={heroLabel}
         heroCurrent={heroCurrent}
         heroGoal={heroGoal}
-        heroProgress={heroProgress}
         official_reps={official_reps}
         challengeGoal={CHALLENGE_GOAL}
         onLogout={handleLogout}

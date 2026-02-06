@@ -6,11 +6,22 @@ export default function DashboardHero({
   heroLabel,
   heroCurrent,
   heroGoal,
-  heroProgress,
   official_reps,
   challengeGoal,
   onLogout,
 }) {
+  const chunks = 4;
+  const safeGoal = heroGoal > 0 ? heroGoal : 1;
+  const chunkSize = safeGoal / chunks;
+  const chunkFills = Array.from({ length: chunks }, (_, index) => {
+    const start = index * chunkSize;
+    const progress = (heroCurrent - start) / chunkSize;
+    return Math.max(0, Math.min(1, progress));
+  });
+  const labelValues = Array.from({ length: chunks + 1 }, (_, index) =>
+    Math.round((safeGoal / chunks) * index),
+  );
+
   return (
     <div className="bg-[radial-gradient(circle_at_50%_0%,_#F0F2F5_0%,_#D1D5DB_100%)] pt-8 pb-12 px-6 rounded-b-leaf relative overflow-hidden">
       <div className="relative">
@@ -44,23 +55,37 @@ export default function DashboardHero({
             <span className="text-[68px] font-extrabold leading-[0.85] tracking-[-0.03em] bg-gradient-to-br from-[#FF5500] via-[#FF9F0A] to-[#FF5500] bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(255,85,0,0.15)]">
               {heroCurrent}
             </span>
-            <span className="text-[15px] font-semibold text-[#636366]/80">/ {heroGoal} reps</span>
           </div>
 
-          <div className="relative h-2.5 rounded-full bg-black/5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] mb-7 overflow-hidden">
-            <div
-              className="absolute inset-y-0 right-0 pointer-events-none"
-              style={{
-                left: `${Math.round(heroProgress * 100)}%`,
-                backgroundImage:
-                  'linear-gradient(to right, transparent 0, transparent calc(20% - 0.5px), rgba(0,0,0,0.04) calc(20% - 0.5px), rgba(0,0,0,0.04) 20%)',
-                backgroundSize: '20% 100%',
-              }}
-            />
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-[#FF9F0A] to-[#FF5500] shadow-[0_4px_12px_rgba(255,85,0,0.4)]"
-              style={{ width: `${Math.round(heroProgress * 100)}%` }}
-            />
+          <div className="mb-5">
+            <div className="flex gap-2 h-8 w-full">
+              {chunkFills.map((fillAmount, index) => (
+                <div
+                  key={index}
+                  className="flex-1 rounded-md overflow-hidden bg-black/5"
+                  style={{ transform: 'skewX(-10deg)' }}
+                >
+                  <div
+                    className="h-full bg-gradient-to-r from-[#FF9F0A] to-[#FF5500] shadow-[0_0_10px_rgba(255,164,0,0.4)]"
+                    style={{
+                      width: `${Math.round(fillAmount * 100)}%`,
+                      transform: 'skewX(10deg)',
+                      transformOrigin: 'left',
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 flex justify-between text-[10px] font-bold uppercase text-[#999] px-1">
+              {labelValues.map((value, index) => {
+                const isActive = heroCurrent >= value;
+                return (
+                  <span key={value} className={isActive ? 'text-[#FF5500]' : ''}>
+                    {index === 0 ? 'Start' : value}
+                  </span>
+                );
+              })}
+            </div>
           </div>
 
           <div className="border-t border-black/5 pt-4">
