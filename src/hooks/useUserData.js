@@ -34,7 +34,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
 
       if (profileUnsub.current) profileUnsub.current();
 
-      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', cleanName);
+      const userRef = doc(db, 'users', cleanName);
       profileUnsub.current = onSnapshot(
         userRef,
         (docSnap) => {
@@ -88,7 +88,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         }
       );
     },
-    [appId, db]
+    [db]
   );
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
   const addReps = useCallback(
     async (amount) => {
       if (!userData?.id || !db) return;
-      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
+      const userRef = doc(db, 'users', userData.id);
       const fieldToUpdate = isTraining ? 'training_reps' : 'official_reps';
 
       try {
@@ -117,14 +117,14 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         console.error('Error adding reps:', err);
       }
     },
-    [appId, db, isTraining, season, userData?.id]
+    [db, isTraining, season, userData?.id]
   );
 
   const undoLastAction = useCallback(async () => {
     if (!userData?.logs?.length || !db) return;
     const logs = [...userData.logs];
     const lastLog = logs.pop();
-    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
+    const userRef = doc(db, 'users', userData.id);
 
     const logSeason = lastLog.season || (isTraining ? 'TRAINING' : 'OFFICIAL');
     const fieldToUpdate = logSeason === 'TRAINING' ? 'training_reps' : 'official_reps';
@@ -137,7 +137,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
     } catch (err) {
       console.error('Error undoing:', err);
     }
-  }, [appId, db, isTraining, userData?.id, userData?.logs]);
+  }, [db, isTraining, userData?.id, userData?.logs]);
 
   const deleteLogByIndex = useCallback(
     async (logIndex) => {
@@ -146,7 +146,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
       const logToDelete = logs[logIndex];
       logs.splice(logIndex, 1);
 
-      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
+      const userRef = doc(db, 'users', userData.id);
       const logSeason = logToDelete.season || (isTraining ? 'TRAINING' : 'OFFICIAL');
       const fieldToUpdate = logSeason === 'TRAINING' ? 'training_reps' : 'official_reps';
 
@@ -160,13 +160,13 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         throw err;
       }
     },
-    [appId, db, isTraining, userData?.id, userData?.logs]
+    [db, isTraining, userData?.id, userData?.logs]
   );
 
   const addHistoricalReps = useCallback(
     async (date, amount) => {
       if (!userData?.id || !db || !amount || amount <= 0) return;
-      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
+      const userRef = doc(db, 'users', userData.id);
       const fieldToUpdate = isTraining ? 'training_reps' : 'official_reps';
 
       try {
@@ -185,7 +185,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         throw err;
       }
     },
-    [appId, db, isTraining, season, userData?.id]
+    [db, isTraining, season, userData?.id]
   );
 
   const calculateStreak = useCallback(() => {
