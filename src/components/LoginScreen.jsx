@@ -32,7 +32,10 @@ export default function LoginScreen({
           <div className="text-sm font-bold text-neutral-gray-mid tracking-wider">2026</div>
         </div>
 
-        <Card variant="soft" className="mb-6 bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg">
+        <Card
+          variant="soft"
+          className="mb-6 bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg"
+        >
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-brand-orange/10 flex items-center justify-center">

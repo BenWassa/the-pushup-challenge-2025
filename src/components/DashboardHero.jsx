@@ -19,7 +19,7 @@ export default function DashboardHero({
     return Math.max(0, Math.min(1, progress));
   });
   const labelValues = Array.from({ length: chunks + 1 }, (_, index) =>
-    Math.round((safeGoal / chunks) * index),
+    Math.round((safeGoal / chunks) * index)
   );
 
   return (
@@ -36,7 +36,9 @@ export default function DashboardHero({
               ) : (
                 <Trophy className="w-5 h-5 text-brand-orange" />
               )}
-              <h1 className={`text-2xl font-bold ${isTraining ? 'text-black' : 'text-brand-orange'}`}>
+              <h1
+                className={`text-2xl font-bold ${isTraining ? 'text-black' : 'text-brand-orange'}`}
+              >
                 {isTraining ? 'Training Camp' : 'The Challenge'}
               </h1>
             </div>

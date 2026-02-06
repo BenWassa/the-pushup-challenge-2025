@@ -16,9 +16,7 @@ export default function LeaderboardView({ leaderboardData, isTraining, userId })
         return (
           <div key={buddy.id} className={`leaderboard-item ${isMe ? 'current-user' : ''}`}>
             <div className="flex items-center gap-4">
-              <span className={`leaderboard-rank ${isMe ? 'current-user' : ''}`}>
-                #{index + 1}
-              </span>
+              <span className={`leaderboard-rank ${isMe ? 'current-user' : ''}`}>#{index + 1}</span>
               <div>
                 <span className="leaderboard-name">{buddy.displayName}</span>
                 {isMe && <span className="ml-2 text-xs opacity-75">That's you!</span>}

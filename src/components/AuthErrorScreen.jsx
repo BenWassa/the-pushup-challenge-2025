@@ -2,7 +2,12 @@ import React from 'react';
 import Card from './Card';
 import UpdateBanner from './UpdateBanner';
 
-export default function AuthErrorScreen({ updateAvailable, onRefreshUpdate, refreshingUpdate, message }) {
+export default function AuthErrorScreen({
+  updateAvailable,
+  onRefreshUpdate,
+  refreshingUpdate,
+  message,
+}) {
   return (
     <div className="min-h-screen bg-neutral-white flex items-center justify-center p-4">
       {updateAvailable && (
