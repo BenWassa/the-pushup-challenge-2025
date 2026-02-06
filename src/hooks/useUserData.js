@@ -34,7 +34,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
 
       if (profileUnsub.current) profileUnsub.current();
 
-      const userRef = doc(db, 'users', cleanName);
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', cleanName);
       profileUnsub.current = onSnapshot(
         userRef,
         (docSnap) => {
@@ -100,7 +100,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
   const addReps = useCallback(
     async (amount) => {
       if (!userData?.id || !db) return;
-      const userRef = doc(db, 'users', userData.id);
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
       const fieldToUpdate = isTraining ? 'training_reps' : 'official_reps';
 
       try {
@@ -109,7 +109,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
           last_active: serverTimestamp(),
           logs: arrayUnion({
             amount,
-            timestamp: serverTimestamp(),
+            timestamp: Date.now(),
             season,
           }),
         });
@@ -124,7 +124,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
     if (!userData?.logs?.length || !db) return;
     const logs = [...userData.logs];
     const lastLog = logs.pop();
-    const userRef = doc(db, 'users', userData.id);
+    const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
 
     const logSeason = lastLog.season || (isTraining ? 'TRAINING' : 'OFFICIAL');
     const fieldToUpdate = logSeason === 'TRAINING' ? 'training_reps' : 'official_reps';
@@ -146,7 +146,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
       const logToDelete = logs[logIndex];
       logs.splice(logIndex, 1);
 
-      const userRef = doc(db, 'users', userData.id);
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
       const logSeason = logToDelete.season || (isTraining ? 'TRAINING' : 'OFFICIAL');
       const fieldToUpdate = logSeason === 'TRAINING' ? 'training_reps' : 'official_reps';
 
@@ -166,7 +166,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
   const addHistoricalReps = useCallback(
     async (date, amount) => {
       if (!userData?.id || !db || !amount || amount <= 0) return;
-      const userRef = doc(db, 'users', userData.id);
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userData.id);
       const fieldToUpdate = isTraining ? 'training_reps' : 'official_reps';
 
       try {
@@ -220,7 +220,14 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         return log.submitted_date === todayIso;
       }
       if (log.timestamp && isValidTimestamp(log.timestamp)) {
-        const logDate = log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp;
+        let logDate;
+        if (log.timestamp.toDate) {
+          logDate = log.timestamp.toDate();
+        } else if (typeof log.timestamp === 'number') {
+          logDate = new Date(log.timestamp);
+        } else {
+          logDate = new Date(log.timestamp);
+        }
         return logDate && logDate.toDateString() === todayStr;
       }
       return false;
