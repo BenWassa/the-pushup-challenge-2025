@@ -296,7 +296,16 @@ export default function App() {
               <span className="text-[15px] font-semibold text-[#636366]/80">/ {heroGoal} reps</span>
             </div>
 
-            <div className="h-2.5 rounded-full bg-black/5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] mb-7">
+            <div className="relative h-2.5 rounded-full bg-black/5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] mb-7 overflow-hidden">
+              <div
+                className="absolute inset-y-0 right-0 pointer-events-none"
+                style={{
+                  left: `${Math.round(heroProgress * 100)}%`,
+                  backgroundImage:
+                    'linear-gradient(to right, transparent 0, transparent calc(20% - 0.5px), rgba(0,0,0,0.04) calc(20% - 0.5px), rgba(0,0,0,0.04) 20%)',
+                  backgroundSize: '20% 100%',
+                }}
+              />
               <div
                 className="h-full rounded-full bg-gradient-to-r from-[#FF9F0A] to-[#FF5500] shadow-[0_4px_12px_rgba(255,85,0,0.4)]"
                 style={{ width: `${Math.round(heroProgress * 100)}%` }}
@@ -317,20 +326,6 @@ export default function App() {
                   className="h-full rounded-full bg-[#AEAEB2]"
                   style={{ width: `${Math.round((official_reps / CHALLENGE_GOAL) * 100)}%` }}
                 />
-              </div>
-              <div className="flex items-center justify-between text-[12px]">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
-                  <span className="font-medium text-[#636366]">Completed</span>
-                  <span className="font-bold text-[#333]">{official_reps}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-[#636366]">Remaining</span>
-                  <span className="font-bold text-[#333]">
-                    {Math.max(CHALLENGE_GOAL - official_reps, 0)}
-                  </span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#AEAEB2]" />
-                </div>
               </div>
             </div>
           </div>
