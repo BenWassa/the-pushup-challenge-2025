@@ -243,6 +243,11 @@ export default function App() {
     ? Math.min(official_reps / CHALLENGE_GOAL, 1)
     : Math.min((CHALLENGE_GOAL - official_reps) / CHALLENGE_GOAL, 1);
 
+  const currentMonthLabel = new Date().toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  });
+
   return (
     <div className="min-h-screen bg-neutral-white pb-8 relative max-w-lg mx-auto shadow-2xl">
       {updateAvailable && (
@@ -456,7 +461,7 @@ export default function App() {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-bold text-black">Consistency</h3>
               <div className="flex gap-1 text-[10px] text-neutral-gray-mid font-bold uppercase items-center">
-                <span>Jan 2026</span>
+                <span>{currentMonthLabel}</span>
                 <Calendar className="w-3 h-3 ml-1" />
               </div>
             </div>
