@@ -237,11 +237,6 @@ export default function App() {
   const heroCurrent = todayReps;
   const heroGoal = DAILY_GOAL;
   const heroProgress = heroGoal ? Math.min(heroCurrent / heroGoal, 1) : 0;
-  const footerLabel = isTraining ? 'Challenge Total' : 'Remaining';
-  const footerValue = isTraining ? official_reps : Math.max(CHALLENGE_GOAL - official_reps, 0);
-  const footerProgress = isTraining
-    ? Math.min(official_reps / CHALLENGE_GOAL, 1)
-    : Math.min((CHALLENGE_GOAL - official_reps) / CHALLENGE_GOAL, 1);
 
   const currentMonthLabel = new Date().toLocaleDateString('en-US', {
     month: 'short',
@@ -308,22 +303,37 @@ export default function App() {
               />
             </div>
 
-            <div className="border-t border-black/5 pt-4 flex items-center justify-between">
-              <span className="text-[13px] font-semibold text-[#8E8E93] tracking-[0.02em]">
-                {footerLabel}
-              </span>
-              <div className="flex items-center gap-3">
-                <span className="text-[13px] font-semibold text-[#333]">{footerValue}</span>
-                <div className="w-20 h-1.5 rounded-full bg-black/10 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#AEAEB2]"
-                    style={{ width: `${Math.round(footerProgress * 100)}%` }}
-                  />
+            <div className="border-t border-black/5 pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8E8E93]">
+                  Challenge Progress
+                </span>
+                <span className="text-[11px] font-semibold text-[#8E8E93]">
+                  {official_reps} / {CHALLENGE_GOAL}
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full bg-black/10 overflow-hidden mb-3">
+                <div
+                  className="h-full rounded-full bg-[#AEAEB2]"
+                  style={{ width: `${Math.round((official_reps / CHALLENGE_GOAL) * 100)}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[12px]">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
+                  <span className="font-medium text-[#636366]">Completed</span>
+                  <span className="font-bold text-[#333]">{official_reps}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-[#636366]">Remaining</span>
+                  <span className="font-bold text-[#333]">
+                    {Math.max(CHALLENGE_GOAL - official_reps, 0)}
+                  </span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#AEAEB2]" />
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
