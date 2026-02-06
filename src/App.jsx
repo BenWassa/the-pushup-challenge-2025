@@ -3,7 +3,7 @@ import { Activity, Trophy, Calendar, Flame, TrendingUp, RotateCcw } from 'lucide
 import Button from './components/Button';
 import Card from './components/Card';
 import ContributionCalendar from './components/ContributionCalendar';
-import DayDetailModal from './components/DayDetailModal';
+import DaySummaryPopup from './components/DaySummaryPopup';
 import { useAuth } from './hooks/useAuth';
 import { useUserData } from './hooks/useUserData';
 import { useLeaderboard } from './hooks/useLeaderboard';
@@ -51,8 +51,6 @@ export default function App() {
     clearProfile,
     addReps,
     undoLastAction,
-    deleteLogByIndex,
-    addHistoricalReps,
     calculateStreak,
     recentLogs,
     lastLogAmount,
@@ -235,9 +233,9 @@ export default function App() {
   const { training_reps = 0, official_reps = 0 } = userData;
   const DAILY_GOAL = 87;
   const CHALLENGE_GOAL = 2000;
-  const heroLabel = isTraining ? "Today's Effort" : 'Challenge Total';
-  const heroCurrent = isTraining ? todayReps : official_reps;
-  const heroGoal = isTraining ? DAILY_GOAL : CHALLENGE_GOAL;
+  const heroLabel = "Today's Effort";
+  const heroCurrent = todayReps;
+  const heroGoal = DAILY_GOAL;
   const heroProgress = heroGoal ? Math.min(heroCurrent / heroGoal, 1) : 0;
   const footerLabel = isTraining ? 'Challenge Total' : 'Remaining';
   const footerValue = isTraining ? official_reps : Math.max(CHALLENGE_GOAL - official_reps, 0);
@@ -555,7 +553,7 @@ export default function App() {
         .animate-in { animation: slide-up 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
       `}</style>
 
-      <DayDetailModal
+      <DaySummaryPopup
         isOpen={dayDetailModalOpen}
         selectedDate={selectedDate}
         logs={userData?.logs || []}
@@ -563,8 +561,6 @@ export default function App() {
           setDayDetailModalOpen(false);
           setSelectedDate(null);
         }}
-        onAddHistorical={addHistoricalReps}
-        onDeleteLog={deleteLogByIndex}
       />
     </div>
   );

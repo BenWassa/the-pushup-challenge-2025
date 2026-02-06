@@ -209,10 +209,25 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
     return uniqueDays.size;
   }, [userData?.logs]);
 
-  const recentLogs = useMemo(
-    () => (userData?.logs ? [...userData.logs].reverse().slice(0, 3) : []),
-    [userData?.logs]
-  );
+  const recentLogs = useMemo(() => {
+    if (!userData?.logs) return [];
+
+    const todayStr = new Date().toDateString();
+    const todayIso = new Date().toISOString().split('T')[0];
+
+    const todaysLogs = userData.logs.filter((log) => {
+      if (log.source === 'historical' && log.submitted_date) {
+        return log.submitted_date === todayIso;
+      }
+      if (log.timestamp && isValidTimestamp(log.timestamp)) {
+        const logDate = log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp;
+        return logDate && logDate.toDateString() === todayStr;
+      }
+      return false;
+    });
+
+    return [...todaysLogs].reverse().slice(0, 3);
+  }, [userData?.logs]);
   const lastLog = useMemo(
     () => (userData?.logs?.length ? userData.logs[userData.logs.length - 1] : null),
     [userData?.logs]
