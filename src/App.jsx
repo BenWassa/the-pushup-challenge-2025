@@ -539,9 +539,9 @@ export default function App() {
         )}
       </div>
 
-      <div className="mt-12 mb-8 h-px w-full bg-neutral-gray-light mx-6" />
+      <div className="mt-6 mb-4 h-px w-full bg-neutral-gray-light mx-6" />
 
-      <div className="text-center mt-12 mb-6">
+      <div className="text-center mt-6 mb-4">
         <p className="text-xs text-[#858585] font-bold tracking-widest uppercase">
           App Version 4.2.0
         </p>
