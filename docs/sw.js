@@ -11,6 +11,7 @@ const PRECACHE_URLS = [
   'icon-512-maskable.png',
   'icon-32.png',
   'icon-16.png',
+  'icon.png',
   'favicon.ico',
   'apple-touch-icon.png',
 ].map((path) => new URL(path, SCOPE_URL).toString());
