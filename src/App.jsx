@@ -256,7 +256,7 @@ export default function App() {
           </div>
         </div>
       )}
-      <div className="bg-[radial-gradient(circle_at_50%_0%,_#F0F2F5_0%,_#D1D5DB_100%)] pt-12 pb-12 px-6 rounded-b-leaf relative overflow-hidden">
+      <div className="bg-[radial-gradient(circle_at_50%_0%,_#F0F2F5_0%,_#D1D5DB_100%)] pt-8 pb-12 px-6 rounded-b-leaf relative overflow-hidden">
         <div className="relative">
           <div className="flex justify-between items-start mb-6">
             <div>
