@@ -1,4 +1,5 @@
-const CACHE_NAME = 'pushup-pwa-v4.2.0';
+const VERSION = new URL(self.location.href).searchParams.get('app_version') || 'dev';
+const CACHE_NAME = `pushup-pwa-v${VERSION}`;
 const SCOPE_URL = self.registration ? self.registration.scope : self.location.origin;
 const PRECACHE_URLS = [
   '',

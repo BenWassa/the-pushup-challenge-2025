@@ -3,12 +3,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
+import pkg from './package.json' assert { type: 'json' };
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => {
   const cfg = {
     plugins: [react()],
     base: '/the-pushup-challenge-2025/',
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+    },
     build: {
       outDir: 'docs',
     },

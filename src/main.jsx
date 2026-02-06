@@ -1,3 +1,4 @@
+/* global __APP_VERSION__ */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
@@ -16,7 +17,7 @@ document.addEventListener('touchmove', preventZoom, { passive: false });
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    const swUrl = `${import.meta.env.BASE_URL}sw.js`;
+    const swUrl = `${import.meta.env.BASE_URL}sw.js?app_version=${__APP_VERSION__}`;
     navigator.serviceWorker
       .register(swUrl, { updateViaCache: 'none' })
       .then((registration) => {
