@@ -88,7 +88,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         }
       );
     },
-    [db]
+    [appId, db]
   );
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         console.error('Error adding reps:', err);
       }
     },
-    [db, isTraining, season, userData?.id]
+    [appId, db, isTraining, season, userData?.id]
   );
 
   const undoLastAction = useCallback(async () => {
@@ -137,7 +137,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
     } catch (err) {
       console.error('Error undoing:', err);
     }
-  }, [db, isTraining, userData?.id, userData?.logs]);
+  }, [appId, db, isTraining, userData?.id, userData?.logs]);
 
   const deleteLogByIndex = useCallback(
     async (logIndex) => {
@@ -160,7 +160,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         throw err;
       }
     },
-    [db, isTraining, userData?.id, userData?.logs]
+    [appId, db, isTraining, userData?.id, userData?.logs]
   );
 
   const addHistoricalReps = useCallback(
@@ -185,7 +185,7 @@ export const useUserData = ({ db, appId, season, isTraining }) => {
         throw err;
       }
     },
-    [db, isTraining, season, userData?.id]
+    [appId, db, isTraining, season, userData?.id]
   );
 
   const calculateStreak = useCallback(() => {
