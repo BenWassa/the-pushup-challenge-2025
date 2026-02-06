@@ -1,33 +1,26 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Activity, Trophy, Calendar, Flame, TrendingUp, RotateCcw } from 'lucide-react';
-import Button from './components/Button';
-import Card from './components/Card';
-import ContributionCalendar from './components/ContributionCalendar';
 import DaySummaryPopup from './components/DaySummaryPopup';
+import AuthErrorScreen from './components/AuthErrorScreen';
+import LoadingScreen from './components/LoadingScreen';
+import LoginScreen from './components/LoginScreen';
+import UpdateBanner from './components/UpdateBanner';
+import CelebrationBanner from './components/CelebrationBanner';
+import DashboardHero from './components/DashboardHero';
+import NavTabs from './components/NavTabs';
+import DashboardView from './components/DashboardView';
+import StatsView from './components/StatsView';
+import LeaderboardView from './components/LeaderboardView';
+import VersionFooter from './components/VersionFooter';
 import { useAuth } from './hooks/useAuth';
 import { useUserData } from './hooks/useUserData';
 import { useLeaderboard } from './hooks/useLeaderboard';
-import { formatTime, getSeason } from './utils';
+import { getSeason } from './utils';
 
 const VIEWS = {
   DASHBOARD: 'dashboard',
   STATS: 'stats',
   LEADERBOARD: 'leaderboard',
 };
-
-const UpdateBanner = ({ onRefresh, refreshing }) => (
-  <div className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">
-    <div className="card-soft flex items-center justify-between gap-3">
-      <div>
-        <p className="text-sm font-bold text-black">Update available</p>
-        <p className="text-xs text-neutral-gray-text">Tap refresh to get the latest version.</p>
-      </div>
-      <Button variant="primary" size="sm" onClick={onRefresh} disabled={refreshing}>
-        {refreshing ? 'Refreshing...' : 'Refresh'}
-      </Button>
-    </div>
-  </div>
-);
 
 export default function App() {
   const { user, loading: loadingAuth, db, appId, error: authError } = useAuth();
@@ -122,111 +115,35 @@ export default function App() {
 
   if (authError) {
     return (
-      <div className="min-h-screen bg-neutral-white flex items-center justify-center p-4">
-        {updateAvailable && (
-          <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
-        )}
-        <Card className="error-card">
-          <div className="text-center">
-            <h2 className="error-title">Setup Required</h2>
-            <p className="error-message">
-              {authError.message || 'An error occurred. Please try again.'}
-            </p>
-            <div className="error-hint">Check the README.md for setup instructions.</div>
-          </div>
-        </Card>
-      </div>
+      <AuthErrorScreen
+        updateAvailable={updateAvailable}
+        onRefreshUpdate={handleRefreshUpdate}
+        refreshingUpdate={refreshingUpdate}
+        message={authError.message}
+      />
     );
   }
 
   if (loadingAuth || loadingProfile) {
     return (
-      <div className="min-h-screen bg-neutral-white flex items-center justify-center p-4">
-        {updateAvailable && (
-          <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
-        )}
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-16 h-16 bg-neutral-gray-light rounded-full mb-4" />
-          <div className="h-4 w-32 bg-neutral-gray-light rounded" />
-        </div>
-      </div>
+      <LoadingScreen
+        updateAvailable={updateAvailable}
+        onRefreshUpdate={handleRefreshUpdate}
+        refreshingUpdate={refreshingUpdate}
+      />
     );
   }
 
   if (!userData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-neutral-white via-orange-50/30 to-neutral-white flex flex-col relative overflow-hidden">
-        {updateAvailable && (
-          <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
-        )}
-
-        {/* Decorative background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-orange/5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-orange/5 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
-        </div>
-
-        <div className="flex-1 flex flex-col justify-center px-6 max-w-md mx-auto w-full relative z-10 py-12">
-          {/* Logo/Title */}
-          <div className="mb-8 text-center">
-            <h1 className="text-5xl font-bold leading-[1.05] tracking-tight">
-              Push<span className="text-brand-orange">Up</span>
-            </h1>
-            <div className="w-16 h-0.5 bg-brand-orange mx-auto my-2" />
-            <div className="text-sm font-bold text-neutral-gray-mid tracking-wider">2026</div>
-          </div>
-
-          {/* About Card */}
-          <Card
-            variant="soft"
-            className="mb-6 bg-white/80 backdrop-blur-sm border border-orange-100 shadow-lg"
-          >
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-brand-orange/10 flex items-center justify-center">
-                  <Activity className="w-4 h-4 text-brand-orange" />
-                </div>
-                <h2 className="text-base font-bold text-gray-900">About This Challenge</h2>
-              </div>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                Take on <span className="font-bold text-brand-orange">2,000 push-ups</span> for the{' '}
-                <span className="font-bold">2,000 lives</span> lost to suicide each day, worldwide.
-              </p>
-              <div className="pt-2 border-t border-orange-100">
-                <p className="text-xs text-gray-600 italic">
-                  Every rep is a tribute. Every day is progress. Together, we raise awareness and
-                  remember those we've lost.
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Login Form */}
-          <Card variant="standard" className="mb-6 shadow-xl">
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div>
-                <label className="form-label text-xs">WHO ARE YOU?</label>
-                <input
-                  type="text"
-                  value={usernameInput}
-                  onChange={(e) => setUsernameInput(e.target.value)}
-                  placeholder="Enter your name..."
-                  className="form-input text-base"
-                  autoFocus
-                />
-              </div>
-              <Button variant="primary" size="lg" className="w-full shadow-lg" type="submit">
-                Start Pushing
-              </Button>
-            </form>
-          </Card>
-
-          {/* Helper Text */}
-          <p className="text-center text-xs text-neutral-gray-mid">
-            Already using it? Enter your name again to continue.
-          </p>
-        </div>
-      </div>
+      <LoginScreen
+        updateAvailable={updateAvailable}
+        onRefreshUpdate={handleRefreshUpdate}
+        refreshingUpdate={refreshingUpdate}
+        usernameInput={usernameInput}
+        setUsernameInput={setUsernameInput}
+        onSubmit={handleLogin}
+      />
     );
   }
 
@@ -248,299 +165,59 @@ export default function App() {
       {updateAvailable && (
         <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
       )}
-      {showCelebration && (
-        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
-          <div className="bg-brand-orange text-white px-6 py-4 rounded-lg shadow-lg text-center">
-            <p className="font-bold text-lg">🎉 Daily Goal Crushed! 🎉</p>
-            <p className="text-sm opacity-90 mt-1">You hit 87 reps today!</p>
-          </div>
-        </div>
-      )}
-      <div className="bg-[radial-gradient(circle_at_50%_0%,_#F0F2F5_0%,_#D1D5DB_100%)] pt-8 pb-12 px-6 rounded-b-leaf relative overflow-hidden">
-        <div className="relative">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h2 className="text-neutral-gray-mid text-sm font-bold uppercase tracking-widest mb-1">
-                Current Season
-              </h2>
-              <div className="flex items-center gap-2">
-                {isTraining ? (
-                  <Activity className="w-5 h-5 text-neutral-gray-text" />
-                ) : (
-                  <Trophy className="w-5 h-5 text-brand-orange" />
-                )}
-                <h1
-                  className={`text-2xl font-bold ${isTraining ? 'text-black' : 'text-brand-orange'}`}
-                >
-                  {isTraining ? 'Training Camp' : 'The Challenge'}
-                </h1>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-xs font-bold text-neutral-gray-mid underline"
-            >
-              Sign Out
-            </button>
-          </div>
+      {showCelebration && <CelebrationBanner />}
+      <DashboardHero
+        isTraining={isTraining}
+        heroLabel={heroLabel}
+        heroCurrent={heroCurrent}
+        heroGoal={heroGoal}
+        heroProgress={heroProgress}
+        official_reps={official_reps}
+        challengeGoal={CHALLENGE_GOAL}
+        onLogout={handleLogout}
+      />
 
-          <div className="rounded-[28px] bg-white/65 backdrop-blur-xl border border-white/80 p-7 shadow-[0_4px_6px_rgba(0,0,0,0.02),0_12px_24px_rgba(0,0,0,0.05),inset_0_0_0_1px_rgba(255,255,255,0.5)]">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8E8E93] block mb-3">
-              {heroLabel}
-            </span>
-
-            <div className="flex items-end justify-between mb-6">
-              <span className="text-[68px] font-extrabold leading-[0.85] tracking-[-0.03em] bg-gradient-to-br from-[#FF5500] via-[#FF9F0A] to-[#FF5500] bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(255,85,0,0.15)]">
-                {heroCurrent}
-              </span>
-              <span className="text-[15px] font-semibold text-[#636366]/80">/ {heroGoal} reps</span>
-            </div>
-
-            <div className="relative h-2.5 rounded-full bg-black/5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] mb-7 overflow-hidden">
-              <div
-                className="absolute inset-y-0 right-0 pointer-events-none"
-                style={{
-                  left: `${Math.round(heroProgress * 100)}%`,
-                  backgroundImage:
-                    'linear-gradient(to right, transparent 0, transparent calc(20% - 0.5px), rgba(0,0,0,0.04) calc(20% - 0.5px), rgba(0,0,0,0.04) 20%)',
-                  backgroundSize: '20% 100%',
-                }}
-              />
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#FF9F0A] to-[#FF5500] shadow-[0_4px_12px_rgba(255,85,0,0.4)]"
-                style={{ width: `${Math.round(heroProgress * 100)}%` }}
-              />
-            </div>
-
-            <div className="border-t border-black/5 pt-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8E8E93]">
-                  Challenge Progress
-                </span>
-                <span className="text-[11px] font-semibold text-[#8E8E93]">
-                  {official_reps} / {CHALLENGE_GOAL}
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full bg-black/10 overflow-hidden mb-3">
-                <div
-                  className="h-full rounded-full bg-[#AEAEB2]"
-                  style={{ width: `${Math.round((official_reps / CHALLENGE_GOAL) * 100)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-center -mt-6 relative z-30 mb-8 px-4">
-        <div className="nav-tabs">
-          <button
-            onClick={() => setView(VIEWS.DASHBOARD)}
-            className={`nav-tab ${view === VIEWS.DASHBOARD ? 'active' : ''}`}
-          >
-            Log
-          </button>
-          <button
-            onClick={() => setView(VIEWS.STATS)}
-            className={`nav-tab ${view === VIEWS.STATS ? 'active' : ''}`}
-          >
-            Stats
-          </button>
-          <button
-            onClick={() => setView(VIEWS.LEADERBOARD)}
-            className={`nav-tab ${view === VIEWS.LEADERBOARD ? 'active' : ''}`}
-          >
-            Rank
-          </button>
-        </div>
-      </div>
+      <NavTabs view={view} views={VIEWS} onChange={setView} />
 
       <div className="px-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
         {view === VIEWS.DASHBOARD && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-black">Quick Add</h3>
-              <span className="text-xs text-neutral-gray-mid font-medium bg-neutral-gray-lighter px-3 py-1 rounded-full">
-                {isTraining ? 'Training Mode' : 'Official Mode'}
-              </span>
-            </div>
-
-            <div className="logging-grid">
-              <Button
-                variant="secondary"
-                size="xl"
-                onClick={() => addReps(1)}
-                className="logging-btn"
-              >
-                <span className="logging-number text-black">+1</span>
-                <span className="logging-label">Single</span>
-              </Button>
-              <Button
-                variant="secondary"
-                size="xl"
-                onClick={() => addReps(10)}
-                className="logging-btn"
-              >
-                <span className="logging-number">+10</span>
-                <span className="logging-label">Set</span>
-              </Button>
-              <Button
-                variant="secondary"
-                size="xl"
-                onClick={() => addReps(20)}
-                className="logging-btn"
-              >
-                <span className="logging-number">+20</span>
-                <span className="logging-label">Push</span>
-              </Button>
-              <Button
-                variant="secondary"
-                size="xl"
-                onClick={() => addReps(25)}
-                className="logging-btn"
-              >
-                <span className="logging-number">+25</span>
-                <span className="logging-label">Big Set</span>
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              <Button
-                variant={isUndoable ? 'danger' : 'ghost'}
-                size="sm"
-                onClick={undoLastAction}
-                disabled={!isUndoable}
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <RotateCcw className="w-4 h-4" />
-                {isUndoable
-                  ? `Undo Last (${lastLogAmount > 0 ? '+' : ''}${lastLogAmount})`
-                  : 'Nothing to Undo'}
-              </Button>
-
-              {recentLogs.length > 0 && (
-                <div className="pt-4 border-t border-gray-100">
-                  <div className="activity-card">
-                    <h4 className="activity-title">Recent Activity</h4>
-                    <div className="space-y-2">
-                      {recentLogs.map((log, i) => (
-                        <div key={i} className="activity-item">
-                          <span className="activity-time">
-                            {log.source === 'historical'
-                              ? `${log.submitted_date} (Historical)`
-                              : formatTime(log.timestamp)}
-                          </span>
-                          <span
-                            className={`activity-amount ${log.amount > 0 ? 'positive' : 'negative'}`}
-                          >
-                            {log.amount > 0 ? '+' : ''}
-                            {log.amount} reps
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <DashboardView
+            isTraining={isTraining}
+            addReps={addReps}
+            isUndoable={isUndoable}
+            undoLastAction={undoLastAction}
+            lastLogAmount={lastLogAmount}
+            recentLogs={recentLogs}
+          />
         )}
 
         {view === VIEWS.STATS && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xl font-bold text-black">Consistency</h3>
-              <div className="flex gap-1 text-[10px] text-neutral-gray-mid font-bold uppercase items-center">
-                <span>{currentMonthLabel}</span>
-                <Calendar className="w-3 h-3 ml-1" />
-              </div>
-            </div>
-
-            <Card variant="soft" className="bg-white">
-              <ContributionCalendar
-                logs={userData.logs}
-                onDateClick={(date) => {
-                  setSelectedDate(date);
-                  setDayDetailModalOpen(true);
-                }}
-              />
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-orange-100" />
-                  <span className="text-xs text-neutral-gray-mid">Some</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-orange-200" />
-                  <span className="text-xs text-neutral-gray-mid">Good</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-brand-orange" />
-                  <span className="text-xs text-neutral-gray-mid">Great</span>
-                </div>
-              </div>
-            </Card>
-
-            <div className="stats-grid">
-              <div className="stats-card">
-                <div className="stats-header">
-                  <Flame className="w-4 h-4 text-brand-orange" />
-                  Active Days
-                </div>
-                <span className="stats-value">{calculateStreak()}</span>
-              </div>
-              <div className="stats-card">
-                <div className="stats-header">
-                  <TrendingUp className="w-4 h-4 text-brand-orange" />
-                  Avg Reps
-                </div>
-                <span className="stats-value">
-                  {calculateStreak() > 0
-                    ? Math.round((isTraining ? training_reps : official_reps) / calculateStreak())
-                    : 0}
-                </span>
-              </div>
-            </div>
-          </div>
+          <StatsView
+            currentMonthLabel={currentMonthLabel}
+            userLogs={userData.logs}
+            onDateClick={(date) => {
+              setSelectedDate(date);
+              setDayDetailModalOpen(true);
+            }}
+            calculateStreak={calculateStreak}
+            isTraining={isTraining}
+            training_reps={training_reps}
+            official_reps={official_reps}
+          />
         )}
 
         {view === VIEWS.LEADERBOARD && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xl font-bold text-black">Rankings</h3>
-              <span className="text-xs text-neutral-gray-mid">
-                {isTraining ? 'Training' : 'Official'} Phase
-              </span>
-            </div>
-
-            {leaderboardData.map((buddy, index) => {
-              const isMe = buddy.id === userData.id;
-              const score = isTraining ? buddy.training_reps : buddy.official_reps;
-              return (
-                <div key={buddy.id} className={`leaderboard-item ${isMe ? 'current-user' : ''}`}>
-                  <div className="flex items-center gap-4">
-                    <span className={`leaderboard-rank ${isMe ? 'current-user' : ''}`}>
-                      #{index + 1}
-                    </span>
-                    <div>
-                      <span className="leaderboard-name">{buddy.displayName}</span>
-                      {isMe && <span className="ml-2 text-xs opacity-75">That's you!</span>}
-                    </div>
-                  </div>
-                  <span className="text-2xl font-bold">{score || 0}</span>
-                </div>
-              );
-            })}
-          </div>
+          <LeaderboardView
+            leaderboardData={leaderboardData}
+            isTraining={isTraining}
+            userId={userData.id}
+          />
         )}
       </div>
 
       <div className="mt-6 mb-4 h-px w-full bg-neutral-gray-light mx-6" />
 
-      <div className="text-center mt-6 mb-4">
-        <p className="text-xs text-[#858585] font-bold tracking-widest uppercase">
-          App Version 4.2.0
-        </p>
-      </div>
+      <VersionFooter />
 
       <style>{`
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
