@@ -409,7 +409,7 @@ export default function App() {
               </Button>
             </div>
 
-            <div className="space-y-4 pt-4 border-t border-gray-100">
+            <div className="space-y-4">
               <Button
                 variant={isUndoable ? 'danger' : 'ghost'}
                 size="sm"
@@ -424,24 +424,26 @@ export default function App() {
               </Button>
 
               {recentLogs.length > 0 && (
-                <div className="activity-card">
-                  <h4 className="activity-title">Recent Activity</h4>
-                  <div className="space-y-2">
-                    {recentLogs.map((log, i) => (
-                      <div key={i} className="activity-item">
-                        <span className="activity-time">
-                          {log.source === 'historical'
-                            ? `${log.submitted_date} (Historical)`
-                            : formatTime(log.timestamp)}
-                        </span>
-                        <span
-                          className={`activity-amount ${log.amount > 0 ? 'positive' : 'negative'}`}
-                        >
-                          {log.amount > 0 ? '+' : ''}
-                          {log.amount} reps
-                        </span>
-                      </div>
-                    ))}
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="activity-card">
+                    <h4 className="activity-title">Recent Activity</h4>
+                    <div className="space-y-2">
+                      {recentLogs.map((log, i) => (
+                        <div key={i} className="activity-item">
+                          <span className="activity-time">
+                            {log.source === 'historical'
+                              ? `${log.submitted_date} (Historical)`
+                              : formatTime(log.timestamp)}
+                          </span>
+                          <span
+                            className={`activity-amount ${log.amount > 0 ? 'positive' : 'negative'}`}
+                          >
+                            {log.amount > 0 ? '+' : ''}
+                            {log.amount} reps
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
