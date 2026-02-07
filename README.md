@@ -2,7 +2,7 @@
 
 A lightweight, mobile-first app for tracking daily pushups during the PushUp Challenge.
 
-Built to be fast, motivating, and simple. No accounts, no noise, no friction.
+Built to be fast, motivating, and simple. Optional account login, no noise, low friction.
 
 Designed for personal use and small groups.
 
@@ -23,7 +23,8 @@ The app prioritizes momentum and clarity over gamification.
 
 ## Core Features
 
-- Anonymous login using a simple username
+- Email/password login for cloud mode
+- Demo mode with local-only storage
 - One-tap rep logging (+1, +10, +20, +25)
 - Safe undo of last action
 - Daily progress tracking
@@ -140,7 +141,7 @@ npm install
 Create a Firebase project and enable:
 
 - **Firestore**
-- **Anonymous Authentication**
+- **Email/Password Authentication**
 
 This app is intended for a very small number of users (≈5 people).
 For this scale, Firebase provides more than enough performance and safety.
@@ -156,7 +157,7 @@ The app supports two environments:
 
 1. **Create a Firebase project** at https://console.firebase.google.com/
 2. **Enable services:**
-   - Go to Authentication > Sign-in method > Enable "Anonymous"
+   - Go to Authentication > Sign-in method > Enable "Email/Password"
    - Go to Firestore Database > Create database (start in test mode)
 3. **Get your config:**
    - Go to Project Settings > General > Your apps
@@ -172,6 +173,7 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
 VITE_FIREBASE_APP_ID=your-app-id
+VITE_DEMO_MODE=false
 ```
 
 ---
@@ -182,7 +184,7 @@ The app can receive the following injected variables when hosted:
 
 - `__firebase_config`
 - `__app_id`
-- `__initial_auth_token` (optional)
+- `VITE_DEMO_MODE` (optional build-time demo override)
 
 For local development, these values are typically supplied via `.env.local` using `VITE_*` variables.
 

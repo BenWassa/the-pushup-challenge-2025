@@ -1,12 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { initializeApp, getApps } from 'firebase/app';
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInAnonymously,
-  signInWithCustomToken,
-} from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorageMode, isDemoStorageMode } from '../utils/mode';
 
 // Move appId outside hook to avoid recalculating on every render
 export const APP_ID =
@@ -29,7 +25,6 @@ const parseConfig = () => {
       appId: import.meta.env.VITE_FIREBASE_APP_ID,
     };
 
-    // Filter out undefined values
     const filteredConfig = Object.fromEntries(
       Object.entries(envConfig).filter(([, value]) => value !== undefined)
     );
@@ -42,7 +37,6 @@ const parseConfig = () => {
 };
 
 const isValidConfig = (config) => {
-  // Check if config has required fields and no placeholder values
   return (
     config.apiKey &&
     config.projectId &&
@@ -64,15 +58,43 @@ const getFirebase = (config) => {
   return { app, auth: getAuth(app), db: getFirestore(app) };
 };
 
+const getFriendlyAuthError = (error) => {
+  const code = error?.code || '';
+
+  if (code.includes('invalid-credential')) {
+    return 'Invalid email or password.';
+  }
+  if (code.includes('user-not-found')) {
+    return 'No account exists for this email.';
+  }
+  if (code.includes('email-already-in-use')) {
+    return 'That email is already registered. Try signing in instead.';
+  }
+  if (code.includes('weak-password')) {
+    return 'Password must be at least 6 characters.';
+  }
+  if (code.includes('too-many-requests')) {
+    return 'Too many login attempts. Try again shortly.';
+  }
+
+  return error?.message || 'Authentication failed.';
+};
+
 export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
+  const [authActionLoading, setAuthActionLoading] = useState(false);
+  const [authActionError, setAuthActionError] = useState('');
+
+  const storageMode = useMemo(() => getStorageMode(), []);
+  const isDemoMode = isDemoStorageMode(storageMode);
 
   const config = useMemo(() => parseConfig(), []);
   const isConfigured = useMemo(() => isValidConfig(config), [config]);
 
-  // Calculate error and loading states
   const error = useMemo(() => {
+    if (isDemoMode) return null;
+
     if (!isConfigured) {
       return {
         type: 'CONFIG',
@@ -81,59 +103,76 @@ export const useAuth = () => {
       };
     }
     return null;
-  }, [isConfigured]);
+  }, [isConfigured, isDemoMode]);
 
-  // Initialize Firebase synchronously if configured
   const firebaseInstance = useMemo(() => {
-    if (!isConfigured) return null;
+    if (isDemoMode || !isConfigured) return null;
     try {
       return getFirebase(config);
     } catch (e) {
       console.warn('Firebase initialization failed:', e.message);
       return null;
     }
-  }, [config, isConfigured]);
-
-  const loading = !error && !authReady;
+  }, [config, isConfigured, isDemoMode]);
 
   const { auth, db } = firebaseInstance || { auth: null, db: null };
   const appId = APP_ID;
 
   useEffect(() => {
-    if (!auth) return;
+    if (isDemoMode) {
+      setUser({ uid: 'demo-user', isDemo: true });
+      setAuthReady(true);
+      return undefined;
+    }
 
-    let unsubAuth;
-    const initAuth = async () => {
-      const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    if (!auth) return undefined;
+
+    const unsubAuth = onAuthStateChanged(auth, (u) => {
+      setUser(u || null);
+      setAuthReady(true);
+    });
+
+    return () => unsubAuth();
+  }, [auth, isDemoMode]);
+
+  const signInWithEmail = useCallback(
+    async (email, password) => {
+      if (!auth || isDemoMode) return false;
+
+      setAuthActionLoading(true);
+      setAuthActionError('');
+
       try {
-        if (token) {
-          await signInWithCustomToken(auth, token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (e) {
-        console.error('Auth init failed, falling back to anonymous', e);
-        try {
-          await signInAnonymously(auth);
-        } catch (err) {
-          console.error('Anonymous auth failed', err);
-          // If we hit an auth failure, mark authReady so UI doesn't stay loading forever
-          setAuthReady(true);
-          return;
-        }
+        await signInWithEmailAndPassword(auth, email, password);
+        return true;
+      } catch (signInError) {
+        setAuthActionError(getFriendlyAuthError(signInError));
+        return false;
+      } finally {
+        setAuthActionLoading(false);
       }
+    },
+    [auth, isDemoMode]
+  );
 
-      unsubAuth = onAuthStateChanged(auth, (u) => {
-        setUser(u || null);
-        setAuthReady(true);
-      });
-    };
+  const logoutAuth = useCallback(async () => {
+    if (!auth || isDemoMode) return;
+    await signOut(auth);
+  }, [auth, isDemoMode]);
 
-    initAuth();
-    return () => {
-      if (unsubAuth) unsubAuth();
-    };
-  }, [auth]);
+  const loading = !error && !authReady;
 
-  return { user, loading, db, appId, error };
+  return {
+    user,
+    loading,
+    db,
+    appId,
+    error,
+    storageMode,
+    isDemoMode,
+    authActionLoading,
+    authActionError,
+    signInWithEmail,
+    logoutAuth,
+  };
 };

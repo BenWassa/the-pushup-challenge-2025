@@ -24,11 +24,25 @@ const VIEWS = {
 
 export default function App() {
   const DAILY_GOAL = 87;
-  const { user, loading: loadingAuth, db, appId, error: authError } = useAuth();
+  const {
+    user,
+    loading: loadingAuth,
+    db,
+    appId,
+    error: authError,
+    storageMode,
+    isDemoMode,
+    authActionLoading,
+    authActionError,
+    signInWithEmail,
+    logoutAuth,
+  } = useAuth();
   const season = getSeason();
   const isTraining = season === 'TRAINING';
 
   const [usernameInput, setUsernameInput] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
   const [view, setView] = useState(VIEWS.DASHBOARD);
   const [celebrationToast, setCelebrationToast] = useState(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -50,15 +64,19 @@ export default function App() {
     recentLogs,
     lastLogAmount,
     isUndoable,
-  } = useUserData({ db, appId, season, isTraining });
+  } = useUserData({ db, appId, season, isTraining, storageMode });
 
-  const leaderboardData = useLeaderboard({ db, appId, isTraining, user });
+  const leaderboardData = useLeaderboard({ db, appId, isTraining, user, storageMode });
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      clearProfile();
+      return;
+    }
+
     const storedName = localStorage.getItem('pushup_username');
     if (storedName) loadUserProfile(storedName);
-  }, [loadUserProfile, user]);
+  }, [clearProfile, loadUserProfile, user]);
 
   // Show a toast when the daily goal is hit and when reps keep increasing past goal.
   useEffect(() => {
@@ -126,6 +144,15 @@ export default function App() {
     }
   };
 
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    const email = emailInput.trim();
+    const password = passwordInput;
+
+    if (!email || !password) return;
+    await signInWithEmail(email, password);
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
     if (!usernameInput.trim()) return;
@@ -133,10 +160,16 @@ export default function App() {
     loadUserProfile(usernameInput);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem('pushup_username');
     clearProfile();
     setUsernameInput('');
+
+    if (!isDemoMode) {
+      await logoutAuth();
+      setEmailInput('');
+      setPasswordInput('');
+    }
   };
 
   if (authError) {
@@ -169,6 +202,16 @@ export default function App() {
         usernameInput={usernameInput}
         setUsernameInput={setUsernameInput}
         onSubmit={handleLogin}
+        storageMode={storageMode}
+        isDemoMode={isDemoMode}
+        isAuthenticated={Boolean(user)}
+        emailInput={emailInput}
+        setEmailInput={setEmailInput}
+        passwordInput={passwordInput}
+        setPasswordInput={setPasswordInput}
+        onAuthSubmit={handleAuthSubmit}
+        authLoading={authActionLoading}
+        authError={authActionError}
       />
     );
   }
