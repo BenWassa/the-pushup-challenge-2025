@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { getDaysInMonth, getFirstDayOfMonth } from '../utils/date';
+import { toDate } from '../utils/timestamp';
 
 // Monthly contribution calendar for the current month.
 const ContributionCalendar = ({ logs, onDateClick }) => {
@@ -14,6 +15,7 @@ const ContributionCalendar = ({ logs, onDateClick }) => {
     if (!logs) return data;
 
     logs.forEach((log) => {
+      if (!log || typeof log.amount !== 'number') return;
       let day;
 
       // Handle historical logs with submitted_date (YYYY-MM-DD format)
@@ -24,7 +26,8 @@ const ContributionCalendar = ({ logs, onDateClick }) => {
         }
       } else if (log.timestamp) {
         // Handle real-time logs with timestamp
-        const date = new Date(log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp);
+        const date = toDate(log.timestamp);
+        if (!date) return;
         if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
           day = date.getDate();
         }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { getDateString } from '../utils/timestamp';
+import { getDateString, toDate } from '../utils/timestamp';
 
 const DaySummaryPopup = ({ isOpen, selectedDate, logs, onClose }) => {
   if (!isOpen || !selectedDate) return null;
@@ -9,11 +9,12 @@ const DaySummaryPopup = ({ isOpen, selectedDate, logs, onClose }) => {
   const dateIsoStr = selectedDate.toISOString().split('T')[0];
 
   const dayLogs = logs.filter((log) => {
+    if (!log || typeof log.amount !== 'number') return false;
     if (log.source === 'historical' && log.submitted_date) {
       return log.submitted_date === dateIsoStr;
     }
     if (log.timestamp) {
-      const logDate = log.timestamp.toDate ? log.timestamp.toDate() : log.timestamp;
+      const logDate = toDate(log.timestamp);
       return logDate && getDateString(logDate) === dateStr;
     }
     return false;

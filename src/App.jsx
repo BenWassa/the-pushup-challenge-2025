@@ -23,18 +23,20 @@ const VIEWS = {
 };
 
 export default function App() {
+  const DAILY_GOAL = 87;
   const { user, loading: loadingAuth, db, appId, error: authError } = useAuth();
   const season = getSeason();
   const isTraining = season === 'TRAINING';
 
   const [usernameInput, setUsernameInput] = useState('');
   const [view, setView] = useState(VIEWS.DASHBOARD);
-  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationToast, setCelebrationToast] = useState(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [refreshingUpdate, setRefreshingUpdate] = useState(false);
   const [dayDetailModalOpen, setDayDetailModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
-  const prevTodayRepsRef = useRef(0);
+  const prevTodayRepsRef = useRef(null);
+  const toastTimerRef = useRef(null);
 
   const {
     userData,
@@ -58,21 +60,45 @@ export default function App() {
     if (storedName) loadUserProfile(storedName);
   }, [loadUserProfile, user]);
 
-  // Detect when daily goal (87) is reached
+  // Show a toast when the daily goal is hit and when reps keep increasing past goal.
   useEffect(() => {
-    const DAILY_GOAL = 87;
-    const shouldCelebrate =
-      isTraining && todayReps >= DAILY_GOAL && prevTodayRepsRef.current < DAILY_GOAL;
-    prevTodayRepsRef.current = todayReps;
-    if (!shouldCelebrate) return;
+    if (prevTodayRepsRef.current === null) {
+      prevTodayRepsRef.current = todayReps;
+      return;
+    }
 
-    const showTimer = setTimeout(() => setShowCelebration(true), 0);
-    const hideTimer = setTimeout(() => setShowCelebration(false), 3000);
+    const previousReps = prevTodayRepsRef.current;
+    const increasedTodayReps = todayReps > previousReps;
+    const justHitGoal = previousReps < DAILY_GOAL && todayReps >= DAILY_GOAL;
+    const surpassedGoalFurther = previousReps >= DAILY_GOAL && increasedTodayReps;
+
+    prevTodayRepsRef.current = todayReps;
+    if (!(justHitGoal || surpassedGoalFurther)) return;
+
+    const overGoalBy = Math.max(0, todayReps - DAILY_GOAL);
+    const title = justHitGoal ? '🎉 Daily Goal Hit! 🎉' : '🔥 Still Building Momentum';
+    const message = justHitGoal
+      ? `Great work. You reached ${todayReps} reps today.`
+      : `You're now ${overGoalBy} over goal at ${todayReps} reps.`;
+
+    const showTimer = setTimeout(() => {
+      setCelebrationToast({ title, message });
+    }, 0);
+
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => {
+      setCelebrationToast(null);
+      toastTimerRef.current = null;
+    }, 3000);
+
+    return () => clearTimeout(showTimer);
+  }, [todayReps, DAILY_GOAL]);
+
+  useEffect(() => {
     return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
-  }, [todayReps, isTraining]);
+  }, []);
 
   useEffect(() => {
     const handleUpdate = () => setUpdateAvailable(true);
@@ -148,7 +174,6 @@ export default function App() {
   }
 
   const { training_reps = 0, official_reps = 0 } = userData;
-  const DAILY_GOAL = 87;
   const CHALLENGE_GOAL = 2000;
   const heroLabel = "Today's Effort";
   const heroCurrent = todayReps;
@@ -164,7 +189,9 @@ export default function App() {
       {updateAvailable && (
         <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
       )}
-      {showCelebration && <CelebrationBanner />}
+      {celebrationToast && (
+        <CelebrationBanner title={celebrationToast.title} message={celebrationToast.message} />
+      )}
       <DashboardHero
         isTraining={isTraining}
         heroLabel={heroLabel}

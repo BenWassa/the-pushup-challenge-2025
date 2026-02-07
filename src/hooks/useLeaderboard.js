@@ -6,9 +6,9 @@ export const useLeaderboard = ({ db, appId, isTraining, user }) => {
   const [leaderboardData, setLeaderboardData] = useState([]);
 
   useEffect(() => {
-    if (!db || !user) return undefined;
+    if (!db || !appId || !user) return undefined;
 
-    const usersRef = collection(db, 'users');
+    const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
     const unsub = onSnapshot(
       usersRef,
       (snapshot) => {
