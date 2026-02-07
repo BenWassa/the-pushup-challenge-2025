@@ -27,6 +27,7 @@ The app prioritizes momentum and clarity over gamification.
 - One-tap rep logging (+1, +10, +20, +25)
 - Safe undo of last action
 - Daily progress tracking
+- Success toast when daily goal is hit or extended beyond goal
 - Monthly contribution calendar
 - Streak and average stats
 - Live leaderboard with real-time sync
@@ -95,23 +96,22 @@ README.md
 
 ## Firebase Data Model
 
-```
-
-users (collection)
-{username} (document)
-displayName: string
-training_reps: number
-official_reps: number
-logs: [
-{
-amount: number
-timestamp: Date
-season: "TRAINING" | "OFFICIAL"
-}
-]
-created_at: timestamp
-last_active: timestamp
-
+```txt
+artifacts/{appId}/public/data/users/{username}
+  displayName: string
+  training_reps: number
+  official_reps: number
+  logs: [
+    {
+      amount: number
+      timestamp?: Date | number
+      submitted_date?: "YYYY-MM-DD"
+      source?: "historical"
+      season: "TRAINING" | "OFFICIAL"
+    }
+  ]
+  created_at: timestamp
+  last_active: timestamp
 ```
 
 ---
@@ -277,3 +277,4 @@ MIT
 
 Active development
 Focused on clarity, speed, and daily usability
+Current release: `v1.12.0`
