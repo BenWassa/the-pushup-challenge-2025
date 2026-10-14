@@ -74,9 +74,9 @@ export default function App() {
       return;
     }
 
-    const storedName = localStorage.getItem('pushup_username');
+    const storedName = isDemoMode ? 'Sample Alex' : localStorage.getItem('pushup_username');
     if (storedName) loadUserProfile(storedName);
-  }, [clearProfile, loadUserProfile, user]);
+  }, [clearProfile, isDemoMode, loadUserProfile, user]);
 
   // Show a toast when the daily goal is hit and when reps keep increasing past goal.
   useEffect(() => {
@@ -156,12 +156,12 @@ export default function App() {
   const handleLogin = (e) => {
     e.preventDefault();
     if (!usernameInput.trim()) return;
-    localStorage.setItem('pushup_username', usernameInput);
+    if (!isDemoMode) localStorage.setItem('pushup_username', usernameInput);
     loadUserProfile(usernameInput);
   };
 
   const handleLogout = async () => {
-    localStorage.removeItem('pushup_username');
+    if (!isDemoMode) localStorage.removeItem('pushup_username');
     clearProfile();
     setUsernameInput('');
 
@@ -229,6 +229,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-white pb-8 relative max-w-lg mx-auto shadow-2xl">
+      {isDemoMode && (
+        <div className="px-6 py-3 text-sm text-center" role="note">
+          Demo: fictional progress. Changes reset on reload.
+        </div>
+      )}
       {updateAvailable && (
         <UpdateBanner onRefresh={handleRefreshUpdate} refreshing={refreshingUpdate} />
       )}
