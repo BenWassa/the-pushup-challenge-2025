@@ -20,3 +20,11 @@ test('demo reset restores fictional progress after edits without touching durabl
   resetDemoUsers(date);
   assert.deepEqual(getDemoUserByName('Sample Alex'), original);
 });
+
+test('seeded history is never future-dated, so today counts before noon', () => {
+  const morning = new Date(2026, 9, 13, 9, 15);
+  resetDemoUsers(morning);
+  const alex = getDemoUserByName('Sample Alex');
+  assert.ok(alex.logs.every((log) => log.timestamp <= morning.getTime()));
+  assert.equal(new Date(alex.logs.at(-1).timestamp).getDate(), 13);
+});

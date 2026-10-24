@@ -11,9 +11,11 @@ export const resetDemoUsers = (today = new Date()) => {
   const users = {};
   ['Sample Alex', 'Sample Robin', 'Sample Taylor'].forEach((displayName, index) => {
     const amounts = [30, 50, 70, 40, 90, 60, 45].map((amount) => amount + index * 5);
+    // Cap at "now": a noon timestamp earlier in the day would be in the future and be
+    // rejected as invalid, so today's seeded reps would not count before ~11:00 local.
     const logs = amounts.map((amount, day) => {
       const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6 + day, 12);
-      return { amount, timestamp: date.getTime(), season: 'OFFICIAL' };
+      return { amount, timestamp: Math.min(date.getTime(), today.getTime()), season: 'OFFICIAL' };
     });
     const trainingLogs = amounts.map((amount, day) => {
       const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13 + day, 12);
