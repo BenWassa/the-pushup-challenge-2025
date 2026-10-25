@@ -1,27 +1,37 @@
-const DEMO_USERS_KEY = 'pushup_demo_users_v1';
 const DEMO_STORAGE_EVENT = 'pushup:demo-storage-updated';
+let demoUsers = {};
 
-const hasStorage = () => typeof window !== 'undefined' && typeof localStorage !== 'undefined';
-
-const readUsersMap = () => {
-  if (!hasStorage()) return {};
-
-  try {
-    const raw = localStorage.getItem(DEMO_USERS_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch (error) {
-    console.error('Failed to parse demo user storage', error);
-    return {};
-  }
+const readUsersMap = () => demoUsers;
+const writeUsersMap = (usersMap) => {
+  demoUsers = usersMap;
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(DEMO_STORAGE_EVENT));
 };
 
-const writeUsersMap = (usersMap) => {
-  if (!hasStorage()) return;
-
-  localStorage.setItem(DEMO_USERS_KEY, JSON.stringify(usersMap));
-  window.dispatchEvent(new Event(DEMO_STORAGE_EVENT));
+export const resetDemoUsers = (today = new Date()) => {
+  const users = {};
+  ['Sample Alex', 'Sample Robin', 'Sample Taylor'].forEach((displayName, index) => {
+    const amounts = [30, 50, 70, 40, 90, 60, 45].map((amount) => amount + index * 5);
+    // Cap at "now": a noon timestamp earlier in the day would be in the future and be
+    // rejected as invalid, so today's seeded reps would not count before ~11:00 local.
+    const logs = amounts.map((amount, day) => {
+      const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6 + day, 12);
+      return { amount, timestamp: Math.min(date.getTime(), today.getTime()), season: 'OFFICIAL' };
+    });
+    const trainingLogs = amounts.map((amount, day) => {
+      const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13 + day, 12);
+      return { amount, timestamp: date.getTime(), season: 'TRAINING' };
+    });
+    const total = amounts.reduce((sum, amount) => sum + amount, 0);
+    users[displayName.toLowerCase()] = {
+      displayName,
+      official_reps: total,
+      training_reps: total,
+      created_at: trainingLogs[0].timestamp,
+      last_active: logs[logs.length - 1].timestamp,
+      logs: [...trainingLogs, ...logs],
+    };
+  });
+  writeUsersMap(users);
 };
 
 const cleanNameKey = (name) => name.toLowerCase().trim();
