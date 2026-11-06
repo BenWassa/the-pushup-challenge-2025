@@ -52,12 +52,13 @@ export default function Home({
     canLog && challenge.day.phase === 'OFFICIAL'
       ? computeStreak(summary.byDate, challenge.today)
       : 0;
+  // Zero categories are omitted: a missing category means none.
   const others = [
     ['Training', summary.training],
     ['Off-season', summary.offSeason],
-    ...(summary.legacy > 0 ? [['Imported', summary.legacy]] : []),
+    ['Imported', summary.legacy],
     ['Active days', summary.activeDays],
-  ];
+  ].filter(([, value]) => value > 0);
   return (
     <div className="home">
       <HomeHeader
@@ -108,16 +109,18 @@ export default function Home({
         edit={data.edit}
         remove={data.remove}
       />
-      <section className="breakdown" aria-label={`${selectedYear} breakdown`}>
-        <dl>
-          {others.map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+      {others.length > 0 && (
+        <section className="breakdown" aria-label={`${selectedYear} breakdown`}>
+          <dl>
+            {others.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
     </div>
   );
 }

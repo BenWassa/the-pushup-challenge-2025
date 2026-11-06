@@ -264,14 +264,14 @@
 }
 .home .as-root {
   margin-top: var(--sp-4);
-  padding-top: var(--sp-5);
+  padding-block: var(--sp-5);
   border-top: 1px solid var(--c-line-strong);
   border-radius: var(--r-sheet) var(--r-sheet) 0 0;
   box-shadow: 0 -14px 30px rgb(0 0 0 / 0.45);
 }
 .home .breakdown {
-  /* cancels the grid gap so the totals read as the foot of the same sheet */
-  margin-top: calc(var(--sp-5) * -1);
+  /* cancels the grid gap and the sheet's bottom padding so the totals read as its foot */
+  margin-top: calc(var(--sp-5) * -2);
   padding-block: var(--sp-3) var(--sp-5);
 }
 /* Quiet days must stay visible on the lighter sheet */

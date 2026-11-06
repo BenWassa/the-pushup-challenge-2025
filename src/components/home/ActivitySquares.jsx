@@ -201,9 +201,11 @@ function MonthActivity({
       </div>
       <section className="as-detail" aria-live="polite" aria-atomic="true">
         <h3 className="as-date">{formatDateLong(selected)}</h3>
-        <p className="as-total">{repsLabel(total)}</p>
-        <p className="as-status">{dateStatus(selected).join(' · ')}</p>
-        {selectedRecords.length ? (
+        <p className="as-total">
+          {repsLabel(total)}
+          <span className="as-status"> · {dateStatus(selected).join(' · ')}</span>
+        </p>
+        {selectedRecords.length > 0 && (
           <ActivityList
             records={selectedRecords}
             canEdit={canEdit}
@@ -211,8 +213,6 @@ function MonthActivity({
             edit={edit}
             remove={remove}
           />
-        ) : (
-          <p className="as-empty">No sets recorded.</p>
         )}
       </section>
     </section>

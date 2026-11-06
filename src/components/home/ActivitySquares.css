@@ -26,13 +26,9 @@
   font-size: var(--fs-lg);
 }
 
-.as-subtitle,
-.as-status,
-.as-empty {
+.as-status {
   color: var(--c-text-muted);
   font-size: var(--fs-sm);
-  margin: var(--sp-2) 0;
-  overflow-wrap: anywhere;
 }
 
 .as-navigation {
