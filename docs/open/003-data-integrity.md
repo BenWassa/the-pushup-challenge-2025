@@ -127,7 +127,7 @@ The retry journal preserves multiple outstanding operation IDs and clears only t
 
 ## Google sign-in and closed-beta allowlist (candidate, not deployed)
 
-- Sign-in is Google only, using a full-page redirect (no popup). Anyone can sign in with Google; only approved people get access.
+- Sign-in is Google only. It uses a popup first; browsers block full-page redirect sign-in when the app (github.io) and Firebase's handler (firebaseapp.com) are on different domains, so redirect is only the fallback when a popup is blocked. Anyone can sign in with Google; only approved people get access.
 - Approval is a document at `allowlist/{lowercase email}` in Firestore. Clients cannot write or list it; a signed-in person can read only their own entry (the app uses that to show the "not on the list yet" screen). `participants/**` reads and writes require a verified email with an allowlist entry.
 - To approve someone: add a document with ID equal to their lowercase Google email (any field, e.g. `approved: true`) in the Firebase console. To revoke: delete it.
 - **Deployed 2026-11-06 with owner approval** to project `pushup2025-df07b`. Before this, the live rules were fully open (`allow read, write: if true`). The deployed rules keep `artifacts/**` and `users/**` (the original site's legacy data) exactly as open as before so the old site keeps working; everything else is denied except the allowlist and approved `participants/**` paths. Owner emails `haddonbenjamin@gmail.com` and `haddonbenjamin@googlemail.com` were added to `allowlist` first.
@@ -135,3 +135,8 @@ The retry journal preserves multiple outstanding operation IDs and clears only t
 - Still open risk: the legacy trees remain world-readable and writable. Tightening them needs a migration plan and owner approval.
 - Enabling the Google provider and the GitHub Pages domain under Authorized domains is a console step for the owner.
 - Existing email/password users keep their UID only if Firebase's "one account per email" setting is on and the Google address matches; verify before relying on history.
+
+### Production Auth changes (2026-11-06, owner-approved)
+
+- Google provider was already enabled; `benwassa.github.io` added to authorized domains.
+- All 76 anonymous Auth accounts deleted; only `haddonbenjamin@gmail.com` kept. Firestore data was not touched (history is stored by profile name, not account ID). Pre-delete export kept locally in the gitignored `backups.local/`.

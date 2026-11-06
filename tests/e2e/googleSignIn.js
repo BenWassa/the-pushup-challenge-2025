@@ -14,17 +14,19 @@ export async function approveEmail(request, email) {
 }
 
 // Drives the Firebase Auth emulator's fake Google account chooser (fictional accounts only).
-// Sign-in is a full-page redirect there and back, so everything happens in the same tab.
+// Sign-in opens a popup that closes itself once the account is chosen.
 export async function signInWithGoogle(page, email) {
+  const popupPromise = page.waitForEvent('popup');
   await page.getByRole('button', { name: 'Sign in with Google', exact: true }).click();
-  await page.waitForURL(/emulator\/auth\/handler/);
-  const existing = page.getByText(email, { exact: false });
+  const popup = await popupPromise;
+  await popup.waitForLoadState('domcontentloaded');
+  const existing = popup.getByText(email, { exact: false });
   if (await existing.count()) {
     await existing.first().click();
   } else {
-    await page.getByRole('button', { name: /add new account/i }).click();
-    await page.getByLabel(/email/i).fill(email);
-    await page.getByRole('button', { name: /sign in with google/i }).click();
+    await popup.getByRole('button', { name: /add new account/i }).click();
+    await popup.getByLabel(/email/i).fill(email);
+    await popup.getByRole('button', { name: /sign in with google/i }).click();
   }
-  await page.waitForURL((url) => !url.pathname.includes('/emulator/auth/handler'));
+  await popup.waitForEvent('close');
 }

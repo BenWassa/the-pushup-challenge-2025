@@ -5,6 +5,7 @@ import {
   connectAuthEmulator,
   onAuthStateChanged,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
@@ -83,7 +84,12 @@ const getFirebase = (config) => {
 const getFriendlyAuthError = (error) => {
   const code = error?.code || '';
 
-  if (code.includes('cancelled-popup-request') || code.includes('user-cancelled')) return '';
+  if (
+    code.includes('cancelled-popup-request') ||
+    code.includes('popup-closed-by-user') ||
+    code.includes('user-cancelled')
+  )
+    return '';
   if (code.includes('network-request-failed'))
     return 'Cannot connect. Check your connection and try again.';
   if (code.includes('too-many-requests')) return 'Too many sign-in attempts. Try again shortly.';
@@ -194,8 +200,20 @@ export const useAuth = () => {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithRedirect(auth, provider);
-      // The page is leaving for Google, so keep the button disabled until it returns.
+      try {
+        // A popup works when the app and Firebase's sign-in handler are on different domains
+        // (GitHub Pages vs firebaseapp.com), where browsers now block redirect sign-in storage.
+        await signInWithPopup(auth, provider);
+      } catch (popupError) {
+        const code = popupError?.code || '';
+        if (!code.includes('popup-blocked') && !code.includes('operation-not-supported')) {
+          throw popupError;
+        }
+        await signInWithRedirect(auth, provider);
+        // The page is leaving for Google, so keep the button disabled until it returns.
+        return true;
+      }
+      setAuthActionLoading(false);
       return true;
     } catch (signInError) {
       setAuthActionError(getFriendlyAuthError(signInError));
