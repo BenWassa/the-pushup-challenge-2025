@@ -362,6 +362,7 @@ footer {
   fill: none;
   stroke-width: 5;
   stroke-linecap: round;
+  overflow: visible;
 }
 .tally .done {
   stroke: var(--accent);
