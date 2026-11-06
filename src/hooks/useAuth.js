@@ -1,14 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import {
+  getAuth,
+  connectAuthEmulator,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorageMode, isDemoStorageMode } from '../utils/mode';
 
 // Move appId outside hook to avoid recalculating on every render
 export const APP_ID =
   typeof __app_id !== 'undefined' && __app_id ? __app_id : 'pushup-challenge-default';
 
+const localEmulatorsEnabled = () =>
+  import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true' &&
+  typeof window !== 'undefined' &&
+  ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+const connectedEmulators = new WeakSet();
 const parseConfig = () => {
+  if (localEmulatorsEnabled())
+    return {
+      apiKey: 'demo-pushup-local-key',
+      projectId: 'demo-pushup-2027',
+      authDomain: 'demo-pushup-2027.firebaseapp.com',
+      appId: 'demo-pushup-2027',
+    };
   try {
     // Check for injected runtime variable first (production)
     if (typeof __firebase_config !== 'undefined' && __firebase_config) {
@@ -46,26 +64,29 @@ const isValidConfig = (config) => {
 };
 
 const getFirebase = (config) => {
-  const existing = getApps();
-  if (existing.length) {
-    const app = existing[0];
-    return { app, auth: getAuth(app), db: getFirestore(app) };
+  if (!isValidConfig(config)) throw new Error('Firebase configuration is unavailable.');
+  const appName = localEmulatorsEnabled() ? 'pushup-local-emulator' : '[DEFAULT]';
+  const app =
+    getApps().find((candidate) => candidate.name === appName) || initializeApp(config, appName);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  if (localEmulatorsEnabled() && !connectedEmulators.has(app)) {
+    connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+    connectFirestoreEmulator(db, '127.0.0.1', 8080);
+    connectedEmulators.add(app);
   }
-  if (!isValidConfig(config)) {
-    throw new Error('Firebase config not properly set up. Please check your .env.local file.');
-  }
-  const app = initializeApp(config);
-  return { app, auth: getAuth(app), db: getFirestore(app) };
+  return { app, auth, db };
 };
 
 const getFriendlyAuthError = (error) => {
   const code = error?.code || '';
 
-  if (code.includes('invalid-credential')) {
+  if (
+    code.includes('invalid-credential') ||
+    code.includes('user-not-found') ||
+    code.includes('wrong-password')
+  ) {
     return 'Invalid email or password.';
-  }
-  if (code.includes('user-not-found')) {
-    return 'No account exists for this email.';
   }
   if (code.includes('email-already-in-use')) {
     return 'That email is already registered. Try signing in instead.';
@@ -77,7 +98,9 @@ const getFriendlyAuthError = (error) => {
     return 'Too many login attempts. Try again shortly.';
   }
 
-  return error?.message || 'Authentication failed.';
+  if (code.includes('network-request-failed'))
+    return 'Cannot connect. Check your connection and try again.';
+  return 'Unable to sign in. Check your details and try again.';
 };
 
 export const useAuth = () => {
@@ -125,7 +148,10 @@ export const useAuth = () => {
       return undefined;
     }
 
-    if (!auth) return undefined;
+    if (!auth) {
+      setAuthReady(true);
+      return undefined;
+    }
 
     const unsubAuth = onAuthStateChanged(auth, (u) => {
       setUser(u || null);
@@ -157,7 +183,12 @@ export const useAuth = () => {
 
   const logoutAuth = useCallback(async () => {
     if (!auth || isDemoMode) return;
-    await signOut(auth);
+    try {
+      await signOut(auth);
+      setAuthActionError('');
+    } catch {
+      setAuthActionError('Unable to sign out. Check your connection and try again.');
+    }
   }, [auth, isDemoMode]);
 
   const loading = !error && !authReady;
