@@ -208,7 +208,7 @@ The app is optimized for mobile screens but works on desktop.
 npm run build
 ```
 
-This creates a `docs/` folder containing the production build (ready to publish to GitHub Pages).
+This creates ignored `dist/` output. `npm run build:pages` uses the same safe build. Source documentation and the legacy deployed site in `docs/` are preserved. See [the documentation index](docs/README.md) for the 2027 implementation and controlled Pages cutover.
 
 ---
 

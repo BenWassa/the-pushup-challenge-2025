@@ -6,6 +6,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Publish only after approved Pages cutover and candidate verification'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -32,13 +38,13 @@ jobs:
       - name: Production build
         run: npm run build
       - name: Upload site artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.deploy == true
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist/
 
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.deploy == true
     needs: build
     runs-on: ubuntu-latest
     permissions:
