@@ -7,6 +7,7 @@ import {
   assertSucceeds,
 } from '@firebase/rules-unit-testing';
 import { doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { classifyChallengeDate } from '../../src/utils/challengeModel.js';
 import {
   createActivityRepository,
   createAddOperation,
@@ -21,7 +22,7 @@ const path = (owner = 'alice', selectedYear = String(year), id = 'set-a') =>
 const input = {
   amount: 20,
   localDate: `${year}-02-03`,
-  phase: 'OFF_SEASON',
+  phase: classifyChallengeDate(`${year}-02-03`, 'America/Toronto').phase,
   challengeYear: year,
   timeZone: 'America/Toronto',
 };
