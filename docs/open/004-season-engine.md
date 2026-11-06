@@ -25,3 +25,49 @@
 
 ## Out of scope
 Organizer API integration, extra exercise type conversion, personalized coaching.
+
+## Implementation batch: additive engine (November 5, 2026)
+
+`src/utils/challenges.js` supplies immutable `CHALLENGES`, `getChallenge(year)`,
+`toLocalDate(instant, timeZone)`, `validateChallenge(config)`, and
+`getChallengeDay(config, instantOrLocalDate)`. Day results carry `challengeYear`,
+`localDate`, `timeZone`, `phase`, nullable `dailyTarget`, `scheduleStatus`, and
+nullable `isRestDay`. Unknown editions return null; no recurring-year fallback.
+Date-only values remain calendar dates; timestamps must have an explicit offset
+(or be Date/epoch milliseconds). Explicit IANA timezones avoid host-dependent days.
+
+### Configuration decisions and evidence
+
+The organizer's [how-it-works page](https://www.thepushupchallenge.ca/how-it-works),
+checked November 5, 2026, confirms February 3–26, 2027, 2,000 reps, changing daily
+targets available in its app, and Sundays as rest days. Accordingly only February
+7, 14 and 21 have confirmed zero targets. All other official days remain pending;
+no daily targets or evenly distributed estimates are invented. These sources do
+not establish a complete daily schedule. Recheck before launch.
+
+January 1–February 2 is this application's configurable personal training default,
+not an organizer fact. Toronto is the initial participant's configured timezone,
+not a Canada-wide event timezone. These defaults must be visible and adjustable
+in later configuration UX. Training and off-season days have no official target.
+No annual configuration for prior years is inferred from the old recurring logic.
+
+### Shared contract with #3
+
+`getChallengeDay(config, localDate)` can supply the `{challengeYear, phase}`
+classification for the read-only legacy adapter. Records retain canonical
+`localDate` and `timeZone`; classification never depends on today's phase.
+Aggregation must also check record year and explicit official date window.
+Rest days stay in the OFFICIAL phase, with a zero target; logging activity on a
+rest day remains possible without treating that as a fabricated target.
+
+### Verification and limits
+
+- Local `npm run lint`, `npm test` (8 passing tests), `npm run build` passed.
+- Tests cover inclusive dates, midnight offsets, DST, leap days, future editions,
+  malformed dates, overlapping windows, negative targets and full-schedule sums.
+- Build emits existing bundle-size and stale Browserslist warnings.
+- This batch is deliberately additive: existing `getSeason`, hooks and UI are not
+  rerouted until data ownership and persistence integration are reviewed. #4
+  therefore remains open; current app still contains legacy 87/day behavior.
+- No Firebase data, rules, deployed assets or deployment settings changed.
+- Rollback: revert this additive PR; no data rollback is needed.
