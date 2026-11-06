@@ -100,11 +100,14 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
 
   await page.reload();
   await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('10');
+  // Sets are reviewed and edited in History (Home only shows the totals and a 30-day grid).
+  const openHistory = (target) => target.getByRole('button', { name: 'History' }).click();
+  const goHome = (target) => target.getByRole('button', { name: 'Home', exact: true }).click();
+  await openHistory(page);
   await page.getByRole('button', { name: /Edit set of 10 on/ }).click();
   await page.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('15');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('15');
-  await expect(page.getByText('15 push-ups', { exact: true })).toBeVisible();
+  await expect(page.locator('.as-total')).toContainText('15 push-ups');
 
   // A second browser context is a separate device session, not a shared-auth tab.
   const independentSession = await browser.newContext();
@@ -112,6 +115,7 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await second.goto(appPath);
   await signInWithGoogle(second, email);
   await expect(second.getByTestId('primary-total').locator('strong')).toHaveText('15');
+  await openHistory(second);
   await page
     .getByRole('button', { name: /Edit set of 15 on/ })
     .first()
@@ -120,12 +124,15 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await second.getByRole('button', { name: /Edit set of 15 on/ }).click();
   await second.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('22');
   await second.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(second.getByTestId('primary-total').locator('strong')).toHaveText('22');
-  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('22');
+  await expect(second.locator('.as-total')).toContainText('22 push-ups');
+  await expect(page.locator('.as-total')).toContainText('22 push-ups');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('This set changed on another device.');
-  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('22');
+  await expect(page.locator('.as-total')).toContainText('22 push-ups');
   await page.getByRole('button', { name: 'Cancel' }).click();
+  await goHome(page);
+  await goHome(second);
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('22');
   await page.getByRole('button', { name: /Undo latest set/ }).click();
   await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('0');
   await expect(second.getByTestId('primary-total').locator('strong')).toHaveText('0');

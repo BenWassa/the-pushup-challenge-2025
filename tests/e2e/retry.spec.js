@@ -40,7 +40,9 @@ test('denied write survives reload and retries once without claiming an unconfir
     await expect(total(page)).toHaveText('20');
     await page.reload();
     await expect(total(page)).toHaveText('20');
+    await page.getByRole('button', { name: 'History' }).click();
     await expect(page.getByRole('button', { name: /^Edit set of 20 on/ })).toHaveCount(1);
+    await page.getByRole('button', { name: 'Home', exact: true }).click();
     await context.setOffline(true);
     await expect(page.getByRole('button', { name: 'Add 20 push-ups', exact: true })).toBeDisabled();
     await expect(page.getByText(/Offline\. Reconnect/)).toBeVisible();
