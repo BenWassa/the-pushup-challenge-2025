@@ -5,7 +5,7 @@ import vm from 'node:vm';
 
 const source = await readFile(new URL('../public/sw.js', import.meta.url), 'utf8');
 const scope = 'https://example.test/the-pushup-challenge-2025/';
-const current = 'pushup-pwa-/the-pushup-challenge-2025/-v2';
+const current = 'pushup-pwa-/the-pushup-challenge-2025/-v2-2027-brush';
 
 const worker = ({
   names = [],
@@ -90,7 +90,7 @@ test('install does not activate over a running app until the UI requests it', as
 });
 
 test('activation removes only prior caches belonging to this app scope', async () => {
-  const old = current.replace('-v2', '-v1');
+  const old = 'pushup-pwa-/the-pushup-challenge-2025/-v2';
   const app = worker({ names: [current, old, 'other-app', 'pushup-pwa-/other/-v1'] });
   let result;
   app.listeners.activate({ waitUntil: (value) => (result = value) });

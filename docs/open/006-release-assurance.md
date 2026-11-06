@@ -64,3 +64,13 @@ Local verification for the reconciliation: lint/build and Pages artifact preflig
 ## Persisted retry and offline acceptance
 
 The final reconciliation regression exercises an actual denied write in the isolated Auth/Firestore emulator, verifies that the unconfirmed amount is excluded, reloads to recover the pending journal, restores candidate permissions and retries the same operation. Reload then shows exactly one confirmed set. Offline checks retain an already-loaded confirmed total and disable additions until reconnection. Copy explicitly requests reconnection to load history rather than promising all history is available offline. Local integrated acceptance covers five emulator tests and seven browser journeys, with no production access in the test suite.
+
+## Supplied 2027 brush icon
+
+Replaced the source app icon with the supplied red/black artwork and regenerated
+browser, Apple, standard PWA and safe-zone-padded maskable derivatives. Prior
+assets are archived in `design/archive/pre-2027-brush/`; reproduction details and
+rollback are recorded in `design/README.md`. Browser icon URLs and the worker
+cache revision refresh the artwork without changing app identity or scope.
+Legacy `docs/` deployment assets are preserved. Publication and physical-device
+home-screen refresh remain release checks; no production changes are included.
