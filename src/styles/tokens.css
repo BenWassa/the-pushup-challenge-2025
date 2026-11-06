@@ -1,0 +1,74 @@
+/* PushUp design tokens — Athletic Bold / Brush Impact (issues #33, #34).
+   Every colour, size, radius and motion value used by the UI comes from here. */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces: near-black, stepped by elevation */
+  --c-bg: #0a0a0b;
+  --c-surface: #141416;
+  --c-surface-raised: #1c1c1f;
+  --c-surface-press: #26262a;
+  --c-line: rgb(255 255 255 / 0.09);
+  --c-line-strong: rgb(255 255 255 / 0.2);
+
+  /* Type colours (AA on --c-bg and --c-surface) */
+  --c-text: #f6f5f3;
+  --c-text-muted: #aaaab0;
+  --c-text-faint: #8e8e96;
+
+  /* Accent: restrained, confident red */
+  --c-red: #e4322c;
+  --c-red-text: #ff5b53; /* red used as text on dark surfaces */
+  --c-red-fill: #c8231e; /* behind white text */
+  --c-red-soft: rgb(228 50 44 / 0.14);
+
+  /* Status */
+  --c-ok: #7ee0a0;
+  --c-warn: #ffc15a;
+
+  /* Activity squares: charcoal → graduated red (quantitative, not a badge) */
+  --heat-0: #212124;
+  --heat-1: #4d1d1f;
+  --heat-2: #7e2023;
+  --heat-3: #b6252a;
+  --heat-4: #f0453d;
+
+  /* Typography */
+  --font-sans:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, system-ui,
+    sans-serif;
+  --font-display:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Arial,
+    sans-serif;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.75rem;
+  --fs-hero: clamp(3.5rem, 20vw, 5.5rem);
+  --fs-total: clamp(2.5rem, 13vw, 3.5rem);
+
+  /* Spacing (4px base) */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --gutter: max(1.25rem, env(safe-area-inset-left));
+
+  /* Radii */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+
+  /* Interaction */
+  --tap: 44px;
+  --focus-ring: 0 0 0 2px var(--c-bg), 0 0 0 4px var(--c-text);
+  --dur-fast: 110ms;
+  --dur: 200ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --shadow-raise: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 8px 24px rgb(0 0 0 / 0.45);
+}
