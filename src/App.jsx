@@ -421,7 +421,13 @@ export default function App() {
             {view === 'history' && (
               <History key={selectedYear} challenge={challenge} data={data} busy={busy} />
             )}
-            {view === 'account' && <Account auth={auth} challenge={challenge} busy={busy} />}
+            {view === 'account' && (
+              <Account
+                auth={auth}
+                challenge={challenge}
+                busy={saving || Boolean(data.pendingOperation)}
+              />
+            )}
           </>
         )}
       </main>
