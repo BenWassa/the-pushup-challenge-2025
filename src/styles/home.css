@@ -45,9 +45,12 @@
 }
 .brand-year {
   position: relative;
-  margin: 0 0 0.3rem 0.15rem;
+  margin: 0.15rem 0 0.4rem 0.35rem;
   color: var(--c-red-text);
   font-size: 1.125rem;
+  /* Match the upward slant of the brush lettering */
+  transform: rotate(-7deg);
+  transform-origin: left bottom;
 }
 .brand-stroke {
   position: absolute;
