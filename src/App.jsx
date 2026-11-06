@@ -225,6 +225,12 @@ export default function App() {
             )}
             {data.blockedReason && <p className="notice">{data.blockedReason}</p>}
             {data.loading && <p role="status">Loading your confirmed sets…</p>}
+            {data.legacyHistoryPending && (
+              <p className="quiet">
+                Earlier records are preserved in the original archive and await a verified import.
+                An empty year here does not mean your historical activity is lost.
+              </p>
+            )}
             <div className="save-feedback" aria-live="polite" role="status">
               {saving
                 ? 'Saving… Waiting for confirmation.'
@@ -240,7 +246,8 @@ export default function App() {
                 {data.pendingOperation && (
                   <p>
                     This operation has not been confirmed. Retry the same operation to avoid
-                    duplicates.
+                    duplicates. Dismissing a retry does not undo a save that may have completed.
+                    Check confirmed history before logging that set again.
                   </p>
                 )}
                 <div className="actions">

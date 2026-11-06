@@ -16,7 +16,11 @@ export default function History({ challenge, data, busy }) {
   const month = `${selectedYear}-${chosenMonth}`;
   const days = new Date(Date.UTC(selectedYear, Number(chosenMonth), 0)).getUTCDate();
   const offset = new Date(`${month}-01T12:00:00Z`).getUTCDay();
-  const selectedDate = selected?.startsWith(month) ? selected : `${month}-01`;
+  const selectedDate = selected?.startsWith(month)
+    ? selected
+    : today.startsWith(month)
+      ? today
+      : `${month}-01`;
   const records = yearRecords.filter((r) => r.localDate === selectedDate);
   return (
     <section aria-labelledby="history-title">
