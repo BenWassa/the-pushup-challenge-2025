@@ -65,11 +65,12 @@ export default function History({ challenge, data, busy }) {
               className={`calendar-cell ${count ? 'has-reps' : ''}`}
               aria-pressed={selectedDate === date}
               aria-current={today === date ? 'date' : undefined}
-              aria-label={`${date}: ${count} push-ups`}
               onClick={() => setSelected(date)}
             >
+              <span className="sr-only">Day </span>
               <span>{i + 1}</span>
-              <small>{count || '—'}</small>
+              <small>{count}</small>
+              <span className="sr-only"> push-ups on {date}</span>
             </button>
           );
         })}

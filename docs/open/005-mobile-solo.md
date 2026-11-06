@@ -5,9 +5,11 @@
 **Depends on:** #3 data model, #4 season engine
 
 ## Product brief
+
 One participant first. Make logging a set fast and clearly saved. Keep the ability to turn on a small private leaderboard later without surfacing empty group content now.
 
 ## Design scope
+
 - 390px mockups and acceptance review for dashboard, add/undo, calendar, historical edition, and account settings.
 - Preserve existing +1/+10/+20/+25 touch targets as starting interaction.
 - Distinguish today, daily target, official cumulative target, training status, rest day and archival year.
@@ -16,12 +18,14 @@ One participant first. Make logging a set fast and clearly saved. Keep the abili
 - Avoid non-essential animations, auto-zoom blocking, and cramped phone controls.
 
 ## Acceptance
+
 - Main actions work at 320, 390 and 430px; 200% text and keyboard navigation remain usable.
 - Reload and network issues never show falsely confirmed totals.
 - Past years are viewable but cannot accidentally receive new logs.
 - Real-device PWA behaviour reviewed in #6.
 
 ## Not now
+
 Public group registration, notification journeys, social sharing and elaborate gamification.
 
 ## First review batch
@@ -61,3 +65,7 @@ The actual application now uses the annual read model and UID-scoped activity ho
 Save status comes from the persistence hook; failed operations retain their stable retry operation and confirmed totals remain separate. Cloud writes stay gated pending release approval. The demo uses the isolated in-memory v2 repository and clearly states reset behavior. Client feature flags are rollout controls, never authorization enforcement.
 
 Validation before PR: lint, 24 baseline tests and build passed with the pending data/annual hook source dependencies. Playwright browser smoke exercised demo add +20, correction to15, latest-set undo, calendar, preferences and future2027 read-only view. Visually inspected actual390px dashboard and history. All24 overflow checks passed across Log/History/Account ×320/390/430/1280px ×100%/200% root text size; a discovered enlarged-text nav overflow was fixed with wrapping. Root integration suite provides repeatable journey verification. Physical phone/PWA and production ownership/migration approval remain external release gates, not claimed complete by this UI batch.
+
+## Calendar voice and keyboard follow-up
+
+Calendar cells now derive their accessible names from their contents: day number, visible numeric count, and visually hidden date/unit context. This removes the mismatch between visible day/count text and the previous overriding ISO-date label. Zero activity is shown as `0` rather than an unexplained dash. A frozen-2027 browser regression covers populated and empty day names, Space activation, selected-day feedback and a full serious/critical axe scan of History. Existing viewport and cross-device safeguards are retained. Physical screen-reader/voice-control testing remains a separate device gate.
