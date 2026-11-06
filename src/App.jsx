@@ -261,12 +261,6 @@ export default function App() {
                   : 'Loading confirmed sets…'}
               </p>
             )}
-            {data.legacyHistoryPending && (
-              <p className="quiet">
-                Earlier records remain in the original archive, pending verified import. Empty years
-                here do not mean lost history.
-              </p>
-            )}
             {challenge.summary.metadataWarnings.length > 0 && (
               <aside className="notice" role="status" aria-label="Activity data review">
                 <strong>Activity details need review.</strong>

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ActivityList from '../app/ActivityList.jsx';
 import { classifyChallengeDate } from '../../utils/challengeModel.js';
+import { getChallenge } from '../../utils/challenges.js';
 import {
   buildMonthGrid,
   formatDateLong,
@@ -95,7 +96,10 @@ function MonthActivity({
   function dateStatus(date) {
     const classification = classifyChallengeDate(date);
     return [
-      PHASE_LABELS[classification.phase],
+      // Years without a configured edition (e.g. imported history) are not "off-season".
+      classification.phase === 'OFF_SEASON' && !getChallenge(year) && year < todayYear
+        ? 'Archive · unclassified'
+        : PHASE_LABELS[classification.phase],
       classification.isRestDay === true && 'Rest day',
       date === today && 'Today',
       todayYear === year && date > today && 'Upcoming',
