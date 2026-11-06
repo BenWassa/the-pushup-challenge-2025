@@ -57,7 +57,10 @@ export default function Home({
     ? { value: summary.official, target: challenge.challenge.totalTarget }
     : null;
   const recent = records.filter((record) => record.localDate !== detailDate).slice(0, 5);
-  const streak = canLog ? computeStreak(summary.byDate, challenge.today) : 0;
+  const streak =
+    canLog && challenge.day.phase === 'OFFICIAL'
+      ? computeStreak(summary.byDate, challenge.today)
+      : 0;
   const others = [
     ['Training', summary.training],
     ['Off-season', summary.offSeason],

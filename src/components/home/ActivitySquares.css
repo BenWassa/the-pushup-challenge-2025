@@ -84,7 +84,7 @@
   width: 100%;
   min-width: 0;
   margin: 0;
-  padding: calc(var(--sp-3) / 2);
+  padding: 14%;
   border: 0;
   border-radius: var(--r-sm);
   background: none;

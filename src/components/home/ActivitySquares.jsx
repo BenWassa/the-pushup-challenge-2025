@@ -134,8 +134,8 @@ function MonthActivity({
         </div>
       </header>
       <div className="as-grid">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-          <span className="as-weekday" key={day} aria-hidden="true">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+          <span className="as-weekday" key={index} aria-hidden="true">
             {day}
           </span>
         ))}

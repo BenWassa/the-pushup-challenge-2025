@@ -27,7 +27,7 @@ export default function ProgressSummary({ primary, official, streak }) {
               </p>
             </div>
             {streak > 0 && (
-              <p className="streak" aria-label={`${streak}-day streak`}>
+              <p className="streak">
                 <Flame size={16} strokeWidth={2.4} aria-hidden="true" focusable="false" />
                 <span>{streak}</span>
                 <span className="streak-unit">day streak</span>

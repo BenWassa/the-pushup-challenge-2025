@@ -164,7 +164,7 @@ export default function App() {
       clearTimeout(hide);
       setSavedToast(false);
     };
-  }, [data.saveState]);
+  }, [data.saveState, data.records]);
   const saveStatus = saving
     ? 'Saving… awaiting confirmation.'
     : data.saveState === 'saved' && savedToast

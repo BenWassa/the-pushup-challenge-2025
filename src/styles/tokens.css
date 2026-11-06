@@ -56,7 +56,7 @@
   --sp-5: 1.5rem;
   --sp-6: 2rem;
   --sp-7: 3rem;
-  --gutter: max(1.25rem, env(safe-area-inset-left));
+  --gutter: max(20px, env(safe-area-inset-left));
 
   /* Radii */
   --r-sm: 6px;

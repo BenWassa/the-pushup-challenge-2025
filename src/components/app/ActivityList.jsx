@@ -71,6 +71,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
               <label>
                 Push-ups
                 <input
+                  autoFocus
                   type="number"
                   min="1"
                   max="10000"
@@ -94,6 +95,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
               <p>Remove {record.amount}-push-up set?</p>
               <div className="actions">
                 <button
+                  autoFocus
                   className="danger"
                   disabled={busy}
                   onClick={async () => {
