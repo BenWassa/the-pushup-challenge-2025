@@ -93,3 +93,17 @@ Owner direction (visual exploration, not final screen approval):
 - Request next **one focused, standalone Home-screen mockup** on this selected direction; subsequent revisions should compare meaningful layout choices, not change all features at once.
 
 **Implementation implications:** The prior #33 assumption of bottom-tab navigation is superseded by this design preference; assess accessible headings, anchor/section navigation if needed, scroll behavior, safe-area/one-handed reach, and route/state design before implementation. No production code change approved.
+
+
+## Home design round 3 — owner selection feedback (Nov 6, 2026)
+
+Owner preferences:
+- Keep **Brush Impact** in restrained black, white and red.
+- Use the **first heatmap treatment from the three minimal Home alternatives**, rather than the miniature long-range/weekday-row variant. Heatmap is an actual Home section, not a navigation tile.
+- Make +1 / +10 / +20 / +25 **substantially larger in a 2-by-2 quadrant arrangement**, as previously agreed. These are the sole primary log actions; no separate "Log Push-Ups" CTA.
+- **Retain an oversized numerical total counter with a clear progress bar**, and a small streak indicator where a percentage previously appeared. Do not display a calculated percentage; the graphic communicates progress.
+- Keep the compact brush header, one vertical Home page, no bottom navigation, with real content sections ordered by importance.
+- Continue using credible demo numbers: today 60 confirmed and **445 / 2,000 official challenge**, not the image generator's repeated incorrect 12,340 / 100,000. Do not treat image-generated totals as specification.
+- Daily goal remains undecided and should not be invented.
+
+The latest generated image is **not approved**: despite matching the 2×2 button geometry, it still used invented 12,340/100,000 and a mismatched month. Preserve the valid geometry/layout only. Next mockup should correct the figures/date and revisit the owner's chosen first heatmap.
