@@ -22,9 +22,7 @@ function dayNote(challenge) {
   if (day.phase === 'TRAINING' && challenge.trainingGoal)
     return `Training goal: ${challenge.trainingGoal}`;
   if (day.phase === 'OFFICIAL') return 'Official daily target pending';
-  return day.phase === 'TRAINING'
-    ? 'Training is excluded from challenge totals'
-    : 'Off-season is excluded from challenge totals';
+  return null;
 }
 
 /** The single scrolling Home: everything useful is rendered here, nothing is a gateway. */
