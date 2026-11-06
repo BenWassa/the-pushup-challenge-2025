@@ -4,6 +4,8 @@ Issue [#6](https://github.com/BenWassa/the-pushup-challenge-2025/issues/6), Nove
 
 ## Before approving production publication
 
+- Production dependencies must pass `npm audit --omit=dev --audit-level=high` in the reviewed commit's CI. `npm ci` currently reports moderate advisories in the full dependency tree; assess affected packages and runtime reachability before release, and do not apply unreviewed breaking upgrades or assume the count reflects only production packages.
+
 - Record the candidate commit, passing lint/tests/build run, previous deployed commit, artifact and version. Retain a downloadable rollback artifact outside expiring CI storage.
 - Verify `npm run build:pages` preserves `docs/`; the automated regression executes the real command in an expendable fixture.
 - Verify the candidate artifact uses the intended public Firebase client configuration and APP_ID. The current Actions workflow supplies no Firebase environment values, and repository-level Actions secret/variable listings were empty during this audit. Environment-level or organization configuration was not verified. A successful build alone does not demonstrate working cloud sign-in. Never put service-account keys, passwords or private keys in Vite variables.
