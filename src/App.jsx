@@ -1,23 +1,11 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, CircleUserRound, Dumbbell, Undo2 } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useActivityData } from './hooks/useActivityData';
 import { useChallenge } from './hooks/useChallenge';
 import { createChallengeModel } from './utils/challengeModel';
-import ActivityList from './components/app/ActivityList';
-import History from './components/app/History';
-import Account from './components/app/Account';
-
-const phaseLabel = (phase) =>
-  ({ TRAINING: 'Training', OFFICIAL: 'Official', OFF_SEASON: 'Off-season' })[phase];
-const displayDate = (date) =>
-  new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+import { getDemoFixture } from './data/demoFixture';
+import Home from './components/home/Home';
+import Settings from './components/app/Settings';
 
 function Tally() {
   // Decorative tally marks: counted sets in accent, the next ones still to come in grey.
@@ -119,7 +107,9 @@ export default function App() {
   const auth = useAuth();
   // Preferences and the clock are resolved before subscribing to a year. The pure
   // read model then combines that same calendar context with confirmed records.
-  const calendar = useChallenge();
+  // Fictional review data (`?mode=demo&fixture=…`) pins the clock; it never applies outside demo mode.
+  const [fixture] = useState(() => (auth.isDemoMode ? getDemoFixture() : null));
+  const calendar = useChallenge({ now: fixture?.now });
   const { selectedYear, setSelectedYear } = calendar;
   const data = useActivityData({
     db: auth.db,
@@ -127,6 +117,7 @@ export default function App() {
     isDemoMode: auth.isDemoMode,
     year: selectedYear,
     timeZone: calendar.timeZone,
+    now: fixture?.now,
   });
   const challenge = {
     ...calendar,
@@ -138,7 +129,7 @@ export default function App() {
       availableYears: data.years || [],
     }),
   };
-  const [view, setView] = useState('log');
+  const [view, setView] = useState('home');
   const [online, setOnline] = useState(() => navigator.onLine);
   const [update, setUpdate] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
@@ -156,11 +147,11 @@ export default function App() {
       window.removeEventListener('sw-update', available);
     };
   }, []);
-  // The challenge year is automatic. Other years are history, reached from the History tab.
+  // The challenge year is automatic. Past years are read-only and opened from Settings.
   const currentYear = Number(challenge.today.slice(0, 4));
-  const go = (next) => {
-    if (next !== 'history' && selectedYear !== currentYear) setSelectedYear(currentYear);
-    setView(next);
+  const openYear = (year) => {
+    setSelectedYear(year);
+    setView('home');
   };
   const saving = data.saveState === 'saving';
   // Confirmation is acknowledged briefly; pending and failed states stay visible until resolved.
@@ -174,8 +165,14 @@ export default function App() {
       setSavedToast(false);
     };
   }, [data.saveState]);
+  const saveStatus = saving
+    ? 'Saving… awaiting confirmation.'
+    : data.saveState === 'saved' && savedToast
+      ? auth.isDemoMode
+        ? 'Saved · demo resets on reload'
+        : 'Saved'
+      : '';
   const busy = saving || Boolean(data.pendingOperation) || (!online && !auth.isDemoMode);
-  const canEdit = challenge.canLog && data.canWrite && !busy;
   const records = [...challenge.yearRecords].sort(
     (a, b) => (b.createdAt || 0) - (a.createdAt || 0) || b.id.localeCompare(a.id)
   );
@@ -209,11 +206,13 @@ export default function App() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className="app-header">
-        <a className="wordmark" href={import.meta.env.BASE_URL}>
-          PushUp
-        </a>
-      </header>
+      {!auth.user && (
+        <header className="app-header">
+          <a className="wordmark" href={import.meta.env.BASE_URL}>
+            PushUp
+          </a>
+        </header>
+      )}
       {update && (
         <aside className="notice">
           <p>Update ready. Resolve any pending save first.</p>
@@ -247,39 +246,6 @@ export default function App() {
           <AccessPending auth={auth} />
         ) : (
           <>
-            <nav className="main-nav" aria-label="Journal">
-              {[
-                [
-                  'log',
-                  'Log',
-                  <Dumbbell size={22} strokeWidth={2.2} aria-hidden="true" focusable="false" />,
-                ],
-                [
-                  'history',
-                  'History',
-                  <CalendarDays size={22} strokeWidth={2.2} aria-hidden="true" focusable="false" />,
-                ],
-                [
-                  'account',
-                  'Account',
-                  <CircleUserRound
-                    size={22}
-                    strokeWidth={2.2}
-                    aria-hidden="true"
-                    focusable="false"
-                  />,
-                ],
-              ].map(([id, label, icon]) => (
-                <button
-                  key={id}
-                  aria-current={view === id ? 'page' : undefined}
-                  onClick={() => go(id)}
-                >
-                  <span className="tab-icon">{icon}</span>
-                  <span>{label}</span>
-                </button>
-              ))}
-            </nav>
             {!online && !auth.isDemoMode && (
               <p className="notice" role="status">
                 Offline. Reconnect to load history or save.
@@ -310,15 +276,6 @@ export default function App() {
                 </p>
               </aside>
             )}
-            <div className="save-feedback" aria-live="polite" role="status">
-              {saving
-                ? 'Saving… awaiting confirmation.'
-                : data.saveState === 'saved' && savedToast
-                  ? auth.isDemoMode
-                    ? 'Saved · demo resets on reload'
-                    : 'Saved'
-                  : ''}
-            </div>
             {data.error && (
               <div className="error" role="alert">
                 <p>{data.error}</p>
@@ -340,166 +297,28 @@ export default function App() {
                 </div>
               </div>
             )}
-            {view === 'log' && (
-              <section aria-labelledby="log-title">
-                <div className="hero">
-                  <div className="hero-top">
-                    <p className="eyebrow">
-                      {displayDate(challenge.canLog ? challenge.today : challenge.day.localDate)}
-                    </p>
-                    <span className="phase-label">{phaseLabel(challenge.day.phase)}</span>
-                  </div>
-                  <h1 id="log-title" className="sr-only">
-                    {challenge.canLog ? 'Log a set' : `${selectedYear} activity`}
-                  </h1>
-                  <div className="daily-summary">
-                    <div>
-                      <strong>
-                        {challenge.canLog ? challenge.summary.todayTotal : challenge.summary.total}
-                      </strong>
-                      <span className="quiet">
-                        {challenge.canLog ? 'Today · confirmed' : 'Year · confirmed'}
-                      </span>
-                    </div>
-                    <p>
-                      {challenge.day.isRestDay
-                        ? 'Rest day · activity optional'
-                        : challenge.day.dailyTarget !== null
-                          ? `Daily target: ${challenge.day.dailyTarget}`
-                          : challenge.day.phase === 'TRAINING' && challenge.trainingGoal
-                            ? `Training goal: ${challenge.trainingGoal}`
-                            : challenge.day.phase === 'OFFICIAL'
-                              ? 'Official target pending'
-                              : challenge.day.phase === 'TRAINING'
-                                ? 'Training is excluded from challenge totals'
-                                : 'Off-season is excluded from challenge totals'}
-                    </p>
-                  </div>
-                  {challenge.challenge && (
-                    <div className="hero-progress">
-                      <div
-                        className="progress-track"
-                        role="progressbar"
-                        aria-label="Official challenge progress"
-                        aria-valuemin={0}
-                        aria-valuemax={challenge.challenge.totalTarget}
-                        aria-valuenow={Math.min(
-                          challenge.summary.official,
-                          challenge.challenge.totalTarget
-                        )}
-                        aria-valuetext={`${challenge.summary.official} of ${challenge.challenge.totalTarget} push-ups`}
-                      >
-                        <span
-                          style={{
-                            width: `${Math.min(100, (challenge.summary.official / challenge.challenge.totalTarget) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                      <p>
-                        {challenge.summary.official} /{' '}
-                        {challenge.challenge.totalTarget.toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {!challenge.canLog && (
-                  <p className="notice">
-                    Read-only edition. Select {challenge.today.slice(0, 4)} to log today.
-                  </p>
-                )}
-                {challenge.canLog && (
-                  <div className="quick-add" role="group" aria-label="Add push-ups">
-                    {[1, 10, 20, 25].map((amount) => (
-                      <button
-                        className="quick-button"
-                        key={amount}
-                        disabled={!canEdit || data.loading}
-                        onClick={() => add(amount)}
-                        aria-label={`Add ${amount} push-ups`}
-                      >
-                        +{amount}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {challenge.canLog && latest && (
-                  <button
-                    className="undo"
-                    disabled={!canEdit}
-                    onClick={() => data.remove(latest.id, latest.revision)}
-                  >
-                    <Undo2 size={16} aria-hidden="true" focusable="false" />
-                    Undo latest set ({latest.amount})
-                  </button>
-                )}
-                {!auth.isDemoMode && !data.canWrite && !data.pendingOperation && !data.loading && (
-                  <p className="quiet">
-                    Cloud logging awaits owner verification and release activation. History
-                    preserved.
-                  </p>
-                )}
-                <section className="stats-section" aria-label={`${selectedYear} totals`}>
-                  <dl className="totals">
-                    <div>
-                      <dt>Official</dt>
-                      <dd>{challenge.summary.official}</dd>
-                    </div>
-                    <div>
-                      <dt>Training</dt>
-                      <dd>{challenge.summary.training}</dd>
-                    </div>
-                    <div>
-                      <dt>Off-season</dt>
-                      <dd>{challenge.summary.offSeason}</dd>
-                    </div>
-                    {challenge.summary.legacy > 0 && (
-                      <div>
-                        <dt>Imported</dt>
-                        <dd>{challenge.summary.legacy}</dd>
-                      </div>
-                    )}
-                    <div>
-                      <dt>Active days</dt>
-                      <dd>{challenge.summary.activeDays}</dd>
-                    </div>
-                  </dl>
-                  {challenge.challenge && (
-                    <p className="stats-note">
-                      Official {challenge.challenge.official.start} –{' '}
-                      {challenge.challenge.official.end} · daily targets pending · Sundays rest
-                    </p>
-                  )}
-                  {challenge.summary.legacy > 0 && (
-                    <p className="stats-note">Imported · original classification kept</p>
-                  )}
-                </section>
-                <section className="recent-section" aria-labelledby="recent-title">
-                  <div className="section-heading">
-                    <h2 id="recent-title">Recent</h2>
-                    {records.length > 4 && (
-                      <button className="link-button" onClick={() => go('history')}>
-                        View history
-                      </button>
-                    )}
-                  </div>
-                  <ActivityList
-                    records={records.slice(0, 4)}
-                    canEdit={challenge.canLog && data.canWrite}
-                    busy={busy}
-                    edit={data.edit}
-                    remove={data.remove}
-                  />
-                </section>
-              </section>
+            {view === 'home' && (
+              <Home
+                challenge={challenge}
+                data={data}
+                auth={auth}
+                busy={busy}
+                saveStatus={saveStatus}
+                records={records}
+                latest={latest}
+                onAdd={add}
+                onSettings={() => setView('settings')}
+                onBackToCurrent={() => setSelectedYear(currentYear)}
+              />
             )}
-            {view === 'history' && (
-              <History key={selectedYear} challenge={challenge} data={data} busy={busy} />
-            )}
-            {view === 'account' && (
-              <Account
+            {view === 'settings' && (
+              <Settings
                 auth={auth}
                 challenge={challenge}
                 busy={saving || Boolean(data.pendingOperation)}
+                locked={saving || Boolean(data.pendingOperation)}
+                onBack={() => setView('home')}
+                onOpenYear={openYear}
               />
             )}
           </>

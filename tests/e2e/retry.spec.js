@@ -4,7 +4,7 @@ import { approveEmail, signInWithGoogle } from './googleSignIn.js';
 
 const appPath = '/the-pushup-challenge-2025/';
 const rulesEndpoint = 'http://127.0.0.1:8080/emulator/v1/projects/demo-pushup-2027:securityRules';
-const total = (page) => page.locator('.daily-summary strong');
+const total = (page) => page.getByTestId('primary-total').locator('strong');
 
 test('denied write survives reload and retries once without claiming an unconfirmed total', async ({
   page,

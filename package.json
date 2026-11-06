@@ -17,6 +17,8 @@
     "test:integration": "firebase emulators:exec --project demo-pushup-2027 --only auth,firestore \"node --test --test-concurrency=1 tests/emulator/*.test.js && playwright test\""
   },
   "dependencies": {
+    "@radix-ui/react-collapsible": "^1.2.1",
+    "@radix-ui/react-progress": "^1.2.1",
     "firebase": "^12.7.0",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
