@@ -265,6 +265,17 @@ export default function App() {
                 An empty year here does not mean your historical activity is lost.
               </p>
             )}
+            {challenge.summary.metadataWarnings.length > 0 && (
+              <aside className="notice" role="status" aria-label="Activity data review">
+                <strong>Some activity details need review.</strong>
+                <p>
+                  {challenge.summary.metadataWarnings.length} saved{' '}
+                  {challenge.summary.metadataWarnings.length === 1 ? 'set has' : 'sets have'}{' '}
+                  inconsistent phase or timezone details. Progress is calculated using saved dates
+                  and the configured challenge calendar. The original records remain unchanged.
+                </p>
+              </aside>
+            )}
             <div className="save-feedback" aria-live="polite" role="status">
               {saving
                 ? 'Saving… Waiting for confirmation.'

@@ -1,4 +1,11 @@
 import { useState } from 'react';
+import { classifyChallengeDate } from '../../utils/challengeModel.js';
+
+function reportingLabel(record) {
+  const phase = classifyChallengeDate(record.localDate).phase;
+  if (record.provenance && phase === 'OFF_SEASON') return 'Historical activity (unclassified)';
+  return phase === 'OFFICIAL' ? 'Challenge' : phase === 'TRAINING' ? 'Training' : 'Off-season';
+}
 
 export default function ActivityList({ records, canEdit, busy, edit, remove }) {
   const [editing, setEditing] = useState(null);
@@ -14,12 +21,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
             <strong>{record.amount} push-ups</strong>
             {record.provenance && <span>Imported history · read-only</span>}
             <span>
-              {record.localDate} ·{' '}
-              {record.phase === 'OFFICIAL'
-                ? 'Challenge'
-                : record.phase === 'TRAINING'
-                  ? 'Training'
-                  : 'Off-season'}
+              {record.localDate} · {reportingLabel(record)}
             </span>
           </div>
           {canEdit &&
@@ -88,8 +90,8 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
                   className="danger"
                   disabled={busy}
                   onClick={async () => {
-                    await remove(record.id);
-                    setRemoving(null);
+                    const result = await remove(record.id);
+                    if (result !== false) setRemoving(null);
                   }}
                 >
                   Confirm removal
