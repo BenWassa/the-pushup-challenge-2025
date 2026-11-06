@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { signInWithGoogle } from './googleSignIn.js';
 
 const appPath = '/the-pushup-challenge-2025/';
 const rulesEndpoint = 'http://127.0.0.1:8080/emulator/v1/projects/demo-pushup-2027:securityRules';
@@ -11,18 +12,8 @@ test('denied write survives reload and retries once without claiming an unconfir
   context,
 }) => {
   const email = `retry-${Date.now()}@example.test`;
-  const password = 'FictionalEmulatorPassword!';
-  const account = await request.post(
-    'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
-    {
-      data: { email, password, returnSecureToken: true },
-    }
-  );
-  expect(account.ok()).toBe(true);
   await page.goto(appPath);
-  await page.getByLabel('Email', { exact: true }).fill(email);
-  await page.getByLabel('Password', { exact: true }).fill(password);
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await signInWithGoogle(page, email);
   await expect(page.getByRole('button', { name: 'Add 20 push-ups', exact: true })).toBeEnabled();
   const originalRules = await readFile(new URL('../../firestore.rules', import.meta.url), 'utf8');
   const setRules = async (content) => {

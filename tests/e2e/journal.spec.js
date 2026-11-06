@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { signInWithGoogle } from './googleSignIn.js';
 
 const appPath = '/the-pushup-challenge-2025/';
 const currentYear = new Date().getFullYear();
@@ -80,21 +81,12 @@ test('mobile viewports do not overflow and show no serious automated accessibili
 test('isolated Firebase emulator confirms add, reload, history, independent-device conflict and undo', async ({
   page,
   browser,
-  request,
 }) => {
   const email = `pushup-test-${Date.now()}@example.test`;
-  const password = 'LocalEmulatorTest2027!';
-  const response = await request.post(
-    'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
-    { data: { email, password, returnSecureToken: true } }
-  );
-  expect(response.ok(), await response.text()).toBeTruthy();
 
   await page.goto(appPath);
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.getByRole('button', { name: 'Sign in with Google' })).toBeVisible();
+  await signInWithGoogle(page, email);
   await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toBeEnabled();
 
   await expect(page.getByRole('combobox', { name: 'Challenge year' })).toHaveValue(
@@ -117,9 +109,7 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   const independentSession = await browser.newContext();
   const second = await independentSession.newPage();
   await second.goto(appPath);
-  await second.getByLabel('Email').fill(email);
-  await second.getByLabel('Password').fill(password);
-  await second.getByRole('button', { name: 'Sign in' }).click();
+  await signInWithGoogle(second, email);
   await expect(second.locator('.daily-summary strong')).toHaveText('15');
   await page.getByRole('button', { name: 'Log' }).click();
   await page.getByRole('button', { name: /Edit set of 15 on/ }).click();
@@ -145,10 +135,8 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await page.getByRole('combobox', { name: 'Challenge year' }).selectOption(String(currentYear));
   await page.getByRole('button', { name: 'Account', exact: true }).click();
   await page.getByRole('button', { name: 'Sign out' }).click();
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.getByRole('button', { name: 'Sign in with Google' })).toBeVisible();
+  await signInWithGoogle(page, email);
   await page.getByRole('button', { name: 'Log', exact: true }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
 });

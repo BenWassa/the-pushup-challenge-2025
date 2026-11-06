@@ -4,7 +4,8 @@ import {
   getAuth,
   connectAuthEmulator,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
   signOut,
 } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
@@ -81,26 +82,13 @@ const getFirebase = (config) => {
 const getFriendlyAuthError = (error) => {
   const code = error?.code || '';
 
-  if (
-    code.includes('invalid-credential') ||
-    code.includes('user-not-found') ||
-    code.includes('wrong-password')
-  ) {
-    return 'Invalid email or password.';
-  }
-  if (code.includes('email-already-in-use')) {
-    return 'That email is already registered. Try signing in instead.';
-  }
-  if (code.includes('weak-password')) {
-    return 'Password must be at least 6 characters.';
-  }
-  if (code.includes('too-many-requests')) {
-    return 'Too many login attempts. Try again shortly.';
-  }
-
+  if (code.includes('popup-closed-by-user') || code.includes('cancelled-popup-request')) return '';
+  if (code.includes('popup-blocked'))
+    return 'Your browser blocked the Google sign-in window. Allow pop-ups and try again.';
   if (code.includes('network-request-failed'))
     return 'Cannot connect. Check your connection and try again.';
-  return 'Unable to sign in. Check your details and try again.';
+  if (code.includes('too-many-requests')) return 'Too many sign-in attempts. Try again shortly.';
+  return 'Unable to sign in with Google. Try again.';
 };
 
 export const useAuth = () => {
@@ -161,25 +149,24 @@ export const useAuth = () => {
     return () => unsubAuth();
   }, [auth, isDemoMode]);
 
-  const signInWithEmail = useCallback(
-    async (email, password) => {
-      if (!auth || isDemoMode) return false;
+  const signInWithGoogle = useCallback(async () => {
+    if (!auth || isDemoMode) return false;
 
-      setAuthActionLoading(true);
-      setAuthActionError('');
+    setAuthActionLoading(true);
+    setAuthActionError('');
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        return true;
-      } catch (signInError) {
-        setAuthActionError(getFriendlyAuthError(signInError));
-        return false;
-      } finally {
-        setAuthActionLoading(false);
-      }
-    },
-    [auth, isDemoMode]
-  );
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, provider);
+      return true;
+    } catch (signInError) {
+      setAuthActionError(getFriendlyAuthError(signInError));
+      return false;
+    } finally {
+      setAuthActionLoading(false);
+    }
+  }, [auth, isDemoMode]);
 
   const logoutAuth = useCallback(async () => {
     if (!auth || isDemoMode) return;
@@ -203,7 +190,7 @@ export const useAuth = () => {
     isDemoMode,
     authActionLoading,
     authActionError,
-    signInWithEmail,
+    signInWithGoogle,
     logoutAuth,
   };
 };

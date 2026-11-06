@@ -19,8 +19,6 @@ const displayDate = (date) =>
   });
 
 function SignIn({ auth }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   return (
     <section className="sign-in">
       <p className="eyebrow">Your annual push-up journal</p>
@@ -30,41 +28,14 @@ function SignIn({ auth }) {
         one set at a time.
       </h1>
       <p>Sign in to see your personal history and record your next set.</p>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          if (await auth.signInWithEmail(email.trim(), password)) setPassword('');
-        }}
-      >
-        <label>
-          Email
-          <input
-            type="email"
-            autoComplete="username"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </label>
-        <button className="primary" disabled={auth.authActionLoading}>
-          {auth.authActionLoading ? 'Signing in…' : 'Sign in'}
-        </button>
-        {auth.authActionError && (
-          <p role="alert" className="error">
-            {auth.authActionError}
-          </p>
-        )}
-      </form>
+      <button className="primary" disabled={auth.authActionLoading} onClick={auth.signInWithGoogle}>
+        {auth.authActionLoading ? 'Signing in…' : 'Sign in with Google'}
+      </button>
+      {auth.authActionError && (
+        <p role="alert" className="error">
+          {auth.authActionError}
+        </p>
+      )}
       <p className="quiet">
         Existing accounts only. This independent tracker does not submit activity to the organizer.
       </p>

@@ -9,7 +9,9 @@ test('built PWA precaches its first-install assets and opens offline after resta
   try {
     const page = await context.newPage();
     await page.goto(url);
-    await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Sign in with Google', exact: true })
+    ).toBeVisible();
     await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
     const manifest = await context.newCDPSession(page);
     const details = await manifest.send('Page.getAppManifest');
@@ -27,7 +29,9 @@ test('built PWA precaches its first-install assets and opens offline after resta
     await context.setOffline(true);
     const offline = await context.newPage();
     await offline.goto(`${url}?from=installed`);
-    await expect(offline.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+    await expect(
+      offline.getByRole('button', { name: 'Sign in with Google', exact: true })
+    ).toBeVisible();
     await expect(offline.getByRole('heading', { level: 1 })).toBeVisible();
   } finally {
     await context.close();
