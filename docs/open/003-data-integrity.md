@@ -1,7 +1,7 @@
 # #3 — Multi-year data integrity and identity safety
 
 **Issue:** https://github.com/BenWassa/the-pushup-challenge-2025/issues/3  
-**Status:** Planned — design/data audit before any implementation  
+**Status:** v2 implementation and emulator tests complete; production permissions, legacy mapping/import and recovery acceptance outstanding  
 **Depends on:** #2 foundation; coordinate schema with #4
 
 ## Research tasks
