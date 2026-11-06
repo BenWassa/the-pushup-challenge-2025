@@ -53,3 +53,11 @@ Confirmed totals come from acknowledged records only. Pending amount remains sep
 ### Validation and next acceptance
 
 Rendered all three SVGs to 390×844 PNG with rsvg-convert and visually inspected for clipping/overlap. Lint, existing unit tests and production build passed. Native button semantics fix Enter/Space behavior without custom keyboard handling. Browser pinch zoom and actual screen-reader behavior still require real-device verification under #6. No claim is made that the full app passes 320/390/430px or 200% text acceptance. Major dashboard/history changes wait for preview review and safe data/season integration. Existing deployment output in docs/ is preserved.
+
+## Functional UI integration batch
+
+The actual application now uses the annual read model and UID-scoped activity hook instead of the legacy lifetime-counter/profile and leaderboard hooks. The new shell implements quick-add, confirmed progress, latest-set undo, inline correction/removal confirmation, month/day history, read-only year selection, training-goal/timezone preferences, existing-account sign-in/out, and guarded service-worker updates. Imported records are read-only. No public registration or username-based profile selection is present.
+
+Save status comes from the persistence hook; failed operations retain their stable retry operation and confirmed totals remain separate. Cloud writes stay gated pending release approval. The demo uses the isolated in-memory v2 repository and clearly states reset behavior. Client feature flags are rollout controls, never authorization enforcement.
+
+Validation before PR: lint, 24 baseline tests and build passed with the pending data/annual hook source dependencies. Playwright browser smoke exercised demo add +20, correction to15, latest-set undo, calendar, preferences and future2027 read-only view. Visually inspected actual390px dashboard and history. All24 overflow checks passed across Log/History/Account ×320/390/430/1280px ×100%/200% root text size; a discovered enlarged-text nav overflow was fixed with wrapping. Root integration suite provides repeatable journey verification. Physical phone/PWA and production ownership/migration approval remain external release gates, not claimed complete by this UI batch.
