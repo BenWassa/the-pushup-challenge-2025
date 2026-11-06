@@ -5,7 +5,10 @@ import { useChallenge } from './hooks/useChallenge';
 import { createChallengeModel } from './utils/challengeModel';
 import { getDemoFixture } from './data/demoFixture';
 import Home from './components/home/Home';
+import BrandMark from './components/home/BrandMark';
+import HomeSkeleton from './components/home/HomeSkeleton';
 import Settings from './components/app/Settings';
+import History from './components/home/History';
 
 function Tally() {
   // Decorative tally marks: counted sets in accent, the next ones still to come in grey.
@@ -116,6 +119,7 @@ export default function App() {
     user: auth.accessStatus === 'approved' ? auth.user : null,
     isDemoMode: auth.isDemoMode,
     year: selectedYear,
+    rollingToday: calendar.today,
     timeZone: calendar.timeZone,
     now: fixture?.now,
   });
@@ -132,7 +136,6 @@ export default function App() {
   const [view, setView] = useState('home');
   const [online, setOnline] = useState(() => navigator.onLine);
   const [update, setUpdate] = useState(false);
-  const [savedToast, setSavedToast] = useState(false);
   const [updateError, setUpdateError] = useState('');
   useEffect(() => {
     const yes = () => setOnline(true);
@@ -154,25 +157,12 @@ export default function App() {
     setView('home');
   };
   const saving = data.saveState === 'saving';
-  // Confirmation is acknowledged briefly; pending and failed states stay visible until resolved.
-  useEffect(() => {
-    if (data.saveState !== 'saved') return undefined;
-    const show = setTimeout(() => setSavedToast(true), 0);
-    const hide = setTimeout(() => setSavedToast(false), 3200);
-    return () => {
-      clearTimeout(show);
-      clearTimeout(hide);
-      setSavedToast(false);
-    };
-  }, [data.saveState, data.records]);
-  const saveStatus = saving
-    ? 'Saving… awaiting confirmation.'
-    : data.saveState === 'saved' && savedToast
-      ? auth.isDemoMode
-        ? 'Saved · demo resets on reload'
-        : 'Saved'
-      : '';
-  const busy = saving || Boolean(data.pendingOperation) || (!online && !auth.isDemoMode);
+  // Saving happens in the background: taps show instantly and nothing announces success.
+  // Only unresolved failures (the error banner) and offline state reach the surface.
+  const unresolved = Boolean(data.pendingOperation) && data.saveState === 'error';
+  // Online (or demo) first load of the year's sets: show the Home silhouette, not zeros that jump.
+  const showDataSkeleton = data.loading && !data.readError && (online || auth.isDemoMode);
+  const busy = unresolved || (!online && !auth.isDemoMode);
   const records = [...challenge.yearRecords].sort(
     (a, b) => (b.createdAt || 0) - (a.createdAt || 0) || b.id.localeCompare(a.id)
   );
@@ -202,14 +192,17 @@ export default function App() {
       timeZone: challenge.timeZone,
     });
   return (
-    <div className={`app-shell ${auth.user ? 'signed-in' : ''}`}>
+    <div
+      className={`app-shell ${auth.user || auth.loading ? 'signed-in' : ''}`}
+      data-save-state={data.saveState}
+    >
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      {!auth.user && (
+      {!auth.user && !auth.loading && (
         <header className="app-header">
-          <a className="wordmark" href={import.meta.env.BASE_URL}>
-            PushUp
+          <a className="wordmark" href={import.meta.env.BASE_URL} aria-label="PushUp">
+            <BrandMark />
           </a>
         </header>
       )}
@@ -236,10 +229,7 @@ export default function App() {
             <p className="quiet">Contact the app owner to complete release configuration.</p>
           </section>
         ) : auth.loading ? (
-          <section aria-busy="true">
-            <h1>Opening your journal…</h1>
-            <p role="status">Checking your sign-in.</p>
-          </section>
+          <HomeSkeleton />
         ) : !auth.user ? (
           <SignIn auth={auth} />
         ) : auth.accessStatus === 'pending' ? (
@@ -254,12 +244,8 @@ export default function App() {
             {data.blockedReason && challenge.canLog && (
               <p className="notice">{data.blockedReason}</p>
             )}
-            {data.loading && (
-              <p role="status">
-                {!online && !auth.isDemoMode
-                  ? 'Reconnect to load confirmed sets.'
-                  : 'Loading confirmed sets…'}
-              </p>
+            {data.loading && !online && !auth.isDemoMode && (
+              <p role="status">Reconnect to load confirmed sets.</p>
             )}
             {challenge.summary.metadataWarnings.length > 0 && (
               <aside className="notice" role="status" aria-label="Activity data review">
@@ -293,17 +279,19 @@ export default function App() {
                 </div>
               </div>
             )}
-            {view === 'home' && (
+            {view === 'home' && showDataSkeleton && (
+              <HomeSkeleton label="Loading confirmed sets…" />
+            )}
+            {view === 'home' && !showDataSkeleton && (
               <Home
                 challenge={challenge}
                 data={data}
                 auth={auth}
                 busy={busy}
-                saveStatus={saveStatus}
-                records={records}
                 latest={latest}
                 onAdd={add}
                 onSettings={() => setView('settings')}
+                onHistory={() => setView('history')}
                 onBackToCurrent={() => setSelectedYear(currentYear)}
               />
             )}
@@ -321,6 +309,14 @@ export default function App() {
                 locked={saving || Boolean(data.pendingOperation)}
                 onBack={() => setView('home')}
                 onOpenYear={openYear}
+              />
+            )}
+            {view === 'history' && (
+              <History
+                challenge={challenge}
+                data={data}
+                busy={busy}
+                onBack={() => setView('home')}
               />
             )}
           </>

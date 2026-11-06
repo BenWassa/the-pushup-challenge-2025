@@ -91,8 +91,17 @@ const matchCached = async (cache, request) => {
   }
 };
 
+// A host may answer a missing built file with its HTML app fallback (status 200). Such a response must
+// never be stored or served as a script/stylesheet: it would leave the app unstyled until the cache version changes.
+const isBuiltAsset = (url) =>
+  new URL(url).href.startsWith(new URL('assets/', SCOPE_URL).href) &&
+  /\.(js|css)$/.test(new URL(url).pathname);
+const isHtmlResponse = (response) =>
+  /text\/html/i.test((response.headers && response.headers.get('content-type')) || '');
+const isWrongKind = (request, response) => isBuiltAsset(request.url) && isHtmlResponse(response);
+
 const storeResponse = async (cache, request, response) => {
-  if (!cache || !response.ok) return;
+  if (!cache || !response.ok || isWrongKind(request, response)) return;
   try {
     await cache.put(request, response.clone());
   } catch {
@@ -119,7 +128,7 @@ const networkFirst = async (request) => {
 const cacheFirst = async (request) => {
   const cache = await openRuntimeCache();
   const cached = await matchCached(cache, request);
-  if (cached) return cached;
+  if (cached && !isWrongKind(request, cached)) return cached;
   const response = await fetch(request);
   await storeResponse(cache, request, response);
   return response;

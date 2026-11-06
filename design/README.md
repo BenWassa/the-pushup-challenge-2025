@@ -17,3 +17,6 @@ publication, depending on the operating system.
 
 To roll back, restore the archived assets to their original locations and change
 the service-worker cache suffix and browser-icon query strings to a new revision.
+
+Header wordmark: `src/assets/brand/pushup-wordmark.webp` is the white PUSHUP lettering cut from
+`icon-source.png` (transparent background, 320 px wide). The year stays live text in `BrandMark.jsx`.

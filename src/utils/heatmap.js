@@ -59,3 +59,24 @@ export function moveDate(date, deltaDays) {
   parsed.setUTCDate(parsed.getUTCDate() + deltaDays);
   return parsed.toISOString().slice(0, 10);
 }
+
+/** Thirty calendar dates, oldest first, including the supplied local today. */
+export function buildRollingGrid(endDate) {
+  return {
+    leadingBlanks: 0,
+    days: Array.from({ length: 30 }, (_, index) => ({
+      date: moveDate(endDate, index - 29),
+      day: index + 1,
+    })),
+  };
+}
+
+export function formatRollingTitle(endDate, locale = undefined) {
+  const formatter = new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+  return formatter.formatRange(parseDate(moveDate(endDate, -29)), parseDate(endDate));
+}

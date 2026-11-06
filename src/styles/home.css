@@ -6,7 +6,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--sp-5);
-  padding-bottom: var(--sp-4);
+  padding-bottom: 0;
 }
 
 /* A. Masthead */
@@ -15,9 +15,10 @@
 }
 .home-header-top {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap; /* at 200% text the patch drops under the wordmark rather than overflowing */
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--sp-3);
+  gap: var(--sp-2) var(--sp-3);
 }
 .brand-heading {
   min-width: 0;
@@ -26,20 +27,34 @@
 }
 .brand {
   display: inline-flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.4em;
+  flex-direction: column; /* year sits centred under the wordmark so the left side is not wider than the settings button */
+  align-items: center;
+  gap: 0.3rem;
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 900;
   font-style: italic;
   letter-spacing: -0.02em;
-  text-transform: uppercase;
   line-height: 1;
+}
+.brand-word {
+  display: block;
+  width: auto;
+  height: 52px; /* image, not text: stays fixed when text is enlarged to 200% */
+  max-width: 100%;
+  user-select: none;
 }
 .brand-year {
   position: relative;
+  margin: -12px 0 0.5rem; /* tuck up under the lettering (px: the wordmark is a fixed-size image) */
   color: var(--c-red-text);
+  font-size: min(
+    1.5rem,
+    24px
+  ); /* sized to the brush lettering above; capped like the fixed-size wordmark image */
+  /* Match the upward slant of the brush lettering */
+  transform: rotate(-10deg);
+  transform-origin: center;
 }
 .brand-stroke {
   position: absolute;
@@ -49,24 +64,53 @@
   height: 0.24em;
   fill: var(--c-red);
 }
-.home-header-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sp-2) var(--sp-3);
-  margin: var(--sp-1) 0 0;
-  color: var(--c-text-muted);
-  font-size: var(--fs-sm);
+/* Equipment label: the current phase as a sportswear patch. One size for every phase. */
+.home-header .icon-button {
+  margin-right: -10px; /* icon sits on the gutter edge, which frees room for the patch at 320px */
 }
-.phase-chip {
-  padding: 2px var(--sp-3);
-  border-radius: var(--r-pill);
-  background: var(--c-red-soft);
-  color: var(--c-red-text);
-  font-size: var(--fs-xs);
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.phase-patch {
+  --patch-bg: var(--c-red-fill);
+  --patch-ink: oklch(0.98 0.007 35);
+  flex: 0 1 7.375rem; /* rem: the patch grows with enlarged text, so its labels never overflow */
+  min-width: 6.5625rem;
+  max-width: 100%;
+  margin: var(--sp-2) 0 0 auto;
+  padding: 0.5625rem 0.6875rem 0.4375rem;
+  background: var(--patch-bg);
+  color: var(--patch-ink);
+  transform: rotate(3deg);
+}
+.phase-patch.is-off-season {
+  --patch-bg: oklch(0.38 0.055 220); /* deep petrol */
+}
+.phase-patch.is-training {
+  --patch-bg: oklch(0.8 0.14 80); /* warm amber, dark text */
+  --patch-ink: oklch(0.2 0.025 65);
+}
+.phase-patch.is-archive {
+  --patch-bg: var(--c-surface-press);
+  --patch-ink: var(--c-text-muted);
+}
+.patch-kicker,
+.patch-foot {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.patch-foot {
+  padding-top: 5px;
+  border-top: 1px solid color-mix(in oklab, var(--patch-ink) 45%, transparent);
+}
+.patch-name {
+  display: flex;
+  flex-direction: column;
+  margin: 7px 0 8px;
+  font-size: 1.375rem; /* 22px, same for every phase */
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
 }
 .archive-banner {
   display: flex;
@@ -99,54 +143,55 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0 var(--sp-3);
-  margin: var(--sp-1) 0 0;
-  line-height: 0.95;
+  gap: 0 var(--sp-2);
+  margin: 0;
+  line-height: 1;
 }
 .summary-hero strong {
   font-family: var(--font-display);
-  font-size: var(--fs-hero);
-  font-weight: 900;
+  font-size: var(--fs-xl);
+  font-weight: 850;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 .summary-hero span {
   color: var(--c-text-muted);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-md);
   font-weight: 650;
+}
+.summary-today.is-lead .summary-hero strong {
+  font-size: var(--fs-hero);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+.summary-today-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
 }
 .summary-note {
   margin: var(--sp-2) 0 0;
   color: var(--c-text-faint);
   font-size: var(--fs-sm);
 }
-.summary-official {
-  padding-top: var(--sp-4);
-  border-top: 1px solid var(--c-line);
-}
-.summary-official-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--sp-3);
-}
 .summary-total {
-  margin: var(--sp-1) 0 0;
+  margin: 0;
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  line-height: 0.95;
 }
 .summary-total strong {
   font-family: var(--font-display);
-  font-size: var(--fs-total);
+  font-size: var(--fs-hero);
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
 }
 .summary-total span {
   display: inline-block;
   white-space: nowrap;
   color: var(--c-text-muted);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
   font-weight: 650;
 }
 .streak {
@@ -170,19 +215,137 @@
   color: var(--c-text-muted);
   font-weight: 600;
 }
-.progress {
-  height: 10px;
-  margin-top: var(--sp-3);
+/* Progress in hundreds: one bar for the current hundred, a stack of finished hundreds below. */
+.century-barwrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--tap); /* reserved, so the quick-log buttons never move when the bar grows */
+  margin-top: 0;
+}
+.century-bar {
+  position: relative;
+  flex: 1;
+  height: 14px;
   overflow: hidden;
   border-radius: var(--r-pill);
   background: var(--c-surface-raised);
+  transition:
+    height var(--dur) var(--ease),
+    border-radius var(--dur) var(--ease);
 }
-.progress-fill {
+.century-bar.is-full {
+  height: var(--tap);
+  border-radius: var(--r-md);
+  box-shadow:
+    0 0 0 2px var(--c-red-soft),
+    0 0 0 1px var(--c-red-text) inset;
+}
+.century-fill {
   display: block;
   height: 100%;
   border-radius: inherit;
   background: var(--c-red);
   transition: width var(--dur) var(--ease);
+}
+/* Compact: the full bar itself is the button */
+.century .century-compact {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  opacity: 1;
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+.century .century-compact:disabled {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.century .century-compact:hover:not(:disabled) {
+  background: transparent;
+}
+.century .century-compact:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.century-compact span {
+  display: inline-block;
+  letter-spacing: 0.04em;
+}
+/* The word compacts: letters start spread and tighten as the button appears. */
+@keyframes century-tighten {
+  from {
+    letter-spacing: 0.45em;
+    opacity: 0;
+  }
+  to {
+    letter-spacing: 0.04em;
+    opacity: 1;
+  }
+}
+.century-compact.is-ready span {
+  animation: century-tighten 420ms var(--ease) both;
+}
+.century .century-compact:active:not(:disabled) span {
+  animation: none;
+  letter-spacing: -0.02em;
+  transform: scale(0.94);
+}
+.century-blocks {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  margin: var(--sp-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+/* Bricks, not squares: a hundred must not read as a day in the 30-day grid below */
+.century-blocks li {
+  aspect-ratio: 1.8;
+  border: 1px solid var(--c-line-strong);
+  border-radius: 4px;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.century-blocks li.is-on {
+  border-color: transparent;
+  background: var(--c-red);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.25) inset;
+}
+.century-blocks li.is-next {
+  border: 1px dashed var(--c-red-text);
+}
+.century-blocks li.is-landing {
+  opacity: 0;
+}
+.century-blocks li.century-more {
+  display: grid;
+  place-items: center;
+  aspect-ratio: auto;
+  border: 0;
+  color: var(--c-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+.century-flyer {
+  position: absolute;
+  z-index: 2;
+  background: var(--c-red);
+  pointer-events: none;
+}
+.century {
+  position: relative;
 }
 
 /* C. Quick logging: 2×2, equal size */
@@ -195,23 +358,28 @@
   min-height: clamp(5rem, 22vw, 6.5rem);
   border: 1px solid var(--c-line-strong);
   border-radius: var(--r-lg);
-  background: var(--c-surface-raised);
-  box-shadow:
-    var(--shadow-raise),
-    inset 0 -3px 0 var(--c-red);
+  /* Brush artwork: the red sweep sits bottom-right, so anchor there at any aspect ratio */
+  background: url('../assets/brand/quick-button.webp') right bottom / cover no-repeat
+    var(--c-surface-raised);
+  /* Keep the artwork inside the border so the red never tints the outline */
+  background-clip: padding-box, border-box;
+  background-origin: padding-box;
+  box-shadow: var(--shadow-raise);
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 9vw, 2.5rem);
   font-weight: 900;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
 }
-.quick-button:hover:not(:disabled) {
-  background: var(--c-surface-press);
+@media (hover: hover) {
+  .quick-button:hover:not(:disabled) {
+    filter: brightness(1.25);
+  }
 }
 .quick-button:active:not(:disabled) {
   transform: scale(0.98);
-  background: var(--c-red-fill);
-  border-color: transparent;
+  filter: brightness(1.5) saturate(1.2);
+  border-color: var(--c-red);
 }
 .quick-foot {
   display: flex;
@@ -219,15 +387,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-1) var(--sp-3);
-  margin-top: var(--sp-2);
+  margin-top: 0;
   min-height: var(--tap);
-}
-.save-status {
-  margin: 0;
-  min-height: 1.4em;
-  color: var(--c-ok);
-  font-size: var(--fs-sm);
-  font-weight: 600;
 }
 .undo {
   display: inline-flex;
@@ -238,44 +399,18 @@
   background: transparent;
   color: var(--c-text-muted);
   font-size: var(--fs-sm);
+  font-weight: 600;
 }
 .undo:hover:not(:disabled) {
   background: transparent;
   color: var(--c-text);
 }
 
-/* E. Recent sets */
-.recent .section-title,
-.home .section-title {
-  margin-bottom: var(--sp-2);
+@media (max-width: 360px) {
+  .phase-patch {
+    flex-basis: 6.5625rem;
+  }
 }
-.breakdown {
-  color: var(--c-text-faint);
-  font-size: var(--fs-xs);
-}
-.breakdown dl {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2) var(--sp-5);
-  margin: 0 0 var(--sp-2);
-}
-.breakdown dl div {
-  display: flex;
-  gap: var(--sp-2);
-}
-.breakdown dt {
-  color: var(--c-text-faint);
-}
-.breakdown dd {
-  margin: 0;
-  color: var(--c-text-muted);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.breakdown p {
-  margin: var(--sp-1) 0;
-}
-
 @media (min-width: 600px) {
   .app-shell {
     max-width: 38rem;

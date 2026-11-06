@@ -3,6 +3,8 @@ import test from 'node:test';
 import {
   HEAT_THRESHOLDS,
   buildMonthGrid,
+  buildRollingGrid,
+  formatRollingTitle,
   heatLevel,
   formatDateLong,
   formatMonthTitle,
@@ -75,4 +77,24 @@ test('UTC movement crosses months, leap days, years and DST boundaries', () => {
   assert.throws(() => moveDate('invalid', 1), RangeError);
   assert.throws(() => moveDate('2027-02-30', 1), RangeError);
   assert.throws(() => moveDate('2027-02-10', 1.5), RangeError);
+});
+
+test('rolling activity includes exactly 30 dates through today across calendar boundaries', () => {
+  for (const [end, first] of [
+    ['2027-02-10', '2027-01-12'],
+    ['2027-01-05', '2026-12-07'],
+    ['2028-03-10', '2028-02-10'],
+    ['2027-03-20', '2027-02-19'],
+    ['2027-11-10', '2027-10-12'],
+  ]) {
+    const grid = buildRollingGrid(end);
+    assert.equal(grid.days.length, 30);
+    assert.equal(grid.leadingBlanks, 0);
+    assert.equal(grid.days[0].date, first);
+    assert.equal(grid.days.at(-1).date, end);
+    assert.equal(new Set(grid.days.map((day) => day.date)).size, 30);
+    grid.days.forEach(({ date }, index) => assert.equal(date, moveDate(first, index)));
+  }
+  assert.match(formatRollingTitle('2027-02-10', 'en-CA'), /Jan.*12.*Feb.*10.*2027/);
+  assert.throws(() => buildRollingGrid('2027-02-30'), RangeError);
 });

@@ -11,7 +11,7 @@ One participant logging a set on a phone between exercises, often standing with 
 A fast personal annual Push-Up Challenge tracker that confirms saved reps, separates training, official and off-season activity, and preserves previous years. Approved direction is in docs/vision.md and docs/strategy.md.
 
 ## Brand Personality
-Direct, calm, encouraging. Keep orange associated with action and progress; avoid guilt or competitive pressure.
+Direct, calm, encouraging. Keep red (the brand colour) associated with action and progress; avoid guilt or competitive pressure.
 
 ## Anti-references
 No social-feed dashboard, crowded fitness gamification, unexplained achievement animations, empty leaderboard, or decoration that obscures save status.

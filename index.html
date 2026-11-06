@@ -22,10 +22,114 @@
     <meta name="apple-mobile-web-app-title" content="PushUp" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>PushUp — Annual Challenge Journal</title>
+    <style>
+      /* Critical boot styles: paint the branded shell before any JS or the main stylesheet.
+         Literal values mirror src/styles/tokens.css (--c-bg, --c-surface, --c-line); a test keeps them in sync. */
+      html,
+      body {
+        margin: 0;
+        background: #0a0a0b;
+      }
+      .boot {
+        box-sizing: border-box;
+        max-width: 34rem;
+        min-height: 100dvh;
+        margin: 0 auto;
+        padding: max(0.75rem, env(safe-area-inset-top)) max(20px, env(safe-area-inset-left)) 0;
+      }
+      .boot-skeleton {
+        padding-top: max(0.75rem, env(safe-area-inset-top));
+      }
+      .boot-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 52px;
+      }
+      .boot-word {
+        display: block;
+        width: auto;
+        height: 52px;
+      }
+      .boot-block {
+        border-radius: 12px;
+        background: #19191c;
+        animation: boot-pulse 1.4s ease-in-out infinite;
+      }
+      .boot-gear {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+      }
+      .boot-patch {
+        width: 7.375rem;
+        height: 6.25rem;
+        margin: 0.5rem 0 0 auto;
+        border-radius: 4px;
+      }
+      .boot-label {
+        width: 8rem;
+        height: 0.75rem;
+        margin-top: 2.25rem;
+      }
+      .boot-total {
+        width: 62%;
+        height: 4rem;
+        margin-top: 1rem;
+      }
+      .boot-bar {
+        height: 0.5rem;
+        margin-top: 2.25rem;
+        border-radius: 999px;
+      }
+      .boot-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+      .boot-key {
+        height: 4.5rem;
+        border-radius: 18px;
+      }
+      @keyframes boot-pulse {
+        50% {
+          opacity: 0.55;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-block {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
     <noscript>PushUp needs JavaScript to run. Please enable it and reload.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot" aria-hidden="true">
+        <div class="boot-head">
+          <img
+            class="boot-word"
+            src="/src/assets/brand/pushup-wordmark.webp"
+            width="320"
+            height="147"
+            alt=""
+          />
+          <span class="boot-block boot-patch"></span>
+          <span class="boot-block boot-gear"></span>
+        </div>
+        <div class="boot-block boot-label"></div>
+        <div class="boot-block boot-total"></div>
+        <div class="boot-block boot-bar"></div>
+        <div class="boot-grid">
+          <span class="boot-block boot-key"></span>
+          <span class="boot-block boot-key"></span>
+          <span class="boot-block boot-key"></span>
+          <span class="boot-block boot-key"></span>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

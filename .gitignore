@@ -1,3 +1,26 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+dist-hosting
+
+# Local configuration and private recovery snapshots
+*.local
+backups.local/
+
+# Design explorations
+design/mockups/
+
+# Test output
+.test-dist/
+test-results/
+playwright-report/
+
+# Firebase local state
+.firebase/
+
 # Logs
 logs
 *.log
@@ -6,29 +29,17 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*-debug.log
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# Editors and IDEs
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Isolated test output and private recovery snapshots
-backups.local/
-test-results/
-playwright-report/
-.firebase/
-*-debug.log
-
-.test-dist/
-dist-hosting
+# Operating system files
+.DS_Store
