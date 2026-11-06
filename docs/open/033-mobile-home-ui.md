@@ -53,7 +53,8 @@ argument (defaults to the real clock) so the fixture's pinned date can pass the 
    drops Official (already the headline counter).
 7. **Heatmap hit areas:** each square sits in a full-column button (≈40 px pitch at 320 px, ≥ 24 px
    WCAG 2.2 minimum; below the 44 px used for primary controls). Squares stay small as specified.
-8. Hand-built heatmap instead of a calendar library: libraries (React Aria Calendar etc.) name each
+8. **Two zones** (owner decision, 2026-11-06): Today, progress and logging sit on the page background; the heatmap, day detail and totals share one raised sheet with a rounded top edge (History is unchanged). Quiet days use a lighter charcoal on the sheet so they stay visible.
+9. Hand-built heatmap instead of a calendar library: libraries (React Aria Calendar etc.) name each
    cell with the date only; we need the day's total and phase in the accessible name.
 
 ## Independent QA (subagent, read-only) and follow-ups

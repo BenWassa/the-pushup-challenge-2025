@@ -254,6 +254,31 @@
   color: var(--c-text);
 }
 
+/* F. Two zones: "Now" (today, progress, logging) sits on the page background; "Record"
+   (heatmap, day detail, totals) sits on one raised sheet that bleeds to the screen edges. */
+.home .as-root,
+.home .breakdown {
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+  background: var(--c-surface);
+}
+.home .as-root {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--c-line-strong);
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  box-shadow: 0 -14px 30px rgb(0 0 0 / 0.45);
+}
+.home .breakdown {
+  /* cancels the grid gap so the totals read as the foot of the same sheet */
+  margin-top: calc(var(--sp-5) * -1);
+  padding-block: var(--sp-3) var(--sp-5);
+}
+/* Quiet days must stay visible on the lighter sheet */
+.home .as-heat-0 {
+  background-color: var(--c-surface-press);
+}
+
 /* E. Year breakdown */
 .breakdown {
   color: var(--c-text-faint);
