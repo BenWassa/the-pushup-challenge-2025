@@ -9,8 +9,10 @@ function reportingLabel(record) {
 
 export default function ActivityList({ records, canEdit, busy, edit, remove }) {
   const [editing, setEditing] = useState(null);
+  const [editRevision, setEditRevision] = useState(null);
   const [amount, setAmount] = useState('');
   const [removing, setRemoving] = useState(null);
+  const [removeRevision, setRemoveRevision] = useState(null);
   if (!records.length)
     return <p className="quiet">No sets here yet. Your confirmed sets will appear here.</p>;
   return (
@@ -34,6 +36,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
                   disabled={busy}
                   onClick={() => {
                     setEditing(record.id);
+                    setEditRevision(record.revision);
                     setAmount(String(record.amount));
                   }}
                 >
@@ -43,7 +46,13 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
                     set of {record.amount} on {record.localDate}
                   </span>
                 </button>
-                <button disabled={busy} onClick={() => setRemoving(record.id)}>
+                <button
+                  disabled={busy}
+                  onClick={() => {
+                    setRemoving(record.id);
+                    setRemoveRevision(record.revision);
+                  }}
+                >
                   Remove
                   <span className="sr-only">
                     {' '}
@@ -57,7 +66,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
               className="inline-form"
               onSubmit={async (e) => {
                 e.preventDefault();
-                const result = await edit(record.id, Number(amount));
+                const result = await edit(record.id, Number(amount), editRevision);
                 if (result !== false) setEditing(null);
               }}
             >
@@ -90,7 +99,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
                   className="danger"
                   disabled={busy}
                   onClick={async () => {
-                    const result = await remove(record.id);
+                    const result = await remove(record.id, removeRevision);
                     if (result !== false) setRemoving(null);
                   }}
                 >

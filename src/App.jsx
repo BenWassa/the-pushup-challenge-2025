@@ -380,7 +380,7 @@ export default function App() {
                   <button
                     className="undo"
                     disabled={!canEdit}
-                    onClick={() => data.remove(latest.id)}
+                    onClick={() => data.remove(latest.id, latest.revision)}
                   >
                     Undo latest set ({latest.amount} push-ups)
                   </button>

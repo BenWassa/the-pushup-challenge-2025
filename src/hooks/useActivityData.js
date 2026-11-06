@@ -3,6 +3,7 @@ import {
   createActivityRepository,
   createAddOperation,
   createChangeOperation,
+  recordAtRevision,
 } from '../data/activityRepository.js';
 import { journalKey, readPending, writePending, clearPending } from '../data/activityJournal.js';
 import { CHALLENGES, toLocalDate } from '../utils/challenges.js';
@@ -189,23 +190,20 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
     [prepare, ownerUid, year, timeZone]
   );
   const edit = useCallback(
-    (id, amount) =>
+    (id, amount, viewedRevision) =>
       prepare(() =>
         createChangeOperation(
           'edit',
-          recordsRef.current.find((record) => record.id === id),
+          recordAtRevision(recordsRef.current, id, viewedRevision),
           amount
         )
       ),
     [prepare]
   );
   const remove = useCallback(
-    (id) =>
+    (id, viewedRevision) =>
       prepare(() =>
-        createChangeOperation(
-          'remove',
-          recordsRef.current.find((record) => record.id === id)
-        )
+        createChangeOperation('remove', recordAtRevision(recordsRef.current, id, viewedRevision))
       ),
     [prepare]
   );
