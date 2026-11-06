@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Flame } from 'lucide-react';
 import * as Progress from '@radix-ui/react-progress';
 import { CENTURY, centuryState, slotPlan } from '../../utils/century.js';
 
@@ -35,13 +34,12 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
  */
 export default function CenturyProgress({
   subject,
-  streak = 0,
   storageKey,
   canCompact,
   persist,
   loading = false,
 }) {
-  const { label, total, target, suffix } = subject;
+  const { label, total, target } = subject;
   const rootRef = useRef(null);
   const fillRef = useRef(null);
   const slotRefs = useRef([]);
@@ -103,7 +101,6 @@ export default function CenturyProgress({
   };
 
   const full = state.barValue >= CENTURY;
-  const totalText = target ? ` / ${target.toLocaleString()}` : suffix;
   const countText = plan.goalBlocks
     ? `${state.compacted} of ${plan.goalBlocks} blocks`
     : plural(state.compacted, 'block');
@@ -113,22 +110,11 @@ export default function CenturyProgress({
 
   return (
     <div className="summary-official century" ref={rootRef}>
-      <div className="summary-official-row">
-        <div>
-          <p className="summary-label">{label}</p>
-          <p className="summary-total" data-testid="progress-total">
-            <strong>{total.toLocaleString()}</strong>
-            <span className={target ? undefined : 'summary-suffix'}>{totalText}</span>
-          </p>
-        </div>
-        {streak > 0 && (
-          <p className="streak">
-            <Flame size={16} strokeWidth={2.4} aria-hidden="true" focusable="false" />
-            <span>{streak}</span>
-            <span className="streak-unit">day streak</span>
-          </p>
-        )}
-      </div>
+      <span className="sr-only">{`${label}, push-ups this ${target ? 'challenge' : 'year'}: `}</span>
+      <p className="summary-total" data-testid="progress-total">
+        <strong>{total.toLocaleString()}</strong>
+        {target && <span>{` / ${target.toLocaleString()}`}</span>}
+      </p>
       <div className="century-barwrap">
         <Progress.Root
           className={full ? 'century-bar is-full' : 'century-bar'}
@@ -159,26 +145,9 @@ export default function CenturyProgress({
           </span>
         </button>
       </div>
-      <div className="century-row">
-        <p className="century-caption">
-          {ready ? (
-            <>
-              <b>
-                100<span aria-hidden="true"> ✓</span>
-                <span className="sr-only"> ready</span>
-              </b>
-              {state.overflow > 0 && ` · +${state.overflow} toward the next`}
-            </>
-          ) : (
-            <>
-              <b>{state.barValue}</b> / 100 · {CENTURY - state.barValue} to the next block
-            </>
-          )}
-        </p>
-        <p className="century-count" aria-live="polite">
-          {countText}
-        </p>
-      </div>
+      <p className="sr-only" aria-live="polite" data-testid="century-status">
+        {countText}
+      </p>
       <div
         className="century-stack"
         role="img"

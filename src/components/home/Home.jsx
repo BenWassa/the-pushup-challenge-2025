@@ -8,14 +8,6 @@ import { progressSubject } from '../../utils/century.js';
 
 const phaseLabel = (phase) =>
   ({ TRAINING: 'Training', OFFICIAL: 'Official', OFF_SEASON: 'Off-season' })[phase];
-const displayDate = (date) =>
-  new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
-
 function dayNote(challenge) {
   const { day } = challenge;
   if (day.isRestDay) return 'Rest day · activity optional';
@@ -42,11 +34,11 @@ export default function Home({
   const canEdit = challenge.canLog && data.canWrite && !busy;
   const primary = canLog
     ? {
-        label: `Today · ${displayDate(challenge.today)}`,
         value: summary.todayTotal,
+        unit: 'today',
         note: dayNote(challenge),
       }
-    : { label: `${selectedYear} · confirmed`, value: summary.total };
+    : { label: `${selectedYear} · confirmed`, value: summary.total, unit: 'push-ups' };
   // Progress in hundreds. Today's phase decides which total it is about; an archived year only
   // shows the official total (read-only), and a year with no official challenge shows nothing.
   const target = challenge.challenge?.totalTarget ?? null;

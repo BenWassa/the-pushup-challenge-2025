@@ -33,7 +33,7 @@ export default function HomeHeader({ year, phaseLabel, onSettings }) {
             ))}
           </strong>
           <span className="patch-foot" aria-hidden="true">
-            {year} EDITION <span>↗</span>
+            {year} EDITION
           </span>
         </div>
         <button type="button" className="icon-button" onClick={onSettings} aria-label="Settings">

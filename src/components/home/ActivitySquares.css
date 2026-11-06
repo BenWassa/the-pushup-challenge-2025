@@ -277,20 +277,6 @@
 .home .as-heat-0 {
   background: oklch(0.28 0.009 25);
 }
-.home .as-root.as-root {
-  margin-inline: 0;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-.home .as-root .as-heat-0 {
-  background: oklch(0.28 0.009 25);
-}
-.home .breakdown.breakdown {
-  margin-top: calc(var(--sp-5) * -1);
-}
 
 .home .as-root .as-grid {
   grid-template-columns: repeat(10, minmax(0, 1fr));

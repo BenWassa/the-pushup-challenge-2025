@@ -46,7 +46,7 @@
   --fs-lg: 1.25rem;
   --fs-xl: 1.75rem;
   --fs-hero: clamp(3.5rem, 20vw, 5.5rem);
-  --fs-total: clamp(2.5rem, 13vw, 3.5rem);
+  --fs-total: clamp(2.25rem, 11vw, 2.75rem);
 
   /* Spacing (4px base) */
   --sp-1: 0.25rem;

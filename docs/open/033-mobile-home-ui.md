@@ -351,3 +351,13 @@ slots (2,000); training and off-season keep stacking in rows of 10 (a "+N" chip 
 - **Visible changes to confirm:** (1) training and off-season now show progress; during training the
   headline was "Official 0 / 2,000" and is now the training total; (2) with the year breakdown gone from Home (owner cleanup), the official total is only shown while the official phase is running; after it ends Home shows the off-season total and the official result is not shown on Home (decision pending: where it should live); (3) the e2e test id `official-total` is now `progress-total`.
 - **Not built:** auto-compact setting and the alternative button positions (mockup only).
+
+## Polish pass (critique, owner follow-ups)
+
+Independent design review (26/40) and owner direction applied: the running total for the phase is now the lead number
+(the hero), with the bar and bricks directly under it; today's count is the small line beside logging (with the streak).
+Removed copy the owner said the user can work out: the "Today · date" line, the phase label over the total
+(the patch already names the phase), "this year / so far", and the bar captions ("45 / 100", "N to the next block",
+"N of 20 blocks"). Screen readers still get the label and a polite block-count status. Blocks are bricks (1.8:1) so they
+do not read as days in the 30-day grid. Gaps tightened (reserved bar height kept so +N buttons never move), footer link
+44px, hover styling only on hover-capable pointers, leftover raised-sheet and breakdown CSS removed.
