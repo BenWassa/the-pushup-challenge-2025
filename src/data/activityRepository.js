@@ -66,6 +66,24 @@ export function createAddOperation(input, ownerUid, year, id = operationId(), no
   return { type: 'add', id, operationId: id, record };
 }
 
+/** Never upgrade a stale UI confirmation to a newer record revision silently. */
+export function recordAtRevision(records, id, viewedRevision) {
+  const entry = records.find((record) => record.id === id);
+  if (
+    !entry ||
+    entry.deleted ||
+    !Number.isInteger(viewedRevision) ||
+    viewedRevision < 1 ||
+    entry.revision !== viewedRevision
+  ) {
+    throw activityError(
+      'conflict',
+      'This set changed on another device. Review the latest entry before correcting it.'
+    );
+  }
+  return entry;
+}
+
 export function createChangeOperation(type, record, amount, id = operationId(), now = Date.now()) {
   if (record?.id?.startsWith('legacy_'))
     throw activityError('invalid-archive', 'Imported history is read-only.');
