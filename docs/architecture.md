@@ -1,6 +1,6 @@
 # PushUp architecture — integrated source, November 5, 2026
 
-**Scope:** This documents the current `main` source after PRs #7–#22, not the legacy app still served at the live GitHub Pages URL. Production Firebase rules, records and Pages cutover remain separate approval gates.
+**Scope:** This documents the current `main` source through the reconciled candidate in PR #31, not the legacy app still served at the live GitHub Pages URL. Production Firebase rules, records and Pages cutover remain separate approval gates.
 
 ## Runtime
 
@@ -11,7 +11,7 @@
 - `src/data/activityRepository.js`: one Firestore document per activity with transactional conflict checks and tombstone removals; `src/data/activityJournal.js` retains operation IDs for retries.
 - `src/data/memoryRepository.js`: fictional, reload-reset demo entries that never use Firestore.
 - `src/components/app/{ActivityList,History,Account}.jsx` and `src/App.jsx`: mobile-first solo journal, quick-add, year selection, recent sets, calendar, editing, account preferences, explicit warning/failure UI.
-- `public/sw.js`, `public/manifest.webmanifest`: scoped PWA caches, offline navigation fallback and year-neutral install metadata.
+- `public/sw.js`, `public/manifest.webmanifest`: scoped PWA caches, explicit update activation, offline navigation fallback and year-neutral install metadata. Vite emits `precache-manifest.json` for the compiled JS/CSS; installation precaches those assets so a first installed client can reopen offline. Pages preflight validates that asset list.
 
 Old `src/hooks/useUserData.js`, `useLeaderboard.js`, `src/utils/season.js`, and several old components remain in the repository for historical context but are **not imported by the current `src/App.jsx`**. Do not mistake their legacy design for active runtime behavior.
 
@@ -44,3 +44,7 @@ Release evidence, stop-ship criteria and rollback sequence: [production cutover]
 ## Remaining external acceptance
 
 Owner-controlled verification of the actual deployed project/rules and UID mapping; recoverable restricted backup; approved coordinated rules/Pages cutover; real Android/iOS PWA, persistence and accessibility checks; served artifact version and historical record reconciliation. Until then: **integrated source and automated test candidate, not verified production release**.
+
+## Additional reconciled acceptance
+
+PRs #29–#31 retain the newer mainline's revision safeguards, serialized emulator testing, hosted-Chrome CI, dependency audit and manual publication gates. Added browser tests exercise the actual production build's offline restart/update path, calendar label/keyboard behavior and denied-write journal recovery after reload. Local totals: 55 native tests, five mandatory emulator tests, seven browser journeys. These do not substitute for owner-confirmed legacy ownership or physical-device production acceptance.

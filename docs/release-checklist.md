@@ -8,12 +8,12 @@ Issue [#6](https://github.com/BenWassa/the-pushup-challenge-2025/issues/6), Nove
 
 - Record the candidate commit, passing lint/tests/build run, previous deployed commit, artifact and version. Retain a downloadable rollback artifact outside expiring CI storage.
 - Verify `npm run build:pages` preserves `docs/`; the automated regression executes the real command in an expendable fixture.
-- Verify the candidate artifact uses the intended public Firebase client configuration and APP_ID. The current Actions workflow supplies no Firebase environment values, and repository-level Actions secret/variable listings were empty during this audit. Environment-level or organization configuration was not verified. A successful build alone does not demonstrate working cloud sign-in. Never put service-account keys, passwords or private keys in Vite variables.
+- Verify the candidate artifact uses the intended public Firebase client configuration and APP_ID. The Actions workflow passes reviewed Firebase repository variables when configured; repository-level secret/variable listings were empty during the earlier audit. Environment-level or organization configuration was not verified. A successful build alone does not demonstrate working cloud sign-in. Never put service-account keys, passwords or private keys in Vite variables.
 - Complete #3 ownership/rules verification and backup/restore rehearsal before approving cloud schema/write changes. Do not infer authorization from hidden UI controls or Firebase client configuration.
 - Preview the exact artifact with the correct repository base. Verify direct navigation, manifest scope/start URL, icons, and every referenced hashed asset returns the expected content type and HTTP 200.
 - In an isolated test account/emulator, verify login, log, explicit confirmed save, reload, undo, history and failure/retry. Confirm 2027 official totals exclude training, off-season and old years. Do not use a production record for destructive smoke tests.
 - On real iOS Safari and Android Chrome at 320/390/430px, verify pinch zoom, 200% text, keyboard focus, tap targets, safe areas, install/launch, offline navigation and update/reload. Desktop unit tests do not establish these results.
-- Increment the application version for a release that changes assets. The worker cache version comes from package version; multiple deployments using one version can reuse cached assets/metadata. Test old installed clients through the update path. Existing immediate `skipWaiting`/claim behavior still needs device review.
+- Increment the application version for a release that changes assets. The worker cache version comes from package version; multiple deployments using one version can reuse cached assets/metadata. Test old installed clients through the update path. Explicit waiting-worker activation and first-install offline reopening are browser-tested; installed clients still need physical-device review.
 
 ## Publication
 
@@ -33,8 +33,7 @@ With approval, record and change Pages Source to GitHub Actions, dispatch the re
 
 - PR #7 CI and local checks passed; PR #8 gates further publication. Existing legacy assets remain tracked.
 - This batch adds worker behavior tests for cache ownership, scope, offline query navigation, successful cache reuse, HTTP error handling and cache open/read/write failures preserving online responses. It does not simulate full browser lifecycle, installation, cache quota or Firebase persistence.
-- No production Firebase records, rules or settings were changed. Live rules, owner identity, actual historical record inventory, verified backup restoration, real-device logging and final 2027 UI integration remain outstanding.
-
+- No production Firebase records, rules or settings were changed. Live rules, owner identity, actual historical record inventory, verified backup restoration, real-device logging and production cutover remain outstanding.
 
 ## Recovery tooling and approval packet
 
@@ -89,6 +88,10 @@ Writes are rejected unless the endpoint is localhost HTTP and project ID begins 
 
 ### Limited production approval still required
 
-Before any release ask for one concrete approval packet containing: candidate commit/artifact and checks, complete database scope inventory and verified private backup/restore evidence, approved UID mapping and timezone decisions, discrepancy resolutions, tested candidate rules, and rollback artifact. The read-only inventory found permissive deployed rules (`read, write: if true`) and username-selected records without UID ownership. Candidate owner-scoped rules deny legacy access: applying them while the old deployed UI remains live would break that UI. Coordinate the new runtime, legacy read policy and rule cutover as one reviewed release window; neither rules deployment nor source/publication is authorized by an implementation merge.
+Before any release ask for one concrete approval packet containing: candidate commit/artifact and checks, complete database scope inventory and verified private backup/restore evidence, approved UID mapping and timezone decisions, discrepancy resolutions, tested candidate rules, and rollback artifact. The read-only inventory found deployed ownership controls that require remediation and username-selected records without UID ownership. Candidate owner-scoped rules deny legacy access: applying them while the old deployed UI remains live would break that UI. Coordinate the new runtime, legacy read policy and rule cutover as one reviewed release window; neither rules deployment nor source/publication is authorized by an implementation merge.
 
 A rules rollback to the current allow-all policy reopens the known exposure and must not be the automatic incident response. Prefer retaining deny-by-default access and repairing/redeploying the new runtime under an approved incident plan. Preserve both legacy and newly confirmed canonical entries through rollback. No production write/import command ships in this batch; a separately reviewed, explicitly approved operator procedure is required.
+
+### Private backup evidence already obtained
+
+A read-only logical snapshot of the audited database contains three documents and 99 historical logs dated 2026. Exact typed-field restoration and readback of all three documents succeeded in an isolated local demo emulator. The checksummed snapshot, deployed-rule snapshot and ownership worksheet remain in restricted, ignored `backups.local/` storage in the primary workspace; no personal identifiers or raw records are in source control. This establishes database-document restoration for that snapshot, not Firebase Auth/Storage recovery, account ownership, timezone approval or snapshot freshness at cutover. Owner confirmation of the mapping and a reviewed fresh release snapshot remain required.
