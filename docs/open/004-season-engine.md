@@ -71,3 +71,40 @@ rest day remains possible without treating that as a fabricated target.
   therefore remains open; current app still contains legacy 87/day behavior.
 - No Firebase data, rules, deployed assets or deployment settings changed.
 - Rollback: revert this additive PR; no data rollback is needed.
+
+## Application read model and hook integration batch
+
+`createChallengeModel` now provides a single selected-year read model for the
+runtime integration. `useChallenge` wraps it with year controls, a 30-second/focus
+clock refresh and optional personal training goal/timezone preferences. App can
+control `selectedYear` with `onYearChange`, allowing the year-scoped persistence
+subscription to be constructed before the challenge model without a hook cycle.
+`availableYears` merges known storage years into configured/current/record years.
+
+Initial selection is the current participant-local calendar year, allowing logging
+now even before 2027. A year without verified configuration is explicitly
+UNCONFIGURED and new activity is OFF_SEASON with no daily/annual organizer goal.
+Past and future selections have `canLog: false`; the UI and persistence adapter
+must enforce this together. Changing timezone affects today's date and future
+logging, never the saved local dates of existing records. At year rollover an
+already selected old year becomes read-only rather than receiving new logs.
+
+Summary fields: `total`, `official`, `training`, `offSeason`, `legacy`,
+`todayTotal`, `activeDays`, `byDate`, `rejected`, `conflictingIds`. Official credit
+requires both OFFICIAL phase and the configured official window. Identical IDs
+count once; contradictory IDs are excluded. `getMonthActivity(model, 1..12)`
+returns year-scoped records, total and day sums. Records must be owner-scoped by
+the persistence adapter; this display model is not an authorization boundary.
+
+`readLegacyExport` accepts an explicitly identified immutable export and retains
+original phase provenance. Unknown historical editions show physical activity
+under `legacy`, without claiming official credit or inventing historical
+organizer dates. Invalid/ambiguous rows remain in a quarantine report. This is
+read-only support, not a production export, import or identity-mapping approval.
+
+Local validation: lint, all 31 Node tests and production build pass. Seven new
+read-model tests cover current/future/archive access, midnight/year rollover,
+phase totals, rest-day activity, timezone preference stability, duplicate IDs,
+legacy provenance/quarantine, month filtering and leap-day archive selection.
+Hook effects and integrated browser journeys remain integration QA responsibilities.
+No Firebase data/rules or deployed assets/configuration were changed in this batch.

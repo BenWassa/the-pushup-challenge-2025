@@ -1,0 +1,54 @@
+rules_version = '2';
+// Candidate v2 rules for emulator verification only. Never deploy without owner approval.
+// participants/{authUID}/challenges/{year}/entries/{stableID}
+// Required canonical fields plus revision(int), deleted(bool), updatedAt(epoch ms),
+// lastOperationId(bounded string). UID, year, date, phase, timezone and createdAt immutable.
+// Deletes are tombstones, preserving provenance and making retries safe.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function boundedString(value, limit) { return value is string && value.size() > 0 && value.size() <= limit; }
+    // Accept the real local-calendar year across UTC+14 through UTC-12 boundaries.
+    function writableYear(year) {
+      return year.matches('^[1-9][0-9]{3}$') &&
+        request.time >= timestamp.date(int(year), 1, 1) - duration.value(14, 'h') &&
+        request.time < timestamp.date(int(year) + 1, 1, 1) + duration.value(12, 'h');
+    }
+    function validDate(value, year) {
+      return value is string && value.size() == 10 &&
+        value.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') && value[0:4] == year &&
+        int(value[5:7]) >= 1 && int(value[5:7]) <= 12 &&
+        int(value[8:10]) >= 1 &&
+        int(value[8:10]) <= (int(value[5:7]) == 2 ?
+          ((int(year) % 4 == 0 && (int(year) % 100 != 0 || int(year) % 400 == 0)) ? 29 : 28) :
+          (int(value[5:7]) in [4, 6, 9, 11] ? 30 : 31));
+    }
+    function validEntry(data, uid, year, entryId) {
+      return data.keys().hasAll(['schemaVersion', 'id', 'ownerUid', 'challengeYear', 'localDate', 'phase', 'timeZone', 'amount', 'createdAt', 'updatedAt', 'revision', 'deleted', 'lastOperationId']) &&
+        data.keys().hasOnly(['schemaVersion', 'id', 'ownerUid', 'challengeYear', 'localDate', 'phase', 'timeZone', 'amount', 'createdAt', 'updatedAt', 'revision', 'deleted', 'lastOperationId']) &&
+        data.schemaVersion == 2 && boundedString(data.id, 128) && data.id == entryId &&
+        boundedString(data.ownerUid, 128) && data.ownerUid == uid &&
+        year.matches('^[1-9][0-9]{3}$') && data.challengeYear is int && data.challengeYear == int(year) &&
+        validDate(data.localDate, year) && data.phase in ['TRAINING', 'OFFICIAL', 'OFF_SEASON'] &&
+        boundedString(data.timeZone, 100) && data.amount is int && data.amount >= 1 && data.amount <= 10000 &&
+        data.createdAt is int && data.createdAt >= 0 && data.createdAt <= request.time.toMillis() + 60000 &&
+        data.updatedAt is int && data.updatedAt >= data.createdAt && data.updatedAt <= request.time.toMillis() + 60000 &&
+        data.revision is int && data.revision >= 1 && data.revision <= 1000000 &&
+        data.deleted is bool && boundedString(data.lastOperationId, 128);
+    }
+    match /participants/{uid}/challenges/{year}/entries/{entryId} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && writableYear(year) && !entryId.matches('^legacy_.*') && validEntry(request.resource.data, uid, year, entryId) &&
+        request.resource.data.revision == 1 && request.resource.data.deleted == false &&
+        request.resource.data.lastOperationId == entryId;
+      allow update: if isOwner(uid) && writableYear(year) && !entryId.matches('^legacy_.*') && validEntry(request.resource.data, uid, year, entryId) &&
+        resource.data.ownerUid == uid && resource.data.deleted == false &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['amount', 'deleted', 'revision', 'updatedAt', 'lastOperationId']) &&
+        request.resource.data.revision == resource.data.revision + 1 &&
+        request.resource.data.lastOperationId != resource.data.lastOperationId &&
+        request.resource.data.updatedAt >= resource.data.updatedAt;
+      allow delete: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
