@@ -7,6 +7,8 @@ import {
   recordAtRevision,
 } from '../data/activityRepository.js';
 import { journalKey, readPending, writePending, clearPending } from '../data/activityJournal.js';
+import { createChallengeModel } from '../utils/challengeModel.js';
+import { moveDate } from '../utils/heatmap.js';
 import { CHALLENGES, toLocalDate } from '../utils/challenges.js';
 import { createMemoryRepository } from '../data/memoryRepository.js';
 
@@ -62,6 +64,7 @@ export function useActivityData({
   isDemoMode,
   year,
   timeZone = 'America/Toronto',
+  rollingToday,
   now, // fixed clock for fictional demo fixtures only; real sessions use the current time
 }) {
   const ownerUid = user?.uid;
@@ -74,6 +77,47 @@ export function useActivityData({
       ? createMemoryRepository(ownerUid, year)
       : createActivityRepository(db, ownerUid, year);
   }, [db, ownerUid, isDemoMode, year, enabled]);
+  // Only January windows need an additional owner-scoped, read-only subscription.
+  // Never run a second write journal or mix prior-year records into annual totals.
+  const previousYear = rollingToday && Number(moveDate(rollingToday, -29).slice(0, 4));
+  const previousRepository = useMemo(() => {
+    if (
+      !repository ||
+      previousYear === year ||
+      !previousYear ||
+      Number(rollingToday.slice(0, 4)) !== year
+    )
+      return null;
+    return isDemoMode
+      ? createMemoryRepository(ownerUid, previousYear)
+      : createActivityRepository(db, ownerUid, previousYear);
+  }, [repository, previousYear, year, rollingToday, isDemoMode, ownerUid, db]);
+  const [previous, setPrevious] = useState(null);
+  useEffect(() => {
+    if (!previousRepository) return undefined;
+    let active = true;
+    const unsubscribe = previousRepository.subscribe(
+      (records) => {
+        if (active) setPrevious({ scope: previousRepository, records, error: false });
+      },
+      () => {
+        if (active) setPrevious({ scope: previousRepository, records: [], error: true });
+      }
+    );
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [previousRepository]);
+  const previousByDate =
+    previousRepository && previous?.scope === previousRepository && !previous.error
+      ? createChallengeModel({
+          records: previous.records,
+          year: previousYear,
+          timeZone,
+          now: rollingToday,
+        }).summary.byDate
+      : {};
   const [subscriptionVersion, setSubscriptionVersion] = useState(0);
   const [state, setState] = useState({
     scope: null,
@@ -305,6 +349,14 @@ export function useActivityData({
   }, [isDemoMode, pendingKey]);
   return {
     ...state,
+    previousByDate,
+    previousYearStatus: !previousRepository
+      ? null
+      : previous?.scope !== previousRepository
+        ? 'loading'
+        : previous.error
+          ? 'error'
+          : 'ready',
     records: displayRecords,
     ...(state.scope === repository
       ? {}

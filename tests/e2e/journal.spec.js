@@ -169,11 +169,15 @@ test('activity squares are named with date and total and work from the keyboard'
   });
   await expect(empty).toHaveAttribute('aria-current', 'date');
   await expect(active).toBeVisible();
-  // Weekday alignment: Feb 1, 2027 is a Monday, so it is the second column of the first row.
-  const first = await active.boundingBox();
+  // Compact Home grid starts with day one, without calendar alignment blanks.
+  await expect(page.locator('.as-cell')).toHaveCount(30);
+  const first = await page.locator('.as-cell').first().boundingBox();
   const grid = await page.locator('.as-grid').boundingBox();
-  expect(first.x - grid.x).toBeGreaterThan(grid.width / 7 - 4);
-  expect(first.x - grid.x).toBeLessThan((grid.width / 7) * 2);
+  expect(Math.abs(first.x - grid.x)).toBeLessThan(1);
+  expect(Math.abs(first.width - first.height)).toBeLessThan(1);
+  await expect(page.locator('.as-detail')).toHaveCount(0);
+  await expect(page.locator('.breakdown')).toHaveCount(0);
+  await page.getByRole('button', { name: 'History', exact: true }).click();
   await active.click();
   await expect(page.getByRole('heading', { name: 'Monday, February 1, 2027' })).toBeVisible();
   await expect(active).toHaveAttribute('aria-pressed', 'true');

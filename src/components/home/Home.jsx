@@ -52,13 +52,6 @@ export default function Home({
     canLog && challenge.day.phase === 'OFFICIAL'
       ? computeStreak(summary.byDate, challenge.today)
       : 0;
-  // Zero categories are omitted: a missing category means none.
-  const others = [
-    ['Training', summary.training],
-    ['Off-season', summary.offSeason],
-    ['Imported', summary.legacy],
-    ['Active days', summary.activeDays],
-  ].filter(([, value]) => value > 0);
   return (
     <div className="home">
       <HomeHeader
@@ -97,30 +90,29 @@ export default function Home({
           Cloud logging awaits owner verification and release activation. History preserved.
         </p>
       )}
+      {canLog && data.previousYearStatus === 'error' && (
+        <p className="quiet" role="status">
+          December activity could not be loaded. Check History to review it.
+        </p>
+      )}
       <ActivitySquares
+        unavailableBefore={
+          canLog && data.previousYearStatus && data.previousYearStatus !== 'ready'
+            ? `${selectedYear}-01-01`
+            : undefined
+        }
+        rolling={canLog}
         onOpenHistory={onHistory}
         key={selectedYear}
         year={selectedYear}
         today={challenge.today}
-        byDate={summary.byDate}
+        byDate={canLog ? { ...data.previousByDate, ...summary.byDate } : summary.byDate}
         records={challenge.yearRecords}
         canEdit={challenge.canLog && data.canWrite}
         busy={busy}
         edit={data.edit}
         remove={data.remove}
       />
-      {others.length > 0 && (
-        <section className="breakdown" aria-label={`${selectedYear} breakdown`}>
-          <dl>
-            {others.map(([label, value]) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      )}
     </div>
   );
 }

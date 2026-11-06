@@ -156,3 +156,105 @@ once (totals, recent sets, undo) and the write is confirmed in the background, i
 no longer grey out while a save is in flight. Failures are unchanged and still visible: the error
 banner with Retry / Dismiss, and unconfirmed totals are dropped rather than claimed. The app shell
 carries `data-save-state` for tests only.
+
+## Header phase stack (owner follow-up)
+
+The current phase alone appears immediately to the right of the top-left PushUp logo,
+with upright letters stacked one character per line, a gap between words, all caps, no hyphen and red pill styling retained, following the owner's clarification. Competition maps to the existing official phase.
+The date stays below the masthead and archived years retain the read-only label.
+No season rules or data changed.
+
+## Heatmap styling exploration (owner follow-up)
+
+Four standalone, unapproved styling variants are available in
+`design/mockups/heatmap/`: Quiet squares, Calendar tiles, Compact rails and Activity dots.
+See that folder's README and comparison screenshot for rationale and verification.
+The exploration uses fictional data and changes no app behavior. Choose a direction
+before implementing production styling. Lint, 71 unit tests and build pass; browser
+checks cover shared selection, empty totals and 320/390/430px overflow.
+
+Owner refinement: heatmap mockups A–D now all use full-width square cells.
+Removed calendar labels, numbered dates, legends, phone chrome and explanatory
+copy around each variant. Containers hug the grid with one selected-day line.
+Variants differ in spacing, corners and fill/outline treatment only.
+
+## Approved heatmap A wired into Home
+
+Owner selected A. Home now uses full-width square cells with 5px gaps, 3px
+corners, a 10px inset and compact selected-day details. Month/weekday labels,
+calendar alignment blanks and the legend are omitted on Home; History retains
+month navigation and calendar alignment. Today uses a dot and selection a light
+inset border. Home/End keyboard movement follows the displayed row layout.
+Existing day records, editing, phase labels and save failures remain available.
+
+Verification: lint, 71 unit tests and build pass (existing asset-path and bundle
+warnings). Demo browser checks cover 320/390/430px square geometry and overflow,
+keyboard day selection and opening History. Updated the browser regression to
+expect consecutive Home squares. No data, rules or deployment changes. Rollback:
+revert ActivitySquares JSX/CSS and the corresponding browser expectation.
+
+Owner correction: restored the visible month/year heading on Home. The compact
+Home grid now uses ten columns (three rows for February), with matching ten-day
+vertical keyboard steps. History remains seven columns. Browser checks at
+320/390/430px verify the month heading, no overflow, grid height below 130px and
+ArrowDown movement from day 1 to day 11.
+
+Owner cleanup: removed selected-day details and the year breakdown from Home.
+History retains selected-day totals and editable sets. Browser verification confirms
+both Home sections are absent and History detail remains available. Updated the
+browser regression to review day details in History.
+
+Owner refinement: removed today's dot and restored a red outline, inset to retain
+compact square spacing. Other selected days retain the light selection border.
+
+## Rolling 30-day Home activity (owner follow-up)
+
+Home now shows exactly 30 calendar dates, inclusive of today, oldest first in
+three ten-cell rows. The heading names the actual date range. History retains
+calendar months; archived Home views remain year-scoped rather than showing the
+current year's rolling activity. Keyboard rows and bounds follow the displayed
+window, including month/year transitions. Today's red outline is retained.
+
+January windows subscribe read-only to the same owner's previous-year repository
+under the existing demo/cloud gates. Prior-year records are validated through the
+annual model and exposed only as heatmap counts; current annual totals, write
+journals and mutations remain scoped to the selected year. Unloaded prior-year
+cells are named “Activity not loaded”, not zero; a read failure has visible copy.
+No rules, production mutations, migrations or deployment changes.
+
+Verification: lint, all 78 current unit tests, build pass (existing asset-path and
+bundle warnings). Deterministic rolling-date tests cover inclusive count, month
+and year boundaries, leap day and both DST seasons. Browser checks cover January
+prior-year loading, exact first/last dates, ten-column keyboard movement,
+unchanged month History and 320/390/430px overflow. No physical-device or live
+production verification. Rollback: revert rolling-grid helpers, Home wiring and
+the additive previous-year subscription.
+
+### Compact header alternatives
+
+The owner found the single-column letter stack too tall. Five standalone alternatives are
+available in `design/mockups/header/`, with phase and phone-width controls and a comparison
+screenshot. A uses two columns of upright letters; B uses stacked words (readability
+recommendation); C uses one horizontal pill; D rotates a compact line; E places the phase
+beside the year under the wordmark. These are review options, not an approved app change.
+All three phases at 320/390/430px passed mockup overflow checks with no browser errors.
+
+Owner requested more creative divergence after the first five options. Round 2 lives in
+`design/mockups/header/round-2.html`: two distinct compositions, Equipment label (red
+sportswear patch beside the logo) and Journal masthead (wide wordmark, large year and
+phase rule). First-round studies remain available. No app implementation was changed.
+Both directions passed all three phase/width combinations without overflow; comparison
+screenshot is in the same folder. Selection remains an owner design decision.
+
+Owner hierarchy refinement: Home's rolling heatmap is titled “Last 30 days”,
+with a quieter History link on the same header row. Removed the raised sheet
+background, bleed, padding, border and shadow so activity sits on the page surface.
+History retains month names. Browser checks verify the shared row at
+320/390/430px, transparent section background, no overflow and working History.
+
+Equipment label selected for refinement: preserve the OFF SEASON 22px headline size
+for every phase, using two lines without hyphens. Off-season is deep petrol, Training
+warm amber with dark text, Competition red. Updated round-2 mockup and per-phase
+screenshots; verified identical font size and no label overflow for all three phases
+at 320/390/430px. Lint, unit tests and build pass. App implementation remains unchanged
+in this mockup refinement task.

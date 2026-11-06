@@ -119,6 +119,7 @@ export default function App() {
     user: auth.accessStatus === 'approved' ? auth.user : null,
     isDemoMode: auth.isDemoMode,
     year: selectedYear,
+    rollingToday: calendar.today,
     timeZone: calendar.timeZone,
     now: fixture?.now,
   });

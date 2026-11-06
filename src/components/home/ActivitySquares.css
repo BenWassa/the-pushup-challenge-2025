@@ -219,3 +219,107 @@
   height: auto;
   aspect-ratio: 1;
 }
+
+/* Approved square exploration A: edge-to-edge cells, compact framing. */
+.as-grid {
+  gap: 5px;
+}
+.as-cell {
+  position: relative;
+  height: auto;
+  min-height: 24px;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 3px;
+}
+.as-square {
+  height: 100%;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  outline: none;
+}
+.as-cell[aria-current='date'] .as-square,
+.as-cell[aria-pressed='true'] .as-square {
+  outline: none;
+}
+
+.as-cell[aria-pressed='true'] .as-square {
+  box-shadow: inset 0 0 0 2px var(--c-text);
+}
+.as-cell:hover .as-square {
+  filter: brightness(1.2);
+}
+.as-header-compact {
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+.as-legend[hidden] {
+  display: none;
+}
+.home .as-detail {
+  margin-top: 8px;
+  padding-top: 0;
+  border: 0;
+}
+.home .as-date,
+.home .as-total {
+  display: inline;
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  color: var(--c-text-muted);
+}
+.home .as-total::before {
+  content: ' · ';
+}
+.home .as-status {
+  font-size: inherit;
+}
+.home .as-heat-0 {
+  background: oklch(0.28 0.009 25);
+}
+.home .as-root.as-root {
+  margin-inline: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.home .as-root .as-heat-0 {
+  background: oklch(0.28 0.009 25);
+}
+.home .breakdown.breakdown {
+  margin-top: calc(var(--sp-5) * -1);
+}
+
+.home .as-root .as-grid {
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+}
+.home .as-root .as-header-compact {
+  justify-content: space-between;
+}
+.home .as-root .as-title {
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.home .as-root .as-history-link {
+  padding-inline: 0;
+  color: var(--c-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+}
+.home .as-root .as-history-link:hover {
+  color: var(--c-text);
+}
+
+/* Today stays red even when its cell is also selected. */
+.as-cell[aria-current='date'] .as-square {
+  outline: 2px solid var(--c-red-text);
+  outline-offset: -2px;
+}
+.as-unavailable .as-square {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--c-line-strong);
+}
