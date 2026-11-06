@@ -2,7 +2,7 @@
 
 - Issue: https://github.com/BenWassa/the-pushup-challenge-2025/issues/34
 - Implementation gate: https://github.com/BenWassa/the-pushup-challenge-2025/issues/33
-- Status: **In exploration — no design approved**
+- Status: **Home component decisions partly approved; complete Home mockup not yet approved**
 - Owner: product owner approves each screen in ChatGPT
 - Medium: ChatGPT-generated high-fidelity *still* mockups, screen by screen; no coded prototypes as initial deliverables.
 
@@ -29,8 +29,8 @@ Visual hierarchy:
 2. Dominant today's count: **60 push-ups** (confirmed).
 3. Four distinct large +1, +10, +20, +25 logging targets, reachable with one hand.
 4. Undo last set and small but legible current save state; error/retry alternatives later.
-5. Clearly labeled official progress: **445 / 2,000**; optionally numeric percentage, never graphic-only.
-6. Obvious navigation to Home, History, Account.
+5. Clearly labeled official progress: **445 / 2,000** and a visual progress bar; **no numeric percentage**.
+6. One vertically scrolling Home page with its primary sections visible; no bottom navigation bar. History and Account remain accessible as secondary actions.
 7. Last sets and ancillary statistics below fold; account/year controls secondary.
 
 ### Three starting directions
@@ -107,3 +107,43 @@ Owner preferences:
 - Daily goal remains undecided and should not be invented.
 
 The latest generated image is **not approved**: despite matching the 2×2 button geometry, it still used invented 12,340/100,000 and a mismatched month. Preserve the valid geometry/layout only. Next mockup should correct the figures/date and revisit the owner's chosen first heatmap.
+
+
+## APPROVED component decision — activity heatmap (Nov 6, 2026)
+
+**Owner decision: A — Activity Squares.** This is a confirmed choice of heatmap component, **not approval of the complete Home page**. It supersedes prior year-long contribution strips, 7-row month-as-columns layouts, numbered-grid alternatives, and any image-generated heatmap with inaccurate dates.
+
+### Design specification
+
+- **Month view**, titled for the selected month (example: **February 2027**) with optional quiet subtitle "Daily push-up activity".
+- Standard **seven columns ordered Sunday through Saturday**, with unobtrusive weekday labels at the top; weeks run in horizontal rows. Preserve actual day/date alignment; February 1, 2027 is Monday, February 10 is Wednesday. Blank leading cells are not activity.
+- Render **small, discrete rounded squares**, one per calendar date. **Do not put date numerals in the square** in the default presentation; this is the key owner preference over alternative B.
+- Neutral charcoal for no recorded activity; restrained red intensity steps for higher rep counts. Treat intensity as quantitative, not a completion badge. Include a small "Less activity" to "More activity" legend or accessible equivalent.
+- Today's/selected date is distinguished with an outline in addition to fill, with a non-color accessible designation.
+- **On selection**, reveal the calendar date, confirmed push-up total, and that date's sets in a detail section or accessible disclosure; allow correction/history actions only in permitted writable states. The exact interaction remains to be validated as HTML, not inferred from the static image.
+- Rest days, future dates, unknown historical data, imported/legacy records and training-vs-official classification must be labeled correctly and should never be fabricated by the graphic. Counts are sourced from the date-scoped model; treat previous-year archive views as read-only.
+- Scales adapt to widths 320/390/430px without tiny unusable touch controls: consider day selection hit areas and keyboard/focus support separately from the appearance of small squares. Preserve readable month/weekday labels, contrast, and reduced motion.
+- Use fictional demo-only activity in mockups. Example **Wednesday, February 10, 2027** selected, 60 confirmed push-ups on that date. Heatmap intensity thresholds shown during visual exploration are **illustrative**, not product-approved thresholds; define thresholds against real representative data during implementation.
+
+### Approved/provisional Home design decisions
+
+| Component | Status | Decision |
+|---|---|---|
+| Visual identity | Direction preferred | Athletic Bold / Brush Impact; textured near-black, white, restrained red brush marks; compact hero. |
+| Main progress | Preferred | Large `445 / 2,000` challenge counter with horizontal red progress bar; no numeric percentage. |
+| Today metric | Required product contract | `60 confirmed push-ups today` in consistent fictional test case; visually distinct from cumulative total. |
+| Streak | Preferred, conditional on accurate data | Small streak indicator beside counter, replacing percent; 7-day value is sample only and must not imply real streak calculation. |
+| Quick add | Explicitly selected | Four large equal-size `+1`, `+10`, `+20`, `+25` buttons in a **2×2 quadrant**, dark surfaces with restrained red accents. No separate Log CTA. |
+| Activity heatmap | **APPROVED** | **A — Activity Squares**, month-based seven-column squares without default dates, selected-date detail. |
+| Navigation structure | Explicitly selected | One vertically scrolling Home with useful modules rendered in place; no bottom navigation, no gateway cards that replace useful content. |
+| Lower sections | Direction preferred, details unresolved | Recent sets/history content directly on Home, secondary Account/archive settings. |
+| Daily goal | **Unresolved** | Do not display invented organizer or personal target. |
+| Complete Home layout | **Not approved** | Need next compliant full-screen composition with all selected components, correct dates/totals, and owner review. |
+
+### Next output / review gate
+
+Produce **one accurate full Home image** showing compact Brush Impact header, separate Today = 60, 2×2 quick-add, 445/2,000 + progress bar, small streak, approved monthly Activity Squares calendar, and actual recent sets on a long scrolling page. Avoid years/months from other examples, wrong totals, invented daily goals, unrelated trophies, huge decorative hero, redundant nav, and a duplicate Log button. Record owner selection and image reference before transferring to #33.
+
+### Reference accessibility note
+
+The mockup in the conversation showed an **illustrative** five-step red/charcoal activity scale; do not claim its contrast, date mapping, intensity thresholds, or interaction is production-approved. Build accessible labels, focus states, keyboard interaction and accurate data mapping during implementation.
