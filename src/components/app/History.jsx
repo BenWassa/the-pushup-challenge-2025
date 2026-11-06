@@ -62,7 +62,7 @@ export default function History({ challenge, data, busy }) {
             <button
               type="button"
               key={date}
-              className={`calendar-cell ${count ? 'has-reps' : ''}`}
+              className={`calendar-cell ${count ? 'has-reps' : ''} ${count >= 100 ? 'activity-high' : count >= 40 ? 'activity-medium' : count > 0 ? 'activity-low' : ''} ${(offset + i) % 7 === 0 ? 'rest-day' : ''}`}
               aria-pressed={selectedDate === date}
               aria-current={today === date ? 'date' : undefined}
               onClick={() => setSelected(date)}

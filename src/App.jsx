@@ -187,7 +187,7 @@ export default function App() {
       timeZone: challenge.timeZone,
     });
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${auth.user ? 'signed-in' : ''}`}>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
