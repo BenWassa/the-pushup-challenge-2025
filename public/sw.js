@@ -1,6 +1,7 @@
 const VERSION = new URL(self.location.href).searchParams.get('app_version') || 'dev';
-const CACHE_NAME = `pushup-pwa-v${VERSION}`;
-const SCOPE_URL = self.registration ? self.registration.scope : self.location.origin;
+const SCOPE_URL = self.registration ? self.registration.scope : `${self.location.origin}/`;
+const CACHE_PREFIX = `pushup-pwa-${new URL(SCOPE_URL).pathname}-v`;
+const CACHE_NAME = `${CACHE_PREFIX}${VERSION}`;
 const PRECACHE_URLS = [
   '',
   'index.html',
@@ -36,30 +37,64 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.map((key) => (key === CACHE_NAME ? null : caches.delete(key))))
+        Promise.all(
+          keys.map((key) =>
+            key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME ? caches.delete(key) : null
+          )
+        )
       )
       .then(() => self.clients.claim())
   );
 });
 
-const networkFirst = async (request) => {
+// Cache storage is optional: quota/private-mode failures must not break online use.
+const openRuntimeCache = async () => {
   try {
-    const response = await fetch(request);
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, response.clone());
-    return response;
-  } catch (error) {
-    const cached = await caches.match(request);
-    return cached || Promise.reject(error);
+    return await caches.open(CACHE_NAME);
+  } catch {
+    return null;
   }
 };
 
+const matchCached = async (cache, request) => {
+  try {
+    return cache ? await cache.match(request) : null;
+  } catch {
+    return null;
+  }
+};
+
+const storeResponse = async (cache, request, response) => {
+  if (!cache || !response.ok) return;
+  try {
+    await cache.put(request, response.clone());
+  } catch {
+    // Preserve the successful network response when storage is unavailable.
+  }
+};
+
+const networkFirst = async (request) => {
+  let response;
+  try {
+    response = await fetch(request);
+  } catch (error) {
+    const cache = await openRuntimeCache();
+    const cached =
+      (await matchCached(cache, request)) ||
+      (await matchCached(cache, new URL('index.html', SCOPE_URL).href));
+    if (cached) return cached;
+    throw error;
+  }
+  await storeResponse(await openRuntimeCache(), request, response);
+  return response;
+};
+
 const cacheFirst = async (request) => {
-  const cached = await caches.match(request);
+  const cache = await openRuntimeCache();
+  const cached = await matchCached(cache, request);
   if (cached) return cached;
   const response = await fetch(request);
-  const cache = await caches.open(CACHE_NAME);
-  cache.put(request, response.clone());
+  await storeResponse(cache, request, response);
   return response;
 };
 
@@ -68,7 +103,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin || !url.href.startsWith(SCOPE_URL)) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(networkFirst(request));
