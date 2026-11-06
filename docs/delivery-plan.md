@@ -4,26 +4,28 @@ Updated November 5, 2026. Tracker: [issues #2–#6](https://github.com/BenWassa/
 
 ## Integrated baseline
 
-After PRs #7–#22, current `main` (merge commit `7cd22e6`) includes:
+The reconciled release candidate includes the implementation from PRs #7–#28 and focused follow-ups #29–#31:
+
 - Configurable annual calendar, explicit training/official/off-season phases, derived date-correct yearly progress and unknown daily-target safeguards.
 - UID/year-scoped v2 activity repository, idempotent add/edit/remove, revision conflict handling, pending retry journal and source-preserving metadata warnings.
 - Mobile-first solo logging, history/calendar, past-year read-only views, account settings, demo isolation, safe saved/error feedback and corrected PWA asset paths.
 - Candidate owner-scoped Firestore rules and private backup/migration planning + emulator restore tooling; **not deployed**, with legacy history still pending actual approved import.
 - Browser acceptance on 320/390/430px, automated accessibility checks, Firebase emulator authorization/concurrency/migration tests and GitHub PR/push CI.
-- Reviewed annual app/PWA version 1.13.0 and manual-only release configuration guards.
+- Reviewed annual app/PWA version 1.13.0, revision-bound cross-device corrections, production dependency auditing and manual-only release configuration guards.
+- Generated JS/CSS precaching with built-artifact offline restart/update checks, calendar voice/keyboard labels and persisted denied-write retry acceptance.
 
 The integrated `main` [Actions run 42145594256](https://github.com/BenWassa/the-pushup-challenge-2025/actions/runs/42145594256) passed source build and Firebase emulator/browser jobs; deploy was deliberately skipped. This is not proof of real production user access or phone installability.
 
 ## Outcomes
 
-| Milestone | Status | Evidence or remaining exit condition |
-| --- | --- | --- |
-| Foundation, safe `dist/` builds and issue/PR structure | Source complete; Pages cutover pending | #2, #7–#8 |
-| UID-owned annual activity and correct phase reporting | Implemented, emulator-tested; production cutover pending | #3, #11, #17–#19 |
-| 2027 calendar and year-specific progress | Implemented; unconfirmed daily schedule remains pending | #4, #9, #13–#14 |
-| Mobile solo logging/history/account and warning UX | Implemented and browser-tested; physical phone pending | #5, #10, #16, #20–#21 |
-| Automated release, security, backups and rollback preparation | Implemented in source; independent production proof pending | #6, #12, #15, #18, #20, #22 |
-| Live 2027 publication, historical import and verified recovery | **Blocked by owner-controlled approval and checks** | [Production cutover](production-cutover.md) |
+| Milestone                                                      | Status                                                      | Evidence or remaining exit condition        |
+| -------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------- |
+| Foundation, safe `dist/` builds and issue/PR structure         | Source complete; Pages cutover pending                      | #2, #7–#8                                   |
+| UID-owned annual activity and correct phase reporting          | Implemented, emulator-tested; production cutover pending    | #3, #11, #17–#19                            |
+| 2027 calendar and year-specific progress                       | Implemented; unconfirmed daily schedule remains pending     | #4, #9, #13–#14                             |
+| Mobile solo logging/history/account and warning UX             | Implemented and browser-tested; physical phone pending      | #5, #10, #16, #20–#21                       |
+| Automated release, security, backups and rollback preparation  | Implemented in source; independent production proof pending | #6, #12, #15, #18, #20, #22                 |
+| Live 2027 publication, historical import and verified recovery | **Blocked by owner-controlled approval and checks**         | [Production cutover](production-cutover.md) |
 
 ## Remaining release sequence
 
@@ -37,3 +39,7 @@ The integrated `main` [Actions run 42145594256](https://github.com/BenWassa/the-
 ## Invariants
 
 No production database writes, rule changes, destructive migration, Pages source switch, repository rename or public release without explicit authorization. Preserve existing records and the currently deployed app until coordinated replacement. CI can show code quality; only actual rule, backup and device verification can establish release readiness.
+
+## Reconciliation evidence
+
+The newer mainline at `3836f1d` passed 50 native tests, five mandatory emulator tests and three browser journeys before additional changes. The unfinished local implementation was preserved in a named Git stash, and its competing CI/metadata/version alternatives were not reapplied. Focused regressions reproduced the remaining first-install offline and calendar-label gaps. The reconciled candidate passes 55 native tests, five emulator tests and seven browser journeys locally, plus lint, build and the Pages artifact preflight. PR checks remain the publication gate. Production data, rules, Pages source and public application remain unchanged.

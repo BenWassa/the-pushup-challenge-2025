@@ -254,11 +254,17 @@ export default function App() {
             </nav>
             {!online && !auth.isDemoMode && (
               <p className="notice" role="status">
-                You’re offline. Confirmed history remains visible. Reconnect before saving a set.
+                You’re offline. Reconnect to load history or save a set.
               </p>
             )}
             {data.blockedReason && <p className="notice">{data.blockedReason}</p>}
-            {data.loading && <p role="status">Loading your confirmed sets…</p>}
+            {data.loading && (
+              <p role="status">
+                {!online && !auth.isDemoMode
+                  ? 'Reconnect to load your confirmed sets.'
+                  : 'Loading your confirmed sets…'}
+              </p>
+            )}
             {data.legacyHistoryPending && (
               <p className="quiet">
                 Earlier records are preserved in the original archive and await a verified import.
