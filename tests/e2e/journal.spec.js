@@ -107,7 +107,7 @@ test('isolated Firebase emulator confirms add, reload, history, two-tab sync and
   await page.reload();
   await expect(page.locator('.daily-summary strong')).toHaveText('10');
   await page.getByRole('button', { name: /Edit set of 10 on/ }).click();
-  await page.getByLabel('Push-ups').fill('15');
+  await page.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('15');
   await page.getByRole('button', { name: 'Save correction' }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('15');
   await page.getByRole('button', { name: 'History' }).click();
