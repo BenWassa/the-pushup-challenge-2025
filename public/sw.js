@@ -1,7 +1,7 @@
 const VERSION = new URL(self.location.href).searchParams.get('app_version') || 'dev';
 const SCOPE_URL = self.registration ? self.registration.scope : `${self.location.origin}/`;
 const CACHE_PREFIX = `pushup-pwa-${new URL(SCOPE_URL).pathname}-v`;
-const CACHE_NAME = `${CACHE_PREFIX}${VERSION}`;
+const CACHE_NAME = `${CACHE_PREFIX}${VERSION}-2027-brush`;
 const PRECACHE_URLS = [
   '',
   'index.html',
@@ -15,6 +15,11 @@ const PRECACHE_URLS = [
   'icon.png',
   'favicon.ico',
   'apple-touch-icon.png',
+  'icon-32.png?v=2027-brush',
+  'icon-16.png?v=2027-brush',
+  'icon.png?v=2027-brush',
+  'favicon.ico?v=2027-brush',
+  'apple-touch-icon.png?v=2027-brush',
 ].map((path) => new URL(path, SCOPE_URL).toString());
 
 self.addEventListener('install', (event) => {
