@@ -77,7 +77,7 @@ test('mobile viewports do not overflow and show no serious automated accessibili
   ).toEqual([]);
 });
 
-test('isolated Firebase emulator confirms add, reload, history, two-tab sync and undo', async ({
+test('isolated Firebase emulator confirms add, reload, history, independent-device conflict and undo', async ({
   page,
   browser,
   request,
@@ -122,6 +122,17 @@ test('isolated Firebase emulator confirms add, reload, history, two-tab sync and
   await second.getByRole('button', { name: 'Sign in' }).click();
   await expect(second.locator('.daily-summary strong')).toHaveText('15');
   await page.getByRole('button', { name: 'Log' }).click();
+  await page.getByRole('button', { name: /Edit set of 15 on/ }).click();
+  await page.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('99');
+  await second.getByRole('button', { name: /Edit set of 15 on/ }).click();
+  await second.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('22');
+  await second.getByRole('button', { name: 'Save correction' }).click();
+  await expect(second.locator('.daily-summary strong')).toHaveText('22');
+  await expect(page.locator('.daily-summary strong')).toHaveText('22');
+  await page.getByRole('button', { name: 'Save correction' }).click();
+  await expect(page.getByRole('alert')).toContainText('This set changed on another device.');
+  await expect(page.locator('.daily-summary strong')).toHaveText('22');
+  await page.getByRole('button', { name: 'Cancel' }).click();
   await page.getByRole('button', { name: /Undo latest set/ }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
   await expect(second.locator('.daily-summary strong')).toHaveText('0');
