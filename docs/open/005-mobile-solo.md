@@ -1,7 +1,7 @@
 # #5 — Solo-first mobile logging UX
 
 **Issue:** https://github.com/BenWassa/the-pushup-challenge-2025/issues/5  
-**Status:** Planned — design before implementation  
+**Status:** Mobile-first source UI and browser acceptance implemented; real-device/PWA acceptance outstanding  
 **Depends on:** #3 data model, #4 season engine
 
 ## Product brief
