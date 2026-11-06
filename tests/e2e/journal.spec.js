@@ -132,7 +132,7 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await independentSession.close();
   await page.getByRole('button', { name: 'Settings' }).click();
   await page.getByRole('button', { name: String(currentYear - 1), exact: true }).click();
-  await expect(page.getByText(`Viewing ${currentYear - 1} · read-only`)).toBeVisible();
+  await expect(page.getByText('Archive, read-only')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toHaveCount(0);
   await page.getByRole('button', { name: `Back to ${currentYear}` }).click();
   await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toBeEnabled();
@@ -303,4 +303,49 @@ test('current month blocks future month navigation by button and keyboard', asyn
   await expect(page.getByRole('button', { name: 'Next month' })).toBeEnabled();
   await page.getByRole('button', { name: 'Next month' }).click();
   await expect(monthTitle).toBeVisible();
+});
+
+test('past years are static records with a breakdown and year-scoped History', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-02-10T20:00:00Z'));
+  await page.goto(`${appPath}?mode=demo`);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: '2026', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '2026', exact: true })).toBeVisible();
+  await expect(page.getByTestId('archive-total')).toContainText('45');
+  const ledger = page.locator('.archive-ledger');
+  await expect(ledger).toContainText('Off-season45');
+  await expect(ledger).toContainText('Active days2');
+  await expect(ledger).toContainText('25 push-ups');
+  await expect(ledger).toContainText('February 9, 2026');
+  await expect(page.getByRole('button', { name: /^Add \d+ push-ups/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Compact|Undo/ })).toHaveCount(0);
+  await expect(page.getByRole('progressbar')).toHaveCount(0);
+  await expect(page.getByTestId('phase-patch')).toHaveCount(0);
+  await expect(page.locator('.archive-days span')).toHaveCount(365);
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const size of ['100%', '200%']) {
+      await page.evaluate((value) => {
+        document.documentElement.style.fontSize = value;
+      }, size);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= document.documentElement.clientWidth
+        )
+      ).toBe(true);
+    }
+  }
+  const findings = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(findings.violations).toEqual([]);
+  await page.getByRole('button', { name: 'Open 2026 History' }).click();
+  await expect(page.getByRole('heading', { name: 'February 2026' })).toBeVisible();
+  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await page.getByRole('button', { name: 'Back to 2027' }).click();
+  await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toBeVisible();
+  // The pinned fixture has no previous-year seeds: it also exercises an empty record.
+  await page.goto(`${appPath}?mode=demo&fixture=feb-10-2027`);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: '2026', exact: true }).click();
+  await expect(page.getByTestId('archive-total')).toContainText('0');
+  await expect(page.getByText('No activity recorded', { exact: true })).toBeVisible();
 });

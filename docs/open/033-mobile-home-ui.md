@@ -361,3 +361,23 @@ Removed copy the owner said the user can work out: the "Today · date" line, the
 "N of 20 blocks"). Screen readers still get the label and a polite block-count status. Blocks are bricks (1.8:1) so they
 do not read as days in the 30-day grid. Gaps tightened (reserved bar height kept so +N buttons never move), footer link
 44px, hover styling only on hover-capable pointers, leftover raised-sheet and breakdown CSS removed.
+
+## Past years record page
+
+Past years now use a separate static YearArchive ledger whenever `canLog` is false.
+Back to the current year is the top action; Settings remains reachable. The confirmed
+annual total leads, followed by non-zero categories, active days, best day (earliest
+date wins a tie), finished hundreds, and twelve static activity rows. History already
+uses the selected year, so its link opens that year's existing month browser.
+This supersedes the earlier archived Home/official-progress treatment above.
+Intentionally absent: logging, Undo, Compact, progress bar, streak, phase patch,
+Home masthead, tappable activity cells, animations, and new persistence behavior.
+
+Verification in this worktree: lint and diff whitespace checks passed; 79/80 unit
+tests passed, including best-day tests. The build-safety test and standard build
+hit EPERM writing Vite's cache through the shared node_modules symlink. A production
+build with `--configLoader runner` passed (existing asset/bundle warnings remain).
+The new Playwright test includes populated/empty archives, History/back navigation,
+320/390/430px at 100%/200% text, and WCAG A/AA axe assertions, but could not run:
+a temporary config on ports 4195/4196 ultimately hit sandbox EPERM binding 4195.
+Temporary configs were removed. Browser layout/accessibility verification remains pending.

@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
+import YearArchive from './YearArchive.jsx';
 import HomeHeader from './HomeHeader.jsx';
 import ProgressSummary from './ProgressSummary.jsx';
 import QuickLog from './QuickLog.jsx';
@@ -31,6 +31,16 @@ export default function Home({
   onBackToCurrent,
 }) {
   const { summary, selectedYear, canLog } = challenge;
+  if (!canLog) {
+    return (
+      <YearArchive
+        challenge={challenge}
+        onBackToCurrent={onBackToCurrent}
+        onSettings={onSettings}
+        onHistory={onHistory}
+      />
+    );
+  }
   const canEdit = challenge.canLog && data.canWrite && !busy;
   const primary = canLog
     ? {
@@ -67,15 +77,6 @@ export default function Home({
         phaseLabel={canLog ? phaseLabel(challenge.day.phase) : 'Archive · read-only'}
         onSettings={onSettings}
       />
-      {!canLog && (
-        <p className="archive-banner">
-          <span>Viewing {selectedYear} · read-only</span>
-          <button type="button" className="link-button" onClick={onBackToCurrent}>
-            <ArrowLeft size={16} aria-hidden="true" focusable="false" />
-            Back to {challenge.today.slice(0, 4)}
-          </button>
-        </p>
-      )}
       <ProgressSummary primary={primary} century={century} streak={streak} />
       {canLog && (
         <QuickLog
