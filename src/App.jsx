@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, CircleUserRound, Dumbbell } from 'lucide-react';
+import { CalendarDays, CircleUserRound, Dumbbell, Undo2 } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useActivityData } from './hooks/useActivityData';
 import { useChallenge } from './hooks/useChallenge';
@@ -9,11 +9,11 @@ import History from './components/app/History';
 import Account from './components/app/Account';
 
 const phaseLabel = (phase) =>
-  ({ TRAINING: 'Training', OFFICIAL: 'Official challenge', OFF_SEASON: 'Off-season' })[phase];
+  ({ TRAINING: 'Training', OFFICIAL: 'Official', OFF_SEASON: 'Off-season' })[phase];
 const displayDate = (date) =>
   new Date(`${date}T12:00:00Z`).toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'long',
+    weekday: 'short',
+    month: 'short',
     day: 'numeric',
     year: 'numeric',
     timeZone: 'UTC',
@@ -141,6 +141,7 @@ export default function App() {
   const [view, setView] = useState('log');
   const [online, setOnline] = useState(() => navigator.onLine);
   const [update, setUpdate] = useState(false);
+  const [savedToast, setSavedToast] = useState(false);
   const [updateError, setUpdateError] = useState('');
   useEffect(() => {
     const yes = () => setOnline(true);
@@ -162,6 +163,17 @@ export default function App() {
     setView(next);
   };
   const saving = data.saveState === 'saving';
+  // Confirmation is acknowledged briefly; pending and failed states stay visible until resolved.
+  useEffect(() => {
+    if (data.saveState !== 'saved') return undefined;
+    const show = setTimeout(() => setSavedToast(true), 0);
+    const hide = setTimeout(() => setSavedToast(false), 3200);
+    return () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+      setSavedToast(false);
+    };
+  }, [data.saveState]);
   const busy = saving || Boolean(data.pendingOperation) || (!online && !auth.isDemoMode);
   const canEdit = challenge.canLog && data.canWrite && !busy;
   const records = [...challenge.yearRecords].sort(
@@ -176,7 +188,7 @@ export default function App() {
       return;
     }
     if (!navigator.serviceWorker) {
-      setUpdateError('Close and reopen the app to update.');
+      setUpdateError('Reopen the app to update.');
       return;
     }
     navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload(), {
@@ -199,13 +211,12 @@ export default function App() {
       </a>
       <header className="app-header">
         <a className="wordmark" href={import.meta.env.BASE_URL}>
-          PushUp<span>Annual challenge journal</span>
+          PushUp
         </a>
-        <span className="edition-mark">2027 & beyond</span>
       </header>
       {update && (
         <aside className="notice">
-          <p>A new version is ready. Finish or resolve your pending save before updating.</p>
+          <p>Update ready. Resolve any pending save first.</p>
           <button disabled={saving || Boolean(data.pendingOperation)} onClick={updateApp}>
             Update app
           </button>
@@ -213,9 +224,7 @@ export default function App() {
         </aside>
       )}
       {auth.isDemoMode && (
-        <aside className="demo-note">
-          Fictional demo · changes reset on reload · no cloud writes
-        </aside>
+        <aside className="demo-note">Demo · resets on reload · no cloud writes</aside>
       )}
       <main id="main">
         {auth.error ? (
@@ -273,26 +282,26 @@ export default function App() {
             </nav>
             {!online && !auth.isDemoMode && (
               <p className="notice" role="status">
-                You’re offline. Reconnect to load history or save a set.
+                Offline. Reconnect to load history or save.
               </p>
             )}
             {data.blockedReason && <p className="notice">{data.blockedReason}</p>}
             {data.loading && (
               <p role="status">
                 {!online && !auth.isDemoMode
-                  ? 'Reconnect to load your confirmed sets.'
-                  : 'Loading your confirmed sets…'}
+                  ? 'Reconnect to load confirmed sets.'
+                  : 'Loading confirmed sets…'}
               </p>
             )}
             {data.legacyHistoryPending && (
               <p className="quiet">
-                Earlier records are preserved in the original archive and await a verified import.
-                An empty year here does not mean your historical activity is lost.
+                Earlier records remain in the original archive, pending verified import. Empty years
+                here do not mean lost history.
               </p>
             )}
             {challenge.summary.metadataWarnings.length > 0 && (
               <aside className="notice" role="status" aria-label="Activity data review">
-                <strong>Some activity details need review.</strong>
+                <strong>Activity details need review.</strong>
                 <p>
                   {challenge.summary.metadataWarnings.length} saved{' '}
                   {challenge.summary.metadataWarnings.length === 1 ? 'set has' : 'sets have'}{' '}
@@ -303,11 +312,11 @@ export default function App() {
             )}
             <div className="save-feedback" aria-live="polite" role="status">
               {saving
-                ? 'Saving… Waiting for confirmation.'
-                : data.saveState === 'saved'
+                ? 'Saving… awaiting confirmation.'
+                : data.saveState === 'saved' && savedToast
                   ? auth.isDemoMode
-                    ? 'Saved in this demo. Resets on reload.'
-                    : 'Saved to your account.'
+                    ? 'Saved · demo resets on reload'
+                    : 'Saved'
                   : ''}
             </div>
             {data.error && (
@@ -315,9 +324,8 @@ export default function App() {
                 <p>{data.error}</p>
                 {data.pendingOperation && (
                   <p>
-                    This operation has not been confirmed. Retry the same operation to avoid
-                    duplicates. Dismissing a retry does not undo a save that may have completed.
-                    Check confirmed history before logging that set again.
+                    Unconfirmed. Retry this operation to avoid duplicates. Dismissing does not undo
+                    a possible save. Check confirmed history before logging it again.
                   </p>
                 )}
                 <div className="actions">
@@ -335,60 +343,72 @@ export default function App() {
             {view === 'log' && (
               <section aria-labelledby="log-title">
                 <div className="hero">
-                  <div className="today-heading">
+                  <div className="hero-top">
                     <p className="eyebrow">
                       {displayDate(challenge.canLog ? challenge.today : challenge.day.localDate)}
                     </p>
-                    <h1 id="log-title">
-                      {challenge.canLog ? 'Ready for your next set?' : `${selectedYear} activity`}
-                    </h1>
                     <span className="phase-label">{phaseLabel(challenge.day.phase)}</span>
                   </div>
-                  {!challenge.canLog && (
-                    <p className="notice">
-                      This edition is read-only. Select {challenge.today.slice(0, 4)} to record
-                      today’s activity.
-                    </p>
-                  )}
-                  {challenge.challenge && (
-                    <p className="event-dates">
-                      Official challenge: {challenge.challenge.official.start} to{' '}
-                      {challenge.challenge.official.end}
-                    </p>
-                  )}
-                  {challenge.challenge && (
-                    <p className="quiet">
-                      Official daily targets pending. Sundays are confirmed rest days.
-                    </p>
-                  )}
+                  <h1 id="log-title" className="sr-only">
+                    {challenge.canLog ? 'Log a set' : `${selectedYear} activity`}
+                  </h1>
                   <div className="daily-summary">
                     <div>
-                      <span className="quiet">
-                        {challenge.canLog
-                          ? 'Today’s confirmed push-ups'
-                          : 'Confirmed push-ups this year'}
-                      </span>
                       <strong>
                         {challenge.canLog ? challenge.summary.todayTotal : challenge.summary.total}
                       </strong>
+                      <span className="quiet">
+                        {challenge.canLog ? 'Today · confirmed' : 'Year · confirmed'}
+                      </span>
                     </div>
                     <p>
                       {challenge.day.isRestDay
-                        ? 'Rest day. Any activity is optional.'
+                        ? 'Rest day · activity optional'
                         : challenge.day.dailyTarget !== null
                           ? `Daily target: ${challenge.day.dailyTarget}`
                           : challenge.day.phase === 'TRAINING' && challenge.trainingGoal
-                            ? `Personal training goal: ${challenge.trainingGoal}`
+                            ? `Training goal: ${challenge.trainingGoal}`
                             : challenge.day.phase === 'OFFICIAL'
-                              ? 'Official daily target pending.'
+                              ? 'Official target pending'
                               : challenge.day.phase === 'TRAINING'
-                                ? 'Training counts separately from the challenge.'
-                                : 'Off-season activity stays separate from challenge totals.'}
+                                ? 'Training is excluded from challenge totals'
+                                : 'Off-season is excluded from challenge totals'}
                     </p>
                   </div>
+                  {challenge.challenge && (
+                    <div className="hero-progress">
+                      <div
+                        className="progress-track"
+                        role="progressbar"
+                        aria-label="Official challenge progress"
+                        aria-valuemin={0}
+                        aria-valuemax={challenge.challenge.totalTarget}
+                        aria-valuenow={Math.min(
+                          challenge.summary.official,
+                          challenge.challenge.totalTarget
+                        )}
+                        aria-valuetext={`${challenge.summary.official} of ${challenge.challenge.totalTarget} push-ups`}
+                      >
+                        <span
+                          style={{
+                            width: `${Math.min(100, (challenge.summary.official / challenge.challenge.totalTarget) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <p>
+                        {challenge.summary.official} /{' '}
+                        {challenge.challenge.totalTarget.toLocaleString()}
+                      </p>
+                    </div>
+                  )}
                 </div>
+                {!challenge.canLog && (
+                  <p className="notice">
+                    Read-only edition. Select {challenge.today.slice(0, 4)} to log today.
+                  </p>
+                )}
                 {challenge.canLog && (
-                  <div className="quick-add" aria-label="Add push-ups">
+                  <div className="quick-add" role="group" aria-label="Add push-ups">
                     {[1, 10, 20, 25].map((amount) => (
                       <button
                         className="quick-button"
@@ -398,7 +418,6 @@ export default function App() {
                         aria-label={`Add ${amount} push-ups`}
                       >
                         +{amount}
-                        <span>push-ups</span>
                       </button>
                     ))}
                   </div>
@@ -409,52 +428,22 @@ export default function App() {
                     disabled={!canEdit}
                     onClick={() => data.remove(latest.id, latest.revision)}
                   >
-                    Undo latest set ({latest.amount} push-ups)
+                    <Undo2 size={16} aria-hidden="true" focusable="false" />
+                    Undo latest set ({latest.amount})
                   </button>
                 )}
                 {!auth.isDemoMode && !data.canWrite && !data.pendingOperation && !data.loading && (
                   <p className="quiet">
-                    Cloud logging is available only after the owner verifies private access and
-                    enables this release. Existing history is preserved.
+                    Cloud logging awaits owner verification and release activation. History
+                    preserved.
                   </p>
                 )}
-                <section className="progress-section" aria-labelledby="progress-title">
-                  <h2 id="progress-title">Your {selectedYear} progress</h2>
+                <section className="stats-section" aria-label={`${selectedYear} totals`}>
                   <dl className="totals">
                     <div>
-                      <dt>Official challenge</dt>
-                      <dd>
-                        {challenge.summary.official}
-                        {challenge.challenge
-                          ? ` / ${challenge.challenge.totalTarget.toLocaleString()}`
-                          : ''}
-                      </dd>
+                      <dt>Official</dt>
+                      <dd>{challenge.summary.official}</dd>
                     </div>
-                    {challenge.challenge && (
-                      <div className="progress-row">
-                        <dt className="sr-only">Challenge progress</dt>
-                        <dd>
-                          <div
-                            className="progress-track"
-                            role="progressbar"
-                            aria-label="Official challenge progress"
-                            aria-valuemin={0}
-                            aria-valuemax={challenge.challenge.totalTarget}
-                            aria-valuenow={Math.min(
-                              challenge.summary.official,
-                              challenge.challenge.totalTarget
-                            )}
-                            aria-valuetext={`${challenge.summary.official} of ${challenge.challenge.totalTarget} push-ups`}
-                          >
-                            <span
-                              style={{
-                                width: `${Math.min(100, (challenge.summary.official / challenge.challenge.totalTarget) * 100)}%`,
-                              }}
-                            />
-                          </div>
-                        </dd>
-                      </div>
-                    )}
                     <div>
                       <dt>Training</dt>
                       <dd>{challenge.summary.training}</dd>
@@ -465,7 +454,7 @@ export default function App() {
                     </div>
                     {challenge.summary.legacy > 0 && (
                       <div>
-                        <dt>Imported history (original classification retained)</dt>
+                        <dt>Imported</dt>
                         <dd>{challenge.summary.legacy}</dd>
                       </div>
                     )}
@@ -474,19 +463,32 @@ export default function App() {
                       <dd>{challenge.summary.activeDays}</dd>
                     </div>
                   </dl>
+                  {challenge.challenge && (
+                    <p className="stats-note">
+                      Official {challenge.challenge.official.start} –{' '}
+                      {challenge.challenge.official.end} · daily targets pending · Sundays rest
+                    </p>
+                  )}
+                  {challenge.summary.legacy > 0 && (
+                    <p className="stats-note">Imported · original classification kept</p>
+                  )}
                 </section>
                 <section className="recent-section" aria-labelledby="recent-title">
-                  <h2 id="recent-title">Recent sets</h2>
+                  <div className="section-heading">
+                    <h2 id="recent-title">Recent</h2>
+                    {records.length > 4 && (
+                      <button className="link-button" onClick={() => go('history')}>
+                        View history
+                      </button>
+                    )}
+                  </div>
                   <ActivityList
-                    records={records.slice(0, 10)}
+                    records={records.slice(0, 4)}
                     canEdit={challenge.canLog && data.canWrite}
                     busy={busy}
                     edit={data.edit}
                     remove={data.remove}
                   />
-                  {records.length > 10 && (
-                    <button onClick={() => go('history')}>See calendar history</button>
-                  )}
                 </section>
               </section>
             )}
@@ -504,11 +506,9 @@ export default function App() {
         )}
       </main>
       <footer>
-        <p>
-          Independent personal tracker. Activity here is not submitted to The Push-Up Challenge.
-        </p>
+        <p>Independent tracker. Reps aren’t submitted to The Push-Up Challenge.</p>
         <a href="https://www.thepushupchallenge.ca/how-it-works" target="_blank" rel="noreferrer">
-          Organizer’s event information
+          Event information
         </a>
       </footer>
     </div>

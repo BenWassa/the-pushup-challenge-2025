@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { classifyChallengeDate } from '../../utils/challengeModel.js';
 
 function reportingLabel(record) {
   const phase = classifyChallengeDate(record.localDate).phase;
-  if (record.provenance && phase === 'OFF_SEASON') return 'Historical activity (unclassified)';
+  if (record.provenance && phase === 'OFF_SEASON') return 'History · unclassified';
   return phase === 'OFFICIAL' ? 'Challenge' : phase === 'TRAINING' ? 'Training' : 'Off-season';
 }
 
@@ -13,15 +14,14 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
   const [amount, setAmount] = useState('');
   const [removing, setRemoving] = useState(null);
   const [removeRevision, setRemoveRevision] = useState(null);
-  if (!records.length)
-    return <p className="quiet">No sets here yet. Your confirmed sets will appear here.</p>;
+  if (!records.length) return <p className="quiet">No confirmed sets yet.</p>;
   return (
     <ul className="activity-list">
       {records.map((record) => (
         <li key={record.id}>
           <div className="set-description">
-            <strong>{record.amount} push-ups</strong>
-            {record.provenance && <span>Imported history · read-only</span>}
+            <strong>{record.amount}</strong>
+            {record.provenance && <span>Imported · read-only</span>}
             <span>
               {record.localDate} · {reportingLabel(record)}
             </span>
@@ -40,10 +40,9 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
                     setAmount(String(record.amount));
                   }}
                 >
-                  Edit
+                  <Pencil size={18} aria-hidden="true" focusable="false" />
                   <span className="sr-only">
-                    {' '}
-                    set of {record.amount} on {record.localDate}
+                    Edit set of {record.amount} on {record.localDate}
                   </span>
                 </button>
                 <button
@@ -53,10 +52,9 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
                     setRemoveRevision(record.revision);
                   }}
                 >
-                  Remove
+                  <Trash2 size={18} aria-hidden="true" focusable="false" />
                   <span className="sr-only">
-                    {' '}
-                    set of {record.amount} on {record.localDate}
+                    Remove set of {record.amount} on {record.localDate}
                   </span>
                 </button>
               </div>
@@ -83,7 +81,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
               </label>
               <div className="actions">
                 <button className="primary" disabled={busy}>
-                  Save correction
+                  Save
                 </button>
                 <button type="button" disabled={busy} onClick={() => setEditing(null)}>
                   Cancel
@@ -93,7 +91,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
           )}
           {removing === record.id && (
             <div className="inline-form">
-              <p>Remove this {record.amount} push-up set?</p>
+              <p>Remove {record.amount}-push-up set?</p>
               <div className="actions">
                 <button
                   className="danger"
@@ -103,10 +101,10 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
                     if (result !== false) setRemoving(null);
                   }}
                 >
-                  Confirm removal
+                  Remove set
                 </button>
                 <button disabled={busy} onClick={() => setRemoving(null)}>
-                  Keep set
+                  Keep
                 </button>
               </div>
             </div>

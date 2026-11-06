@@ -29,7 +29,7 @@ export default function History({ challenge, data, busy }) {
     <section aria-labelledby="history-title">
       <div className="year-bar">
         <label>
-          Challenge year
+          Year
           <select
             aria-label="Challenge year"
             value={selectedYear}
@@ -43,12 +43,10 @@ export default function History({ challenge, data, busy }) {
             ))}
           </select>
         </label>
-        <span className="year-state">
-          {selectedYear === currentYear ? 'Current year' : 'Read-only edition'}
-        </span>
+        <span className="year-state">{selectedYear === currentYear ? 'Current' : 'Read-only'}</span>
       </div>
       <details className="year-jump">
-        <summary>Open another year</summary>
+        <summary>Another year</summary>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -71,7 +69,7 @@ export default function History({ challenge, data, busy }) {
               placeholder="YYYY"
             />
           </label>
-          <button disabled={locked}>Open year</button>
+          <button disabled={locked}>Open</button>
         </form>
       </details>
       <div className="section-heading">
@@ -93,10 +91,7 @@ export default function History({ challenge, data, busy }) {
           </select>
         </label>
       </div>
-      <p>
-        {monthLabel(month)} · {summary.activeDays} active days this year
-      </p>
-      <div className="calendar-grid" aria-label={monthLabel(month)}>
+      <div className="calendar-grid" role="group" aria-label={monthLabel(month)}>
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
           <span className="weekday" key={d} aria-hidden="true">
             {d}
@@ -127,7 +122,7 @@ export default function History({ challenge, data, busy }) {
       </div>
       <div className="day-detail" aria-live="polite">
         <h3>{selectedDate}</h3>
-        <p>{records.reduce((n, r) => n + r.amount, 0)} confirmed push-ups</p>
+        <p>{records.reduce((n, r) => n + r.amount, 0)} confirmed reps</p>
       </div>
       <ActivityList
         records={records}
@@ -136,11 +131,7 @@ export default function History({ challenge, data, busy }) {
         edit={data.edit}
         remove={data.remove}
       />
-      {!canLog && (
-        <p className="notice">
-          This edition is read-only. Return to the current year to log a set.
-        </p>
-      )}
+      {!canLog && <p className="notice">Read-only edition. Select the current year to log.</p>}
     </section>
   );
 }

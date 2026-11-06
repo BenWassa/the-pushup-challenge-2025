@@ -9,24 +9,24 @@ test('fictional demo remains isolated, supports one-handed logging and resets on
   page,
 }) => {
   await page.goto(`${appPath}?mode=demo`);
-  await expect(page.getByText(/Fictional demo · changes reset on reload/)).toBeVisible();
+  await expect(page.getByText(/Demo · resets on reload/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add 20 push-ups' })).toBeEnabled();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
 
   await page.getByRole('button', { name: 'Add 20 push-ups' }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('20');
-  await expect(page.getByText('Saved in this demo. Resets on reload.')).toBeVisible();
+  await expect(page.getByText('Saved · demo resets on reload')).toBeVisible();
   await page.getByRole('button', { name: /Undo latest set/ }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
 
   await page.getByRole('button', { name: 'History' }).click();
   await expect(page.getByRole('heading', { name: 'History' })).toBeVisible();
   await page.getByRole('button', { name: 'Account' }).click();
-  await expect(page.getByText('Fictional demo participant')).toBeVisible();
+  await expect(page.getByText('Demo participant')).toBeVisible();
 
   await page.reload();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
-  await expect(page.getByText(/Fictional demo · changes reset on reload/)).toBeVisible();
+  await expect(page.getByText(/Demo · resets on reload/)).toBeVisible();
 });
 
 test('mobile viewports do not overflow and show no serious automated accessibility issues', async ({
@@ -61,8 +61,8 @@ test('mobile viewports do not overflow and show no serious automated accessibili
   }
   await page.getByRole('button', { name: 'Account', exact: true }).click();
   await page.getByLabel('Timezone').fill('America/Vancouver');
-  await page.getByRole('button', { name: 'Save preferences' }).click();
-  await expect(page.getByText('Preferences saved on this device.')).toBeVisible();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('Saved on this device.')).toBeVisible();
   await page.reload();
   await page.getByRole('button', { name: 'Account', exact: true }).click();
   await expect(page.getByLabel('Timezone')).toHaveValue('America/Vancouver');
@@ -94,17 +94,17 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   // The challenge year is automatic: no year picker on the Log screen.
   await expect(page.getByRole('combobox', { name: 'Challenge year' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Add 10 push-ups' }).click();
-  await expect(page.getByText('Saved to your account.')).toBeVisible();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
   await expect(page.locator('.daily-summary strong')).toHaveText('10');
 
   await page.reload();
   await expect(page.locator('.daily-summary strong')).toHaveText('10');
   await page.getByRole('button', { name: /Edit set of 10 on/ }).click();
   await page.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('15');
-  await page.getByRole('button', { name: 'Save correction' }).click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('15');
   await page.getByRole('button', { name: 'History' }).click();
-  await expect(page.getByText('15 confirmed push-ups')).toBeVisible();
+  await expect(page.getByText('15 confirmed reps')).toBeVisible();
 
   // A second browser context is a separate device session, not a shared-auth tab.
   const independentSession = await browser.newContext();
@@ -117,10 +117,10 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await page.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('99');
   await second.getByRole('button', { name: /Edit set of 15 on/ }).click();
   await second.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('22');
-  await second.getByRole('button', { name: 'Save correction' }).click();
+  await second.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(second.locator('.daily-summary strong')).toHaveText('22');
   await expect(page.locator('.daily-summary strong')).toHaveText('22');
-  await page.getByRole('button', { name: 'Save correction' }).click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('This set changed on another device.');
   await expect(page.locator('.daily-summary strong')).toHaveText('22');
   await page.getByRole('button', { name: 'Cancel' }).click();
@@ -135,7 +135,7 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await page
     .getByRole('combobox', { name: 'Challenge year' })
     .selectOption(String(currentYear - 1));
-  await expect(page.getByText('Read-only edition')).toBeVisible();
+  await expect(page.getByText('Read-only', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toHaveCount(0);
   await page.getByRole('combobox', { name: 'Challenge year' }).selectOption(String(currentYear));
   await page.getByRole('button', { name: 'Account', exact: true }).click();
@@ -165,7 +165,7 @@ test('calendar names include visible day and count for keyboard and voice access
   await page.clock.setFixedTime(new Date('2027-02-03T15:00:00Z'));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${appPath}?mode=demo`);
-  await expect(page.getByText('Official daily target pending.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Official target pending', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'History', exact: true }).click();
   const empty = page.getByRole('button', { name: 'Day 3 0 push-ups on 2027-02-03', exact: true });
   const active = page.getByRole('button', { name: 'Day 1 25 push-ups on 2027-02-01', exact: true });
