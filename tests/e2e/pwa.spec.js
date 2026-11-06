@@ -20,7 +20,10 @@ test('built PWA precaches its first-install assets and opens offline after resta
     const cached = await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.ready;
       const version = new URL(registration.active.scriptURL).searchParams.get('app_version');
-      const cache = await caches.open(`pushup-pwa-/the-pushup-challenge-2025/-v${version}`);
+      // The cache name carries an optional icon-set suffix, e.g. `-v1.14.0-2027-brush`.
+      const prefix = `pushup-pwa-/the-pushup-challenge-2025/-v${version}`;
+      const name = (await caches.keys()).find((key) => key.startsWith(prefix));
+      const cache = await caches.open(name);
       return (await cache.keys()).map((request) => request.url);
     });
     expect(cached.some((asset) => /assets\/.*\.js$/.test(asset))).toBe(true);
