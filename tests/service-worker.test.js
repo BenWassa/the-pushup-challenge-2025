@@ -18,12 +18,15 @@ const worker = ({
   const deleted = [];
   const writes = [];
   const opened = [];
+  const skipWaiting = [];
+  const precached = [];
   const key = (request) => (typeof request === 'string' ? request : request.url);
   const cache = {
     match: async (request) => {
       if (failCache === 'match') throw new Error('cache read failed');
       return entries.get(key(request));
     },
+    addAll: async (urls) => precached.push(...urls),
     put: async (request, value) => {
       if (failCache === 'put') throw new Error('quota exceeded');
       writes.push(key(request));
@@ -37,6 +40,10 @@ const worker = ({
       registration: { scope },
       addEventListener: (name, listener) => (listeners[name] = listener),
       clients: { claim: async () => {} },
+      skipWaiting: () => {
+        skipWaiting.push(true);
+        return Promise.resolve();
+      },
     },
     caches: {
       keys: async () => names,
@@ -52,7 +59,7 @@ const worker = ({
       return response;
     },
   });
-  return { listeners, deleted, writes, opened };
+  return { listeners, deleted, writes, opened, skipWaiting, precached };
 };
 
 const fetchFrom = (app, url, mode = 'navigate', method = 'GET') => {
@@ -60,6 +67,21 @@ const fetchFrom = (app, url, mode = 'navigate', method = 'GET') => {
   app.listeners.fetch({ request: { url, mode, method }, respondWith: (value) => (result = value) });
   return result;
 };
+
+test('install does not activate over a running app until the UI requests it', async () => {
+  const app = worker();
+  let install;
+  app.listeners.install({ waitUntil: (value) => (install = value) });
+  await install;
+  assert.equal(app.skipWaiting.length, 0);
+  assert.ok(app.precached.includes(`${scope}index.html`));
+  assert.ok(app.precached.includes(`${scope}manifest.webmanifest`));
+
+  app.listeners.message({ data: { type: 'OTHER' } });
+  assert.equal(app.skipWaiting.length, 0);
+  app.listeners.message({ data: { type: 'SKIP_WAITING' } });
+  assert.equal(app.skipWaiting.length, 1);
+});
 
 test('activation removes only prior caches belonging to this app scope', async () => {
   const old = current.replace('-v2', '-v1');

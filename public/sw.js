@@ -18,12 +18,9 @@ const PRECACHE_URLS = [
 ].map((path) => new URL(path, SCOPE_URL).toString());
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
-  );
+  // A new version must wait while the old app is active. The UI explicitly
+  // requests activation only after any pending activity operation is resolved.
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
 });
 
 self.addEventListener('message', (event) => {
