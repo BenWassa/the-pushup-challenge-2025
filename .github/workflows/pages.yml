@@ -62,6 +62,8 @@ jobs:
           # The v2 adapter is enabled only for an explicitly dispatched release.
           VITE_ENABLE_V2_CLOUD: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy == true && 'true' || 'false' }}
         run: npm run build
+      - name: Validate GitHub Pages output
+        run: node scripts/verify-pages-build.js
       - name: Upload site artifact
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.deploy == true
         uses: actions/upload-pages-artifact@v4
