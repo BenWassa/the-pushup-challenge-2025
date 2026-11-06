@@ -77,6 +77,11 @@ test('unknown ownership, timezone, amount, dates and classification fail closed'
   assert.equal(normalizeLegacyActivity({ ...log, amount: -10 }, options).reason, 'amount');
   assert.equal(normalizeLegacyActivity({ amount: 10 }, options).reason, 'date');
   assert.equal(
+    normalizeLegacyActivity({ amount: 10, timestamp: NaN, submitted_date: '2027-02-03' }, options)
+      .reason,
+    'timestamp'
+  );
+  assert.equal(
     normalizeLegacyActivity(log, { ...options, classifyDate: () => null }).reason,
     'classification'
   );

@@ -36,10 +36,19 @@ const dateInZone = (millis, timeZone) => {
 export const normalizeLegacyActivity = (log, options) => {
   const { ownerUid, timeZone, sourceId, index, classifyDate } = options;
   const reject = (reason) => ({ record: null, reason });
-  if (!ownerUid || !sourceId || !Number.isInteger(index) || index < 0) return reject('identity');
+  if (
+    typeof ownerUid !== 'string' ||
+    !ownerUid ||
+    typeof sourceId !== 'string' ||
+    !sourceId ||
+    !Number.isInteger(index) ||
+    index < 0
+  )
+    return reject('identity');
   if (!Number.isSafeInteger(log?.amount) || log.amount <= 0) return reject('amount');
   let timestampDate;
   const createdAt = timestampMillis(log.timestamp);
+  if (log.timestamp !== undefined && createdAt === null) return reject('timestamp');
   try {
     // Also validates the caller-supplied timezone when a historical date has no timestamp.
     const formatted = dateInZone(createdAt ?? 0, timeZone);
