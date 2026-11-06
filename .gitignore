@@ -31,3 +31,4 @@ playwright-report/
 *-debug.log
 
 .test-dist/
+dist-hosting

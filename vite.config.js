@@ -24,7 +24,8 @@ export default defineConfig(({ command }) => {
         },
       },
     ],
-    base: '/the-pushup-challenge-2025/',
+    // GitHub Pages serves under the repository path; Firebase Hosting serves from the root.
+    base: process.env.VITE_BASE || '/the-pushup-challenge-2025/',
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
     },
