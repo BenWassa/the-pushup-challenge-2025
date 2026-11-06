@@ -1,5 +1,5 @@
 rules_version = '2';
-// Candidate v2 rules for emulator verification only. Never deploy without owner approval.
+// v2 rules. Deployed 2026-11-06 with owner approval; see docs/open/003-data-integrity.md for rollback.
 // participants/{authUID}/challenges/{year}/entries/{stableID}
 // Required canonical fields plus revision(int), deleted(bool), updatedAt(epoch ms),
 // lastOperationId(bounded string). UID, year, date, phase, timezone and createdAt immutable.
@@ -61,6 +61,11 @@ service cloud.firestore {
         request.resource.data.updatedAt >= resource.data.updatedAt;
       allow delete: if false;
     }
+    // TRANSITIONAL: the original site still reads and writes these two legacy trees, and the live
+    // rules have always been fully open. Kept exactly as open as before so the old site and its
+    // irreplaceable history keep working. Tighten only with a migration plan and owner approval.
+    match /artifacts/{document=**} { allow read, write: if true; }
+    match /users/{document=**} { allow read, write: if true; }
     match /{document=**} { allow read, write: if false; }
   }
 }

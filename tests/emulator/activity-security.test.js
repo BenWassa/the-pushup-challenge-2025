@@ -68,7 +68,9 @@ test('candidate rules enforce owner-only reads/writes, strict schema and immutab
     await assertFails(deleteDoc(doc(db, path())));
   }
   await assertFails(getDocs(collection(alice, 'participants')));
-  await assertFails(getDoc(doc(alice, 'artifacts/legacy/public/data/users/alice')));
+  // Legacy trees stay open as before so the original site keeps working (transitional).
+  await assertSucceeds(getDoc(doc(alice, 'artifacts/legacy/public/data/users/alice')));
+  await assertFails(getDoc(doc(alice, 'somethingElse/doc')));
   for (const change of [
     { ownerUid: 'bob' },
     { challengeYear: year - 1 },
