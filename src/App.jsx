@@ -5,6 +5,7 @@ import { useChallenge } from './hooks/useChallenge';
 import { createChallengeModel } from './utils/challengeModel';
 import { getDemoFixture } from './data/demoFixture';
 import Home from './components/home/Home';
+import BrandMark from './components/home/BrandMark';
 import HomeSkeleton from './components/home/HomeSkeleton';
 import Settings from './components/app/Settings';
 
@@ -211,8 +212,8 @@ export default function App() {
       </a>
       {!auth.user && !auth.loading && (
         <header className="app-header">
-          <a className="wordmark" href={import.meta.env.BASE_URL}>
-            PushUp
+          <a className="wordmark" href={import.meta.env.BASE_URL} aria-label="PushUp">
+            <BrandMark />
           </a>
         </header>
       )}
