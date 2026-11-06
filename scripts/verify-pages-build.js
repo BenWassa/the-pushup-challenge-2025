@@ -49,6 +49,23 @@ export function verifyPagesBuild(directory, base = PAGES_BASE) {
       throw new Error('PWA icon must use a safe repository-relative URL');
     requireFile(directory, icon.src);
   }
+  const offlineAssets = JSON.parse(
+    readFileSync(requireFile(directory, 'precache-manifest.json'), 'utf8')
+  );
+  if (!Array.isArray(offlineAssets) || !offlineAssets.length)
+    throw new Error('Offline asset manifest is empty');
+  for (const asset of offlineAssets) {
+    if (typeof asset !== 'string' || !/^assets\/[A-Za-z0-9_.-]+\.(js|css)$/.test(asset))
+      throw new Error('Unsafe offline asset path');
+    requireFile(directory, asset);
+  }
+  for (const reference of references.filter((reference) =>
+    /\.(js|css)(?:[?#]|$)/.test(reference)
+  )) {
+    const relative = reference.slice(base.length).split(/[?#]/)[0];
+    if (!offlineAssets.includes(relative))
+      throw new Error('Offline manifest omits an entrypoint asset');
+  }
   requireFile(directory, 'sw.js');
   return { checkedReferences: references.length, checkedIcons: manifest.icons.length };
 }

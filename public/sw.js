@@ -18,9 +18,27 @@ const PRECACHE_URLS = [
 ].map((path) => new URL(path, SCOPE_URL).toString());
 
 self.addEventListener('install', (event) => {
-  // A new version must wait while the old app is active. The UI explicitly
-  // requests activation only after any pending activity operation is resolved.
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)));
+  event.waitUntil(
+    (async () => {
+      const response = await fetch(new URL('precache-manifest.json', SCOPE_URL), {
+        cache: 'no-store',
+      });
+      if (!response.ok) throw new Error('Cannot load offline asset manifest');
+      const assets = await response.json();
+      if (
+        !Array.isArray(assets) ||
+        assets.some(
+          (asset) => typeof asset !== 'string' || !/^assets\/[A-Za-z0-9_.-]+\.(js|css)$/.test(asset)
+        )
+      )
+        throw new Error('Invalid offline asset manifest');
+      const cache = await caches.open(CACHE_NAME);
+      await cache.addAll([
+        ...PRECACHE_URLS,
+        ...assets.map((asset) => new URL(asset, SCOPE_URL).href),
+      ]);
+    })()
+  );
 });
 
 self.addEventListener('message', (event) => {
@@ -55,7 +73,14 @@ const openRuntimeCache = async () => {
 
 const matchCached = async (cache, request) => {
   try {
-    return cache ? await cache.match(request) : null;
+    if (!cache) return null;
+    const url = new URL(typeof request === 'string' ? request : request.url);
+    // Built JS/CSS are public static assets. Their precache fetch has no Origin
+    // header, while a module request may have one; Vary: Origin must not hide
+    // those identical bytes offline. Other resources keep normal Vary matching.
+    const staticAsset =
+      url.href.startsWith(new URL('assets/', SCOPE_URL).href) && /\.(js|css)$/.test(url.pathname);
+    return await cache.match(request, { ignoreVary: staticAsset });
   } catch {
     return null;
   }

@@ -14,18 +14,26 @@ export default defineConfig({
     // GitHub-hosted Ubuntu already provides Chrome; local runs use installed Chromium.
     channel: process.env.CI ? 'chrome' : undefined,
   },
-  webServer: {
-    command: 'npm run dev -- --host 127.0.0.1 --port 4173 --strictPort',
-    url: 'http://127.0.0.1:4173/the-pushup-challenge-2025/',
-    reuseExistingServer: false,
-    env: {
-      VITE_USE_FIREBASE_EMULATORS: 'true',
-      VITE_FIREBASE_PROJECT_ID: 'demo-pushup-2027',
-      VITE_FIREBASE_API_KEY: 'demo-key',
-      VITE_FIREBASE_AUTH_DOMAIN: 'demo-pushup-2027.firebaseapp.com',
-      VITE_FIREBASE_APP_ID: 'demo-app',
-      VITE_ENABLE_V2_CLOUD: 'false',
+  webServer: [
+    {
+      command: 'npm run dev -- --host 127.0.0.1 --port 4173 --strictPort',
+      url: 'http://127.0.0.1:4173/the-pushup-challenge-2025/',
+      reuseExistingServer: false,
+      env: {
+        VITE_USE_FIREBASE_EMULATORS: 'true',
+        VITE_FIREBASE_PROJECT_ID: 'demo-pushup-2027',
+        VITE_FIREBASE_API_KEY: 'demo-key',
+        VITE_FIREBASE_AUTH_DOMAIN: 'demo-pushup-2027.firebaseapp.com',
+        VITE_FIREBASE_APP_ID: 'demo-app',
+        VITE_ENABLE_V2_CLOUD: 'false',
+      },
     },
-  },
+    {
+      command:
+        'VITE_USE_FIREBASE_EMULATORS=true npx vite build --outDir .test-dist && npx vite preview --host 127.0.0.1 --port 4174 --strictPort --outDir .test-dist',
+      url: 'http://127.0.0.1:4174/the-pushup-challenge-2025/',
+      reuseExistingServer: false,
+    },
+  ],
   reporter: [['list'], ['html', { open: 'never' }]],
 });

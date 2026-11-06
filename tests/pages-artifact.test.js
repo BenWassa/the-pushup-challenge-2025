@@ -12,6 +12,7 @@ const fixture = () => {
   writeFileSync(path.join(dir, 'icon-192.png'), 'fictional icon');
   writeFileSync(path.join(dir, 'icon-512.png'), 'fictional icon');
   writeFileSync(path.join(dir, 'sw.js'), '// fictional worker');
+  writeFileSync(path.join(dir, 'precache-manifest.json'), JSON.stringify(['assets/main.js']));
   writeFileSync(
     path.join(dir, 'manifest.webmanifest'),
     JSON.stringify({
@@ -67,6 +68,21 @@ test('Pages artifact preflight rejects origin-root links, missing assets and uns
       })
     );
     assert.throws(() => verifyPagesBuild(dir), /PWA icon must use/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('Pages artifact preflight rejects incomplete and unsafe offline manifests', () => {
+  const dir = fixture();
+  try {
+    for (const assets of [[], ['../other.js'], ['assets/missing.js']]) {
+      writeFileSync(path.join(dir, 'precache-manifest.json'), JSON.stringify(assets));
+      assert.throws(() => verifyPagesBuild(dir), /Offline|offline|Missing build asset/);
+    }
+    writeFileSync(path.join(dir, 'assets', 'other.js'), 'fixture');
+    writeFileSync(path.join(dir, 'precache-manifest.json'), JSON.stringify(['assets/other.js']));
+    assert.throws(() => verifyPagesBuild(dir), /omits an entrypoint/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
