@@ -39,7 +39,7 @@ The Pages workflow now rejects a manual publish if any four required fields are 
 2. Privately approve database/ownership mapping, complete snapshot inventory and restored sample. Confirm the desired migration plan, retention policy and an interruption window.
 3. Verify candidate owner-scoped rules in emulator and approve the exact rule change. No public legacy fallback.
 4. Prepare GitHub Pages **Settings → Pages → Source: GitHub Actions** and verify required Firebase web variables. Keep generated legacy `docs/` assets intact.
-5. In the approved window, deploy reviewed owner-scoped Firestore rules, then switch Pages source and manually dispatch `Validate and deploy PushUp Pages` on `main` with `deploy=true`.
+5. In the approved window, deploy reviewed owner-scoped Firestore rules, then switch Pages source and manually dispatch `Validate and deploy PushUp Pages` on `main` with `deploy=true`. The release workflow runs isolated emulator/browser acceptance and only deploys if both build and integration jobs pass.
 6. Verify the *served* asset/version and actual isolated test account: login, add, confirmed save, edit/undo, reload, cross-device read, deny cross-account reads, offline/error behavior and app update. Test on real Android and iOS if available.
 7. Stop/rollback through the documented secure plan if verification fails. Keep rules deny-by-default; never restore `allow all` as an automatic rollback.
 8. Import archived records only as a separately approved, immutable-snapshot operation, reconcile them, and verify no lost/duplicated totals. Clean obsolete generated `docs/` static assets only after new deployment verification.
@@ -49,3 +49,7 @@ The Pages workflow now rejects a manual publish if any four required fields are 
 No user approval for production rules, legacy data import or site publication has been given in this workflow. Production Firebase rules/project identity, restricted backup retention and UID mapping require an owner-controlled verification. Physical-device acceptance and live fingerprint comparison remain external gates.
 
 Use this document and [release checklist](release-checklist.md) as the approval packet; update their evidence links only after checks actually pass.
+
+### Service-worker update safety
+
+The active application defers an update while an activity operation remains pending. New workers cache the new shell but do **not** call `skipWaiting()` in their install event; only an explicit `SKIP_WAITING` message from the UI activates a waiting worker. First-time installations activate normally without an existing controller. This prevents an automatic mid-save client replacement and is covered by `tests/service-worker.test.js`. Verify the installed old-to-new update path on a real device before production release.
