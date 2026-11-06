@@ -33,3 +33,10 @@
 - [Release and rollback checklist](../release-checklist.md) records precise cutover gates, baseline asset identity and recovery procedures.
 
 Local validation: lint, 23 native Node tests across the integrated baseline (including disposable build), production build passed. Cache open/read/write failures are tested to preserve successful network responses. No generated legacy docs assets changed. Real-device PWA, real cloud authorization, backup restoration and final integrated UI validation are still required. Keep #6 open.
+
+
+## End-to-end recovery batch (November 5, 2026)
+
+Added read-only logical backup enumeration with fixed readTime and typed document values, restricted checksummed files, explicit ownership/timezone mapping, pure migration/quarantine/reconciliation reports, deterministic immutable legacy entry IDs, and emulator-only create/readback restore. See [release checklist](../release-checklist.md#recovery-tooling-and-approval-packet).
+
+An actual isolated STANDARD Firestore emulator rehearsal restored fictional source documents, imported archive entries, verified idempotence, rejected a conflicting import without overwrite, and verified retained values. This is evidence for tooling, not a completed production backup or owner mapping. The backup CLI was not executed against production by this agent. Actual project-wide scope, Auth export, production restore and approved ownership remain open. Root's read-only production audit identified permissive deployed rules and no UID ownership fields; the coordinated release must address that exposure without breaking the preserved legacy application.
