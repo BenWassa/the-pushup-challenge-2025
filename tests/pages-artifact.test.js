@@ -53,6 +53,10 @@ test('Pages artifact preflight rejects origin-root links, missing assets and uns
     );
     assert.throws(() => verifyPagesBuild(dir), /Missing build asset/);
     writeFileSync(
+      html,
+      `<html><head><title>PushUp — Annual Challenge Journal</title><link rel="manifest" href="${PAGES_BASE}manifest.webmanifest"></head><body><script src="${PAGES_BASE}assets/main.js"></script></body></html>`
+    );
+    writeFileSync(
       path.join(dir, 'manifest.webmanifest'),
       JSON.stringify({
         name: 'PushUp — Annual Challenge Journal',
