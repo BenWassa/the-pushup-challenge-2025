@@ -1,12 +1,12 @@
 {
-  "name": "Pushup Challenge 2025",
-  "short_name": "Pushup 2025",
-  "description": "Track your daily pushups and stay consistent.",
+  "name": "PushUp — Annual Challenge Journal",
+  "short_name": "PushUp",
+  "description": "Track daily push-ups, training and annual challenge progress.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#f5f2ee",
+  "theme_color": "#f5f2ee",
   "orientation": "portrait",
   "icons": [
     {
