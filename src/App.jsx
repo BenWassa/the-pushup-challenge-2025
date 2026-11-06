@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from './hooks/useAuth';
 import { useActivityData } from './hooks/useActivityData';
 import { useChallenge } from './hooks/useChallenge';
-import { toLocalDate } from './utils/challenges';
+import { createChallengeModel } from './utils/challengeModel';
 import ActivityList from './components/app/ActivityList';
 import History from './components/app/History';
 import Account from './components/app/Account';
@@ -74,22 +74,29 @@ function SignIn({ auth }) {
 
 export default function App() {
   const auth = useAuth();
-  const [selectedYear, setSelectedYear] = useState(() =>
-    Number(toLocalDate(new Date(), 'America/Toronto').slice(0, 4))
-  );
+  // Preferences and the clock are resolved before subscribing to a year. The pure
+  // read model then combines that same calendar context with confirmed records.
+  const calendar = useChallenge();
+  const { selectedYear, setSelectedYear } = calendar;
   const data = useActivityData({
     db: auth.db,
     user: auth.user,
     isDemoMode: auth.isDemoMode,
     year: selectedYear,
+    timeZone: calendar.timeZone,
   });
-  const challenge = useChallenge({
-    records: data.records,
-    selectedYear,
-    onYearChange: setSelectedYear,
-    availableYears: data.years || [],
-  });
+  const challenge = {
+    ...calendar,
+    ...createChallengeModel({
+      records: data.records,
+      year: selectedYear,
+      timeZone: calendar.timeZone,
+      now: calendar.today,
+      availableYears: data.years || [],
+    }),
+  };
   const [view, setView] = useState('log');
+  const [yearInput, setYearInput] = useState('');
   const [online, setOnline] = useState(() => navigator.onLine);
   const [update, setUpdate] = useState(false);
   const [updateError, setUpdateError] = useState('');
@@ -203,6 +210,33 @@ export default function App() {
                   : 'Read-only edition'}
               </p>
             </div>
+            <details className="year-jump">
+              <summary>Open another year</summary>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const year = Number(yearInput);
+                  if (Number.isInteger(year) && year >= 1000 && year <= 9999) {
+                    setSelectedYear(year);
+                    setYearInput('');
+                  }
+                }}
+              >
+                <label>
+                  Year
+                  <input
+                    type="number"
+                    min="1000"
+                    max="9999"
+                    required
+                    value={yearInput}
+                    onChange={(event) => setYearInput(event.target.value)}
+                    placeholder="YYYY"
+                  />
+                </label>
+                <button disabled={saving || Boolean(data.pendingOperation)}>Open year</button>
+              </form>
+            </details>
             <nav className="main-nav" aria-label="Journal">
               {[
                 ['log', 'Log'],
