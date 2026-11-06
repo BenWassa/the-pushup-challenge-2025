@@ -140,3 +140,11 @@ The retry journal preserves multiple outstanding operation IDs and clears only t
 
 - Google provider was already enabled; `benwassa.github.io` added to authorized domains.
 - All 76 anonymous Auth accounts deleted; only `haddonbenjamin@gmail.com` kept. Firestore data was not touched (history is stored by profile name, not account ID). Pre-delete export kept locally in the gitignored `backups.local/`.
+
+### 2026 history import (2026-11-06, owner-approved)
+
+- The owner's legacy `ben` profile (99 sets, 1,630 push-ups, archive years only) was imported into the owner's Google-sign-in account namespace as immutable `legacy_*` entries using `scripts/migration-production.js` (dry-run by default; one atomic create-only batch; read-back verified; refuses to overwrite). Rehearsed twice in the emulator first, including the refusal on re-run.
+- Independent production check: 99 unique entries, sum 1,630, equal to the source reconciliation. The empty `tim` profile (0 logs) had nothing to import. All legacy documents were left untouched and read-only in place.
+- The previous email/password account was disabled (archived, reversible by re-enabling), not deleted. The UID mapping and snapshots stay in the gitignored `backups.local/` and are not recorded here.
+- Rollback: delete only the 99 `legacy_*` documents under the owner's namespace (IDs are in the plan), re-enable the old account if needed. The legacy trees were never modified.
+- Imported history appears in the app once the cloud release flag (`VITE_ENABLE_V2_CLOUD=true`) is on in the published build.
