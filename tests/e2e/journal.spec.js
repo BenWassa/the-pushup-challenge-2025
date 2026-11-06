@@ -138,5 +138,6 @@ test('isolated Firebase emulator confirms add, reload, history, two-tab sync and
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByRole('button', { name: 'Log', exact: true }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
 });
