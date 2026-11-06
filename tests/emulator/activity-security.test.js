@@ -149,3 +149,16 @@ test('archived years and reserved imported IDs remain read-only even for the own
     })
   );
 });
+
+test('owner can tombstone directly written malformed timezone without relaxing ownership', async () => {
+  await environment.clearFirestore();
+  const db = environment.authenticatedContext('alice').firestore();
+  const record = { ...fresh(), timeZone: 'Not_A_Zone' };
+  await assertSucceeds(setDoc(doc(db, path()), record));
+  const repository = createActivityRepository(db, 'alice', year);
+  await repository.execute(
+    createChangeOperation('remove', record, undefined, 'remove-invalid-zone')
+  );
+  assert.equal((await getDoc(doc(db, path()))).data().deleted, true);
+  await assertFails(getDoc(doc(environment.authenticatedContext('bob').firestore(), path())));
+});

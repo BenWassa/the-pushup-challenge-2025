@@ -33,7 +33,10 @@ export function validateActivity(record, ownerUid, year) {
   try {
     new Intl.DateTimeFormat('en', { timeZone: record.timeZone });
   } catch {
-    throw activityError('invalid-activity', 'Choose a valid timezone.');
+    // Owner-created malformed metadata must not trap an otherwise valid set forever.
+    // Tombstones preserve the original metadata and all other validation still applies.
+    if (record.deleted !== true)
+      throw activityError('invalid-activity', 'Choose a valid timezone.');
   }
 }
 

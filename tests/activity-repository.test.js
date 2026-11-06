@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createAddOperation, createChangeOperation } from '../src/data/activityRepository.js';
+import {
+  createAddOperation,
+  createChangeOperation,
+  applyActivityOperation,
+  validateActivity,
+} from '../src/data/activityRepository.js';
 import { createMemoryRepository, resetMemoryActivities } from '../src/data/memoryRepository.js';
 
 const input = {
@@ -131,4 +136,31 @@ test('confirming one journaled operation does not discard another tab change', a
   assert.deepEqual(readPending(storage, key, 'owner', 2027), second);
   clearPending(storage, key, second.operationId);
   assert.equal(readPending(storage, key, 'owner', 2027), null);
+});
+
+test('malformed IANA metadata blocks edit but allows a safe owner tombstone', () => {
+  const original = {
+    ...createAddOperation(input, 'owner', 2027, 'malformed-zone', 1000).record,
+    timeZone: 'Not_A_Zone',
+  };
+  const before = JSON.stringify(original);
+  const edited = applyActivityOperation(
+    original,
+    createChangeOperation('edit', original, 30, 'edit-malformed', 2000)
+  );
+  assert.throws(() => validateActivity(edited, 'owner', 2027), { code: 'invalid-activity' });
+  const removed = applyActivityOperation(
+    original,
+    createChangeOperation('remove', original, undefined, 'remove-malformed', 2000)
+  );
+  assert.doesNotThrow(() => validateActivity(removed, 'owner', 2027));
+  assert.equal(removed.deleted, true);
+  assert.equal(removed.timeZone, original.timeZone);
+  assert.equal(JSON.stringify(original), before);
+  assert.throws(() => validateActivity({ ...removed, amount: -1 }, 'owner', 2027), {
+    code: 'invalid-activity',
+  });
+  assert.throws(() => validateActivity({ ...removed, timeZone: 'x'.repeat(101) }, 'owner', 2027), {
+    code: 'invalid-activity',
+  });
 });
