@@ -10,7 +10,7 @@ Publishing the new client alone under old rules would not repair access exposure
 
 ## Pre-release evidence to verify privately
 
-- **Correct environment:** independently verify exact project ID, database, Firebase Auth account identity and the *deployed* rules, not just repository files.
+- **Correct environment:** independently verify exact project ID, database, Firebase Auth account identity and the _deployed_ rules, not just repository files.
 - **Recoverability:** retain a restricted, independently verifiable backup (checksum, frozen read time and full collection inventory). Rehearse restoration in an isolated demo emulator and preserve a documented recovery path for Firebase Auth/configuration separately.
 - **History:** review explicit legacy profile-to-Auth-UID/year/timezone mappings, all quarantined records, unmatched profiles, counter discrepancies and stable immutable snapshot IDs. No guessing based on email or username. Obtain separate approval for import.
 - **Acceptance:** green source lint, unit tests, Firestore rules emulator, and Playwright browser jobs. Manually test sign-in, save confirmation, reload, retry, two-device synchronization, correction, archival history, installed PWA update and responsive accessibility.
@@ -29,7 +29,7 @@ For an explicitly approved publication, configure **repository/environment Actio
 - `VITE_FIREBASE_APP_ID`
 - Optional: `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`
 
-These are public Firebase *web-app* settings, **not** service-account credentials. They do not establish private access by themselves; deployed Firestore rules do.
+These are public Firebase _web-app_ settings, **not** service-account credentials. They do not establish private access by themselves; deployed Firestore rules do.
 
 The Pages workflow now rejects a manual publish if any four required fields are absent or the project ID has the `demo-` prefix. A successful config check does **not** verify that the project ID is the intended real project; the owner must compare it to the audited database. Normal PR/push builds leave `VITE_ENABLE_V2_CLOUD=false`; the manually dispatched approved release sets it to `true` only for that build.
 
@@ -40,7 +40,7 @@ The Pages workflow now rejects a manual publish if any four required fields are 
 3. Verify candidate owner-scoped rules in emulator and approve the exact rule change. No public legacy fallback.
 4. Prepare GitHub Pages **Settings → Pages → Source: GitHub Actions** and verify required Firebase web variables. Keep generated legacy `docs/` assets intact.
 5. In the approved window, deploy reviewed owner-scoped Firestore rules, then switch Pages source and manually dispatch `Validate and deploy PushUp Pages` on `main` with `deploy=true`. The release workflow runs isolated emulator/browser acceptance and only deploys if both build and integration jobs pass.
-6. Verify the *served* asset/version and actual isolated test account: login, add, confirmed save, edit/undo, reload, cross-device read, deny cross-account reads, offline/error behavior and app update. Test on real Android and iOS if available.
+6. Verify the _served_ asset/version and actual isolated test account: login, add, confirmed save, edit/undo, reload, cross-device read, deny cross-account reads, offline/error behavior and app update. Test on real Android and iOS if available.
 7. Stop/rollback through the documented secure plan if verification fails. Keep rules deny-by-default; never restore `allow all` as an automatic rollback.
 8. Import archived records only as a separately approved, immutable-snapshot operation, reconcile them, and verify no lost/duplicated totals. Clean obsolete generated `docs/` static assets only after new deployment verification.
 
@@ -53,3 +53,13 @@ Use this document and [release checklist](release-checklist.md) as the approval 
 ### Service-worker update safety
 
 The active application defers an update while an activity operation remains pending. New workers cache the new shell but do **not** call `skipWaiting()` in their install event; only an explicit `SKIP_WAITING` message from the UI activates a waiting worker. First-time installations activate normally without an existing controller. This prevents an automatic mid-save client replacement and is covered by `tests/service-worker.test.js`. Verify the installed old-to-new update path on a real device before production release.
+
+## Firebase Hosting (owner decision, 2026-11-06)
+
+The owner chose Firebase Hosting over GitHub Pages for the 2027 app: `https://pushup2025-df07b.web.app` (default site of project `pushup2025-df07b`, which had no release before this). The legacy GitHub Pages site and its `docs/` output are untouched and keep working.
+
+- Build: `npm run build:hosting` (root base `/`, cloud saving enabled, output `dist-hosting/`, gitignored). Firebase web settings come from the local `.env.local`.
+- Deploy: `npm run deploy:hosting` (lint, tests, build, `firebase deploy --only hosting`). Hosting only; it never deploys rules or touches Firestore data.
+- Headers: hashed assets are immutable; `sw.js`, `index.html`, the manifest and the precache list are `no-cache` so installed clients see updates.
+- Rollback: Firebase console → Hosting → release history → roll back to the previous release (or redeploy a reverted commit). Rules and data are independent of hosting.
+- Verify after each deploy: sign in, log +10, reload, undo, install to the home screen on a phone.
