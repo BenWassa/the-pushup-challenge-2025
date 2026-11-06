@@ -5,11 +5,9 @@
 **Owner decision:** strategy direction approved, solo-first for 2027
 
 ## Problem
-
 Current Vite build output is `docs/`, and legacy `build:pages` deletes it, so source documentation in `docs/open` or `docs/closed` is unsafe.
 
 ## Planned / staged work
-
 - [x] Confirm original 2025-named repository is the ongoing base rather than the local-only template.
 - [x] Document vision, strategy, architecture and agent conventions.
 - [x] Change build output to ignored `dist/`; remove destructive docs deletion.
@@ -22,7 +20,6 @@ Current Vite build output is `docs/`, and legacy `build:pages` deletes it, so so
 - [ ] Close issue with deployment validation evidence and move record to `docs/closed/`.
 
 ## Acceptance checks
-
 - `npm run build` does not modify `docs/` or historical data.
 - `npm run build:pages` is non-destructive.
 - GitHub workflow builds `dist/` on a pinned Node version and runs lint/tests.
@@ -30,13 +27,10 @@ Current Vite build output is `docs/`, and legacy `build:pages` deletes it, so so
 - Docs accurately distinguish staged config from completed deployment.
 
 ## Risks / manual steps
-
 The existing Pages site may currently publish `main/docs`. The new workflow requires manual configuration; until switched, the old site will keep serving the existing build. Do not delete generated `docs` assets yet. PR #7 is merged; deployment cutover remains unverified.
 
 ## Review evidence
-
 PR [#7](https://github.com/BenWassa/the-pushup-challenge-2025/pull/7) merged at `3bfaf1d`. GitHub Pages API reports `build_type: legacy`, branch `main`, path `/docs`. Existing URL returned HTTP 200 after merge. No Firebase records or settings were changed. Keep this record open until source cutover and runtime verification are complete.
 
 ### Deployment guard follow-up
-
 The merge-triggered Actions run [42135963914](https://github.com/BenWassa/the-pushup-challenge-2025/actions/runs/42135963914) reported deploy success despite Pages still reporting legacy source. Do not rely on that setting to prevent Actions publication. A legacy Pages rebuild was requested to restore the preserved artifact. The follow-up workflow gates artifact publication and deploy on explicit manual `deploy: true`; ordinary pushes and PRs only validate. This is not approval to cut over production.
