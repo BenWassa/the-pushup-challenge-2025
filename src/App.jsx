@@ -5,6 +5,7 @@ import { useChallenge } from './hooks/useChallenge';
 import { createChallengeModel } from './utils/challengeModel';
 import { getDemoFixture } from './data/demoFixture';
 import Home from './components/home/Home';
+import HomeSkeleton from './components/home/HomeSkeleton';
 import Settings from './components/app/Settings';
 
 function Tally() {
@@ -172,6 +173,8 @@ export default function App() {
         ? 'Saved · demo resets on reload'
         : 'Saved'
       : '';
+  // Online (or demo) first load of the year's sets: show the Home silhouette, not zeros that jump.
+  const showDataSkeleton = data.loading && !data.readError && (online || auth.isDemoMode);
   const busy = saving || Boolean(data.pendingOperation) || (!online && !auth.isDemoMode);
   const records = [...challenge.yearRecords].sort(
     (a, b) => (b.createdAt || 0) - (a.createdAt || 0) || b.id.localeCompare(a.id)
@@ -202,11 +205,11 @@ export default function App() {
       timeZone: challenge.timeZone,
     });
   return (
-    <div className={`app-shell ${auth.user ? 'signed-in' : ''}`}>
+    <div className={`app-shell ${auth.user || auth.loading ? 'signed-in' : ''}`}>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      {!auth.user && (
+      {!auth.user && !auth.loading && (
         <header className="app-header">
           <a className="wordmark" href={import.meta.env.BASE_URL}>
             PushUp
@@ -236,10 +239,7 @@ export default function App() {
             <p className="quiet">Contact the app owner to complete release configuration.</p>
           </section>
         ) : auth.loading ? (
-          <section aria-busy="true">
-            <h1>Opening your journal…</h1>
-            <p role="status">Checking your sign-in.</p>
-          </section>
+          <HomeSkeleton />
         ) : !auth.user ? (
           <SignIn auth={auth} />
         ) : auth.accessStatus === 'pending' ? (
@@ -254,12 +254,8 @@ export default function App() {
             {data.blockedReason && challenge.canLog && (
               <p className="notice">{data.blockedReason}</p>
             )}
-            {data.loading && (
-              <p role="status">
-                {!online && !auth.isDemoMode
-                  ? 'Reconnect to load confirmed sets.'
-                  : 'Loading confirmed sets…'}
-              </p>
+            {data.loading && !online && !auth.isDemoMode && (
+              <p role="status">Reconnect to load confirmed sets.</p>
             )}
             {challenge.summary.metadataWarnings.length > 0 && (
               <aside className="notice" role="status" aria-label="Activity data review">
@@ -293,7 +289,10 @@ export default function App() {
                 </div>
               </div>
             )}
-            {view === 'home' && (
+            {view === 'home' && showDataSkeleton && (
+              <HomeSkeleton label="Loading confirmed sets…" />
+            )}
+            {view === 'home' && !showDataSkeleton && (
               <Home
                 challenge={challenge}
                 data={data}

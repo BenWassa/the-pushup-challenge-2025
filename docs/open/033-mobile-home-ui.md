@@ -111,3 +111,18 @@ view, use a normal dev build with your own Firebase sign-in; nothing here change
 
 Revert the PR; there are no data migrations, rule changes or deployments. The old UI is intact on
 `style/app-ui-v2` and `main`.
+
+## Loading states (follow-up)
+
+Problem: on every refresh a signed-in user saw a blank page, then bare "Opening your journal…" text
+(read as an unstyled page), then Home with zeros and a "Loading confirmed sets…" line, then real data.
+
+Principles applied: paint immediately, one stable silhouette, no layout shift, no jumping numbers.
+
+- `index.html` carries critical inline CSS (app background, skeleton) and a static branded shell, so the
+  first frame is correct even before JavaScript or the main stylesheet (also removes the dev-server blank).
+- `HomeSkeleton` has the identical silhouette and is used for the sign-in check and for the first
+  load of a year's sets; the shell hands over to it without movement.
+- Screen readers get one polite status line; the skeleton is hidden from them. Motion respects reduced-motion.
+- `tests/boot-shell.test.js` keeps the shell, the skeleton and the background token in sync.
+- Offline still shows "Reconnect to load confirmed sets."; sign-in, errors and Settings are unchanged.
