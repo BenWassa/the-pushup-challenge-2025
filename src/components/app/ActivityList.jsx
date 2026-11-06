@@ -21,8 +21,7 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
             <strong>{record.amount} push-ups</strong>
             {record.provenance && <span>Imported history · read-only</span>}
             <span>
-              {record.localDate} ·{' '}
-              {reportingLabel(record)}
+              {record.localDate} · {reportingLabel(record)}
             </span>
           </div>
           {canEdit &&
