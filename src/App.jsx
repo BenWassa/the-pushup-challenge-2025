@@ -8,6 +8,7 @@ import Home from './components/home/Home';
 import BrandMark from './components/home/BrandMark';
 import HomeSkeleton from './components/home/HomeSkeleton';
 import Settings from './components/app/Settings';
+import History from './components/home/History';
 
 function Tally() {
   // Decorative tally marks: counted sets in accent, the next ones still to come in grey.
@@ -304,6 +305,7 @@ export default function App() {
                 latest={latest}
                 onAdd={add}
                 onSettings={() => setView('settings')}
+                onHistory={() => setView('history')}
                 onBackToCurrent={() => setSelectedYear(currentYear)}
               />
             )}
@@ -321,6 +323,14 @@ export default function App() {
                 locked={saving || Boolean(data.pendingOperation)}
                 onBack={() => setView('home')}
                 onOpenYear={openYear}
+              />
+            )}
+            {view === 'history' && (
+              <History
+                challenge={challenge}
+                data={data}
+                busy={busy}
+                onBack={() => setView('home')}
               />
             )}
           </>

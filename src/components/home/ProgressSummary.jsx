@@ -9,7 +9,7 @@ export default function ProgressSummary({ primary, official, streak }) {
   return (
     <section className="summary" aria-label="Progress">
       <div className="summary-today">
-        <p className="summary-label">{primary.label}</p>
+        {primary.label && <p className="summary-label">{primary.label}</p>}
         <p className="summary-hero" data-testid="primary-total">
           <strong>{primary.value}</strong>
           <span>push-ups</span>

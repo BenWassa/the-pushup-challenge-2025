@@ -35,8 +35,10 @@ function MonthActivity({
   remove,
   initialMonth,
   onSelectedChange,
+  onOpenHistory,
 }) {
   const todayYear = Number(today.slice(0, 4));
+  const lastMonth = todayYear === year ? Number(today.slice(5, 7)) : 12;
   const defaultMonth = initialMonth ?? (todayYear === year ? Number(today.slice(5, 7)) : 2);
   const defaultSelection = (month) => {
     const first = buildMonthGrid(year, month).days[0].date;
@@ -60,6 +62,7 @@ function MonthActivity({
   }, [selected]);
 
   function navigateMonth(delta) {
+    if (month + delta < 1 || month + delta > lastMonth) return;
     setSelected(defaultSelection(month + delta));
   }
 
@@ -77,17 +80,20 @@ function MonthActivity({
     if (Object.hasOwn(offsets, event.key)) {
       next = moveDate(date, offsets[event.key]);
     } else if (event.key === 'PageUp' || event.key === 'PageDown') {
+      if (onOpenHistory) return;
       const nextMonth = month + (event.key === 'PageUp' ? -1 : 1);
       event.preventDefault();
-      if (nextMonth < 1 || nextMonth > 12) return;
+      if (nextMonth < 1 || nextMonth > lastMonth) return;
       const days = buildMonthGrid(year, nextMonth).days;
       next = days[Math.min(day, days.length) - 1].date;
     } else {
       return;
     }
     event.preventDefault();
-    const first = `${year}-01-01`;
-    const last = `${year}-12-31`;
+    const first = onOpenHistory ? grid.days[0].date : `${year}-01-01`;
+    const last = onOpenHistory
+      ? grid.days.at(-1).date
+      : buildMonthGrid(year, lastMonth).days.at(-1).date;
     next = next < first ? first : next > last ? last : next;
     focusPending.current = next !== selected;
     setSelected(next);
@@ -113,29 +119,39 @@ function MonthActivity({
     <section className="as-root" aria-label="Daily push-up activity">
       <header className="as-header">
         <div className="as-heading">
-          <h2 className="as-title">{formatMonthTitle(year, month)}</h2>
-          <p className="as-subtitle">Daily push-up activity</p>
+          <h2 className="as-title">
+            {onOpenHistory ? (
+              <button className="as-history-link" type="button" onClick={onOpenHistory}>
+                {formatMonthTitle(year, month)}
+                <ChevronRight className="as-history-chevron" aria-hidden="true" />
+              </button>
+            ) : (
+              formatMonthTitle(year, month)
+            )}
+          </h2>
         </div>
-        <div className="as-navigation">
-          <button
-            className="as-nav"
-            type="button"
-            aria-label="Previous month"
-            disabled={month === 1}
-            onClick={() => navigateMonth(-1)}
-          >
-            <ChevronLeft aria-hidden="true" />
-          </button>
-          <button
-            className="as-nav"
-            type="button"
-            aria-label="Next month"
-            disabled={month === 12}
-            onClick={() => navigateMonth(1)}
-          >
-            <ChevronRight aria-hidden="true" />
-          </button>
-        </div>
+        {!onOpenHistory && (
+          <div className="as-navigation">
+            <button
+              className="as-nav"
+              type="button"
+              aria-label="Previous month"
+              disabled={month === 1}
+              onClick={() => navigateMonth(-1)}
+            >
+              <ChevronLeft aria-hidden="true" />
+            </button>
+            <button
+              className="as-nav"
+              type="button"
+              aria-label="Next month"
+              disabled={month >= lastMonth}
+              onClick={() => navigateMonth(1)}
+            >
+              <ChevronRight aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </header>
       <div className="as-grid">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
@@ -166,9 +182,7 @@ function MonthActivity({
               onClick={() => setSelected(date)}
               onKeyDown={(event) => handleKeyDown(event, date, day)}
             >
-              <span className={`as-square as-heat-${heatLevel(count)}`} aria-hidden="true">
-                {date === today && <span className="as-today-mark" />}
-              </span>
+              <span className={`as-square as-heat-${heatLevel(count)}`} aria-hidden="true" />
             </button>
           );
         })}
@@ -181,6 +195,12 @@ function MonthActivity({
           ))}
         </span>
         <span>More activity</span>
+        {todayYear === year && grid.days.some(({ date }) => date > today) && (
+          <>
+            <span className="as-swatch as-upcoming-swatch" aria-hidden="true" />
+            <span>Upcoming</span>
+          </>
+        )}
       </div>
       <section className="as-detail" aria-live="polite" aria-atomic="true">
         <h3 className="as-date">{formatDateLong(selected)}</h3>

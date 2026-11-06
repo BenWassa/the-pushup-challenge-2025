@@ -184,7 +184,7 @@ test('activity squares are named with date and total and work from the keyboard'
   await page.keyboard.press('ArrowDown');
   await expect(page.getByRole('heading', { name: 'Tuesday, February 9, 2027' })).toBeVisible();
   await page.keyboard.press('PageDown');
-  await expect(page.getByRole('heading', { name: 'March 2027' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'February 2027' })).toBeVisible();
   const findings = await new AxeBuilder({ page }).analyze();
   expect(
     findings.violations
@@ -211,4 +211,32 @@ test('fictional Feb 10 2027 fixture shows 60 today, 445 / 2,000 and a streak, an
   await expect(page.getByTestId('official-total')).toHaveText('470 / 2,000');
   await page.getByRole('button', { name: /Undo latest set \(25\)/ }).click();
   await expect(today).toHaveText('60');
+});
+
+test('current month blocks future month navigation by button and keyboard', async ({ page }) => {
+  await page.goto(`${appPath}?mode=demo&fixture=feb-10-2027`);
+  await expect(page.getByRole('button', { name: 'Next month' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Previous month' })).toHaveCount(0);
+  await expect(page.getByText('Daily push-up activity', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'February 2027' }).click();
+  await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible();
+  const monthTitle = page.getByRole('heading', { name: 'February 2027' });
+  await expect(monthTitle).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next month' })).toBeDisabled();
+  const selected = page.locator('.as-cell[aria-pressed="true"]');
+  await selected.focus();
+  await page.keyboard.press('PageDown');
+  await expect(monthTitle).toBeVisible();
+  await page.locator('.as-cell').last().click();
+  await page.keyboard.press('ArrowRight');
+  await expect(monthTitle).toBeVisible();
+  await expect(page.locator('.as-cell[aria-pressed="true"]')).toHaveAttribute(
+    'aria-label',
+    /February 28, 2027/
+  );
+  await page.getByRole('button', { name: 'Previous month' }).click();
+  await expect(page.getByRole('heading', { name: 'January 2027' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next month' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Next month' }).click();
+  await expect(monthTitle).toBeVisible();
 });

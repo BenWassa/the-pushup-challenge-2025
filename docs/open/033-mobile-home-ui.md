@@ -114,6 +114,26 @@ Revert the PR; there are no data migrations, rule changes or deployments. The ol
 
 ## Loading states (follow-up)
 
+Owner-requested copy cleanup: removed the “Today · confirmed” label above today's total.
+The total, save feedback and archived-year label remain available.
+
+Owner-requested compact heatmap: the month grid fills the available width with 28px-high
+date buttons and closely spaced heat cells that fill each column. Vertical spacing around the grid, legend and
+selected-day details is reduced. Keyboard navigation is preserved.
+
+Current-year month navigation stops at the current month, including keyboard navigation.
+Archived years retain access to all twelve months.
+
+Home now shows the month/year as a button with a matching-size red chevron, without month arrows or
+the redundant daily activity subtitle. It opens a separate History screen with a larger
+month grid, selected-day sets and previous/next controls. Home keyboard selection stays
+within its displayed month; History retains month browsing up to the current month.
+
+Visual refinement: removed dotted future-cell outlines and default cell borders, darkened
+empty cells. A subsequent refinement distinguishes future days with hollow solid-border
+cells and an “Upcoming” legend, while past days remain filled. Today, selection and
+keyboard focus remain explicit.
+
 Problem: on every refresh a signed-in user saw a blank page, then bare "Opening your journal…" text
 (read as an unstyled page), then Home with zeros and a "Loading confirmed sets…" line, then real data.
 

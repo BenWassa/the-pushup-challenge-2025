@@ -40,6 +40,7 @@ export default function Home({
   latest,
   onAdd,
   onSettings,
+  onHistory,
   onBackToCurrent,
 }) {
   const { summary, selectedYear, canLog } = challenge;
@@ -48,7 +49,6 @@ export default function Home({
   const canEdit = challenge.canLog && data.canWrite && !busy;
   const primary = canLog
     ? {
-        label: 'Today · confirmed',
         value: summary.todayTotal,
         note: dayNote(challenge),
       }
@@ -107,6 +107,7 @@ export default function Home({
         </p>
       )}
       <ActivitySquares
+        onOpenHistory={onHistory}
         key={selectedYear}
         year={selectedYear}
         today={challenge.today}
