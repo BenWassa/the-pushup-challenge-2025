@@ -117,6 +117,10 @@ Security-rules-auditor assessment (candidate only):
 
 ### Validation and remaining acceptance
 
-Local lint, 28 unit/regression tests and production build pass. Three emulator suites cover authorization/schema attacks, duplicate adds, concurrent stale edits, safe tombstone retry, and immutable archives. The rules compile in the Standard Firestore emulator. The existing bundle-size warning remains. Integrated browser login/reload/cross-device/offline journeys are owned by release assurance and must pass after the mobile adapter is connected.
+Local lint, 30 unit/regression tests and production build pass. Three emulator suites cover authorization/schema attacks, duplicate adds, concurrent stale edits, safe tombstone retry, and immutable archives. The rules compile in the Standard Firestore emulator. The existing bundle-size warning remains. Integrated browser login/reload/cross-device/offline journeys are owned by release assurance and must pass after the mobile adapter is connected.
 
 No production rules, records, Pages configuration or publication was changed. #3 remains open until real ownership mapping, backup restoration/reconciliation, approved rule cutover and verified production persistence are complete.
+
+Review hardening: seeded demo creation instants use their original activity dates so undo targets the newest actual set. Year options derive from configured editions/current year. A 15-second confirmation timeout retains the same pending operation and permits idempotent retry; the original transaction is not cancelled and only server acknowledgement can establish success.
+
+The retry journal preserves multiple outstanding operation IDs and clears only the confirmed operation, avoiding accidental removal of another tab's pending change. Each operation uses a separate atomic browser-storage key, so concurrent tabs cannot overwrite each other's journal slots. The durable cloud transaction ID and server reconciliation remain authoritative.

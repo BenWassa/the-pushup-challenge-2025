@@ -5,7 +5,7 @@ import {
   createChangeOperation,
 } from '../data/activityRepository.js';
 import { journalKey, readPending, writePending, clearPending } from '../data/activityJournal.js';
-import { toLocalDate } from '../utils/challenges.js';
+import { CHALLENGES, toLocalDate } from '../utils/challenges.js';
 import { createMemoryRepository } from '../data/memoryRepository.js';
 
 const localEmulatorEnabled = () =>
@@ -21,6 +21,8 @@ const journalStorage = () => {
 };
 const friendlyError = (error) => {
   if (error?.code === 'conflict' || error?.code?.startsWith('invalid-')) return error.message;
+  if (error?.code === 'uncertain')
+    return 'Confirmation is taking longer than expected. Retry the same set safely; do not add it again.';
   if (error?.code === 'permission-denied')
     return 'This account cannot save activity. Your set has not been confirmed.';
   if (error?.code === 'unavailable' || error?.code === 'offline')
@@ -79,7 +81,7 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
           pending.current &&
           records.some((record) => record.lastOperationId === pending.current.operationId)
         ) {
-          if (!isDemoMode) clearPending(journalStorage(), pendingKey);
+          if (!isDemoMode) clearPending(journalStorage(), pendingKey, pending.current.operationId);
           pending.current = null;
           setState((current) => ({
             ...current,
@@ -124,12 +126,21 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
         saveState: 'saving',
         pendingOperation: operation,
       }));
+      let confirmationTimer;
       try {
         if (!isDemoMode) writePending(journalStorage(), pendingKey, ownerUid, year, operation);
         if (!isDemoMode && typeof navigator !== 'undefined' && !navigator.onLine)
           throw Object.assign(new Error('offline'), { code: 'offline' });
-        await repository.execute(operation);
-        if (!isDemoMode) clearPending(journalStorage(), pendingKey);
+        await Promise.race([
+          repository.execute(operation),
+          new Promise((_, reject) => {
+            confirmationTimer = setTimeout(
+              () => reject(Object.assign(new Error('unconfirmed'), { code: 'uncertain' })),
+              15000
+            );
+          }),
+        ]);
+        if (!isDemoMode) clearPending(journalStorage(), pendingKey, operation.operationId);
         if (generation.current !== token) return false;
         pending.current = null;
         setState((current) => ({
@@ -141,6 +152,8 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
         return true;
       } catch (error) {
         if (generation.current !== token) return false;
+        if (recordsRef.current.some((record) => record.lastOperationId === operation.operationId))
+          return true;
         setState((current) => ({
           ...current,
           error: friendlyError(error),
@@ -149,6 +162,7 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
         }));
         return false;
       } finally {
+        clearTimeout(confirmationTimer);
         if (generation.current === token) busy.current = false;
       }
     },
@@ -196,15 +210,20 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
     [prepare]
   );
   const retry = useCallback(() => {
+    if (state.readError && repository) {
+      setSubscriptionVersion((value) => value + 1);
+      return Promise.resolve(true);
+    }
     if (pending.current) return canWrite ? execute(pending.current) : Promise.resolve(false);
     if (!repository) return Promise.resolve(false);
     setSubscriptionVersion((value) => value + 1);
     return Promise.resolve(true);
-  }, [execute, canWrite, repository]);
+  }, [execute, canWrite, repository, state.readError]);
   const discardPending = useCallback(() => {
     if (busy.current) return;
+    if (!isDemoMode && pending.current)
+      clearPending(journalStorage(), pendingKey, pending.current.operationId);
     pending.current = null;
-    if (!isDemoMode) clearPending(journalStorage(), pendingKey);
     setState((current) => ({ ...current, pendingOperation: null, error: '', saveState: 'idle' }));
   }, [isDemoMode, pendingKey]);
   return {
@@ -225,7 +244,12 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
     discardPending,
     canWrite,
     years: [
-      ...new Set([2025, 2026, 2027, Number(toLocalDate(new Date(), timeZone).slice(0, 4))]),
+      ...new Set([
+        ...Object.keys(CHALLENGES).map(Number),
+        ...[0, 1, 2].map(
+          (offset) => Number(toLocalDate(new Date(), timeZone).slice(0, 4)) - offset
+        ),
+      ]),
     ].sort((a, b) => b - a),
     legacyHistoryPending: !isDemoMode,
     blockedReason: !enabled

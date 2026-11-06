@@ -20,7 +20,7 @@ export function createMemoryRepository(ownerUid, year) {
       const dates =
         year === currentYear
           ? [now - 86400000, now - 2 * 86400000].map((time) => toLocalDate(time, 'America/Toronto'))
-          : year === 2026 || year === currentYear - 1
+          : [currentYear - 1, currentYear - 2].includes(year)
             ? [`${year}-02-08`, `${year}-02-09`]
             : [];
       dates
@@ -39,7 +39,7 @@ export function createMemoryRepository(ownerUid, year) {
             ownerUid,
             year,
             `sample-${year}-${index}`,
-            now
+            Math.min(now, Date.parse(`${localDate}T12:00:00Z`))
           );
           entries.set(operation.id, operation.record);
         });

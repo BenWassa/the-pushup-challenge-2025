@@ -73,6 +73,10 @@ test('journal survives a new reader and preserves exact operation identity witho
     await import('../src/data/activityJournal.js');
   const values = new Map();
   const storage = {
+    get length() {
+      return values.size;
+    },
+    key: (index) => [...values.keys()][index] ?? null,
     getItem: (key) => values.get(key) ?? null,
     setItem: (key, value) => values.set(key, value),
     removeItem: (key) => values.delete(key),
@@ -89,4 +93,42 @@ test('journal survives a new reader and preserves exact operation identity witho
     code: 'invalid-journal',
   });
   assert.equal(readPending(null, key, 'owner', 2027), null);
+});
+
+test('fictional seed creation instants precede a newly logged set for reliable undo ordering', () => {
+  resetMemoryActivities();
+  const year = Number(
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric' }).format(
+      new Date()
+    )
+  );
+  const unsubscribe = createMemoryRepository('demo-user', year).subscribe((records) => {
+    assert.ok(records.length > 0);
+    for (const record of records) assert.ok(record.createdAt < Date.now() - 3600000);
+  });
+  unsubscribe();
+});
+
+test('confirming one journaled operation does not discard another tab change', async () => {
+  const { journalKey, readPending, writePending, clearPending } =
+    await import('../src/data/activityJournal.js');
+  const values = new Map();
+  const storage = {
+    get length() {
+      return values.size;
+    },
+    key: (index) => [...values.keys()][index] ?? null,
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  };
+  const key = journalKey('demo-project', 'owner', 2027);
+  const first = createAddOperation(input, 'owner', 2027, 'tab-one', 1000);
+  const second = createAddOperation(input, 'owner', 2027, 'tab-two', 1000);
+  writePending(storage, key, 'owner', 2027, first);
+  writePending(storage, key, 'owner', 2027, second);
+  clearPending(storage, key, first.operationId);
+  assert.deepEqual(readPending(storage, key, 'owner', 2027), second);
+  clearPending(storage, key, second.operationId);
+  assert.equal(readPending(storage, key, 'owner', 2027), null);
 });
