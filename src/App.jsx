@@ -135,7 +135,6 @@ export default function App() {
   const [view, setView] = useState('home');
   const [online, setOnline] = useState(() => navigator.onLine);
   const [update, setUpdate] = useState(false);
-  const [savedToast, setSavedToast] = useState(false);
   const [updateError, setUpdateError] = useState('');
   useEffect(() => {
     const yes = () => setOnline(true);
@@ -157,27 +156,12 @@ export default function App() {
     setView('home');
   };
   const saving = data.saveState === 'saving';
-  // Confirmation is acknowledged briefly; pending and failed states stay visible until resolved.
-  useEffect(() => {
-    if (data.saveState !== 'saved') return undefined;
-    const show = setTimeout(() => setSavedToast(true), 0);
-    const hide = setTimeout(() => setSavedToast(false), 3200);
-    return () => {
-      clearTimeout(show);
-      clearTimeout(hide);
-      setSavedToast(false);
-    };
-  }, [data.saveState, data.records]);
-  const saveStatus = saving
-    ? 'Saving… awaiting confirmation.'
-    : data.saveState === 'saved' && savedToast
-      ? auth.isDemoMode
-        ? 'Saved · demo resets on reload'
-        : 'Saved'
-      : '';
+  // Saving happens in the background: taps show instantly and nothing announces success.
+  // Only unresolved failures (the error banner) and offline state reach the surface.
+  const unresolved = Boolean(data.pendingOperation) && data.saveState === 'error';
   // Online (or demo) first load of the year's sets: show the Home silhouette, not zeros that jump.
   const showDataSkeleton = data.loading && !data.readError && (online || auth.isDemoMode);
-  const busy = saving || Boolean(data.pendingOperation) || (!online && !auth.isDemoMode);
+  const busy = unresolved || (!online && !auth.isDemoMode);
   const records = [...challenge.yearRecords].sort(
     (a, b) => (b.createdAt || 0) - (a.createdAt || 0) || b.id.localeCompare(a.id)
   );
@@ -207,7 +191,10 @@ export default function App() {
       timeZone: challenge.timeZone,
     });
   return (
-    <div className={`app-shell ${auth.user || auth.loading ? 'signed-in' : ''}`}>
+    <div
+      className={`app-shell ${auth.user || auth.loading ? 'signed-in' : ''}`}
+      data-save-state={data.saveState}
+    >
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -300,7 +287,6 @@ export default function App() {
                 data={data}
                 auth={auth}
                 busy={busy}
-                saveStatus={saveStatus}
                 records={records}
                 latest={latest}
                 onAdd={add}

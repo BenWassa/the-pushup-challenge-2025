@@ -146,3 +146,11 @@ Principles applied: paint immediately, one stable silhouette, no layout shift, n
 - Screen readers get one polite status line; the skeleton is hidden from them. Motion respects reduced-motion.
 - `tests/boot-shell.test.js` keeps the shell, the skeleton and the background token in sync.
 - Offline still shows "Reconnect to load confirmed sets."; sign-in, errors and Settings are unchanged.
+
+## Background saving (follow-up)
+
+The "Saving… awaiting confirmation." and "Saved" lines were removed. A tap now shows its effect at
+once (totals, recent sets, undo) and the write is confirmed in the background, in tap order. Buttons
+no longer grey out while a save is in flight. Failures are unchanged and still visible: the error
+banner with Retry / Dismiss, and unconfirmed totals are dropped rather than claimed. The app shell
+carries `data-save-state` for tests only.

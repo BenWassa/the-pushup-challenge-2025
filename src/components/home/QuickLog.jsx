@@ -2,8 +2,8 @@ import { Undo2 } from 'lucide-react';
 
 const AMOUNTS = [1, 10, 20, 25];
 
-/** 2×2 one-tap logging, with save status and undo kept directly beneath. */
-export default function QuickLog({ disabled, onAdd, status, undo }) {
+/** 2×2 one-tap logging, with undo directly beneath. Saving is a background concern. */
+export default function QuickLog({ disabled, onAdd, undo }) {
   return (
     <section className="quick-log" aria-label="Log push-ups">
       <div className="quick-grid" role="group" aria-label="Add push-ups">
@@ -21,9 +21,6 @@ export default function QuickLog({ disabled, onAdd, status, undo }) {
         ))}
       </div>
       <div className="quick-foot">
-        <p className="save-status" role="status" aria-live="polite">
-          {status}
-        </p>
         {undo && (
           <button type="button" className="undo" disabled={undo.disabled} onClick={undo.onUndo}>
             <Undo2 size={16} aria-hidden="true" focusable="false" />

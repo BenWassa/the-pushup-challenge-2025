@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  applyActivityOperation,
   createActivityRepository,
   createAddOperation,
   createChangeOperation,
@@ -31,6 +32,30 @@ const friendlyError = (error) => {
   return 'Activity could not be confirmed. Retry when your connection is available.';
 };
 
+/** An operation is confirmed once the server-confirmed records reflect it. */
+const isReflected = (operation, records) =>
+  operation.type === 'remove'
+    ? !records.some((record) => record.id === operation.id)
+    : records.some(
+        (record) => record.id === operation.id && record.lastOperationId === operation.operationId
+      );
+
+/** Show unconfirmed operations on top of confirmed records so taps feel instant. */
+function withOptimistic(records, operations) {
+  if (operations.length === 0) return records;
+  const byId = new Map(records.map((record) => [record.id, record]));
+  for (const operation of operations) {
+    try {
+      const next = applyActivityOperation(byId.get(operation.id), operation);
+      if (next.deleted) byId.delete(operation.id);
+      else byId.set(operation.id, next);
+    } catch {
+      // A stale or conflicting operation is shown as-is by the error flow, never guessed here.
+    }
+  }
+  return [...byId.values()];
+}
+
 export function useActivityData({
   db,
   user,
@@ -58,17 +83,24 @@ export function useActivityData({
     error: '',
     saveState: 'idle',
     pendingOperation: null,
+    optimistic: [],
   });
   const generation = useRef(0);
   const busy = useRef(false);
   const pending = useRef(null);
+  // True while an earlier change is unconfirmed after a failure; new taps wait for Retry/Dismiss.
+  const failed = useRef(false);
+  const queue = useRef(Promise.resolve());
   const recordsRef = useRef([]);
+  const viewRef = useRef([]);
   useEffect(() => {
     const token = ++generation.current;
     busy.current = false;
     pending.current =
       !isDemoMode && ownerUid ? readPending(journalStorage(), pendingKey, ownerUid, year) : null;
     recordsRef.current = [];
+    viewRef.current = [];
+    failed.current = Boolean(pending.current);
     setState({
       scope: repository,
       records: [],
@@ -79,6 +111,7 @@ export function useActivityData({
         : '',
       saveState: pending.current ? 'error' : 'idle',
       pendingOperation: pending.current,
+      optimistic: [],
     });
     if (!repository) return undefined;
     const unsubscribe = repository.subscribe(
@@ -98,7 +131,13 @@ export function useActivityData({
             pendingOperation: null,
           }));
         }
-        setState((current) => ({ ...current, records, loading: false, readError: false }));
+        setState((current) => ({
+          ...current,
+          records,
+          loading: false,
+          readError: false,
+          optimistic: current.optimistic.filter((operation) => !isReflected(operation, records)),
+        }));
       },
       (error) => {
         if (generation.current !== token) return;
@@ -115,6 +154,14 @@ export function useActivityData({
       unsubscribe();
     };
   }, [repository, isDemoMode, ownerUid, year, pendingKey, subscriptionVersion]);
+
+  const displayRecords = useMemo(
+    () => withOptimistic(state.records, state.optimistic),
+    [state.records, state.optimistic]
+  );
+  useEffect(() => {
+    viewRef.current = displayRecords;
+  }, [displayRecords]);
 
   const canWrite =
     Boolean(repository) &&
@@ -133,6 +180,9 @@ export function useActivityData({
         error: '',
         saveState: 'saving',
         pendingOperation: operation,
+        optimistic: current.optimistic.some((item) => item.operationId === operation.operationId)
+          ? current.optimistic
+          : [...current.optimistic, operation],
       }));
       let confirmationTimer;
       try {
@@ -151,22 +201,36 @@ export function useActivityData({
         if (!isDemoMode) clearPending(journalStorage(), pendingKey, operation.operationId);
         if (generation.current !== token) return false;
         pending.current = null;
+        failed.current = false;
         setState((current) => ({
           ...current,
           error: '',
           saveState: 'saved',
           pendingOperation: null,
         }));
+        // Keep showing the set until confirmed records catch up; never leave it up for long.
+        setTimeout(() => {
+          if (generation.current !== token) return;
+          setState((current) => ({
+            ...current,
+            optimistic: current.optimistic.filter(
+              (item) => item.operationId !== operation.operationId
+            ),
+          }));
+        }, 5000);
         return true;
       } catch (error) {
         if (generation.current !== token) return false;
         if (recordsRef.current.some((record) => record.lastOperationId === operation.operationId))
           return true;
+        failed.current = true;
+        // Unconfirmed totals are never claimed: drop everything not yet confirmed.
         setState((current) => ({
           ...current,
           error: friendlyError(error),
           saveState: 'error',
           pendingOperation: operation,
+          optimistic: [],
         }));
         return false;
       } finally {
@@ -178,14 +242,25 @@ export function useActivityData({
   );
 
   const prepare = useCallback(
-    async (factory) => {
-      if (!canWrite || busy.current || pending.current) return false;
+    (factory) => {
+      if (!canWrite || failed.current) return Promise.resolve(false);
+      const token = generation.current;
+      let operation;
       try {
-        return await execute(factory());
+        operation = factory(viewRef.current);
       } catch (error) {
         setState((current) => ({ ...current, error: friendlyError(error), saveState: 'error' }));
-        return false;
+        return Promise.resolve(false);
       }
+      // Show the change immediately; confirmation runs in the background, in tap order.
+      setState((current) => ({ ...current, optimistic: [...current.optimistic, operation] }));
+      viewRef.current = withOptimistic(viewRef.current, [operation]);
+      const result = queue.current.then(() => {
+        if (generation.current !== token || failed.current) return false;
+        return execute(operation);
+      });
+      queue.current = result.catch(() => false);
+      return result;
     },
     [canWrite, execute]
   );
@@ -198,19 +273,15 @@ export function useActivityData({
   );
   const edit = useCallback(
     (id, amount, viewedRevision) =>
-      prepare(() =>
-        createChangeOperation(
-          'edit',
-          recordAtRevision(recordsRef.current, id, viewedRevision),
-          amount
-        )
+      prepare((view) =>
+        createChangeOperation('edit', recordAtRevision(view, id, viewedRevision), amount)
       ),
     [prepare]
   );
   const remove = useCallback(
     (id, viewedRevision) =>
-      prepare(() =>
-        createChangeOperation('remove', recordAtRevision(recordsRef.current, id, viewedRevision))
+      prepare((view) =>
+        createChangeOperation('remove', recordAtRevision(view, id, viewedRevision))
       ),
     [prepare]
   );
@@ -229,10 +300,12 @@ export function useActivityData({
     if (!isDemoMode && pending.current)
       clearPending(journalStorage(), pendingKey, pending.current.operationId);
     pending.current = null;
+    failed.current = false;
     setState((current) => ({ ...current, pendingOperation: null, error: '', saveState: 'idle' }));
   }, [isDemoMode, pendingKey]);
   return {
     ...state,
+    records: displayRecords,
     ...(state.scope === repository
       ? {}
       : {

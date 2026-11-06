@@ -35,7 +35,6 @@ export default function Home({
   data,
   auth,
   busy,
-  saveStatus,
   records,
   latest,
   onAdd,
@@ -89,7 +88,6 @@ export default function Home({
         <QuickLog
           disabled={!canEdit || data.loading}
           onAdd={onAdd}
-          status={saveStatus}
           undo={
             latest
               ? {

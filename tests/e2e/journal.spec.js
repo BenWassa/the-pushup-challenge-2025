@@ -15,7 +15,7 @@ test('fictional demo remains isolated, supports one-handed logging and resets on
 
   await page.getByRole('button', { name: 'Add 20 push-ups' }).click();
   await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('20');
-  await expect(page.getByText('Saved · demo resets on reload')).toBeVisible();
+  await expect(page.getByText(/^Saved/)).toHaveCount(0);
   await page.getByRole('button', { name: /Undo latest set/ }).click();
   await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('0');
 
@@ -94,7 +94,8 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   // The challenge year is automatic: no year picker on the Log screen.
   await expect(page.getByRole('combobox', { name: 'Challenge year' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Add 10 push-ups' }).click();
-  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  // Saving is invisible to users; wait for the background confirmation before reloading.
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-save-state', 'saved');
   await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('10');
 
   await page.reload();
