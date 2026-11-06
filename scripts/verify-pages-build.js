@@ -49,6 +49,27 @@ export function verifyPagesBuild(directory, base = PAGES_BASE) {
       throw new Error('PWA icon must use a safe repository-relative URL');
     requireFile(directory, icon.src);
   }
+  const sizes = (icon) => String(icon.sizes || '').split(/\s+/);
+  const hasIcon = (size, purpose) =>
+    manifest.icons.some(
+      (icon) => sizes(icon).includes(size) && (icon.purpose || 'any').split(/\s+/).includes(purpose)
+    );
+  for (const [size, purpose] of [
+    ['192x192', 'any'],
+    ['512x512', 'any'],
+    ['512x512', 'maskable'],
+  ])
+    if (!hasIcon(size, purpose)) throw new Error(`PWA manifest needs a ${size} ${purpose} icon`);
+  if (manifest.id !== base) throw new Error('PWA manifest id must be the stable Pages base path');
+  if (!manifest.lang || !manifest.short_name)
+    throw new Error('PWA manifest needs lang and short_name');
+  if ('orientation' in manifest)
+    throw new Error('PWA manifest must not lock orientation (WCAG 1.3.4)');
+  for (const shot of manifest.screenshots || []) {
+    if (!shot.src || shot.src.startsWith('/') || shot.src.includes('..'))
+      throw new Error('PWA screenshot must use a safe repository-relative URL');
+    requireFile(directory, shot.src);
+  }
   const offlineAssets = JSON.parse(
     readFileSync(requireFile(directory, 'precache-manifest.json'), 'utf8')
   );

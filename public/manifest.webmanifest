@@ -1,13 +1,21 @@
 {
+  "id": "/the-pushup-challenge-2025/",
   "name": "PushUp — Annual Challenge Journal",
   "short_name": "PushUp",
   "description": "Track daily push-ups, training and annual challenge progress.",
+  "lang": "en-CA",
+  "dir": "ltr",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#f5f2ee",
   "theme_color": "#f5f2ee",
-  "orientation": "portrait",
+  "categories": ["health", "fitness", "lifestyle"],
+  "prefers_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
     {
       "src": "icon-192.png",
@@ -32,6 +40,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-narrow.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Log your next set and see today's confirmed push-ups"
+    },
+    {
+      "src": "screenshot-wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Log your next set and see today's confirmed push-ups"
     }
   ]
 }
