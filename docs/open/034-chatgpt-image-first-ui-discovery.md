@@ -80,3 +80,16 @@ Treat text artifacts in image generation as errors, not approvals. Do not claim 
 - Initial Home exploration contains 3 specification-compliant *standalone* image alternatives.
 - Implementation is blocked pending owner choice. No release changes, data migrations or cloud-rule updates.
 - #33 is the sole implementation owner; #5 remains the functional mobile UX reference.
+
+
+## Home feedback — round 2 (Nov 6, 2026)
+
+Owner direction (visual exploration, not final screen approval):
+- **Preferred style:** concept A, **Brush Impact**, using the black / white / red brush typography and graphic system.
+- **Reduce the hero significantly.** The large showcase image wastes valuable first-screen vertical space. Use a short, punchy graphic/wordmark banner near the top (roughly 80–120px total including identity, not a photographic half-screen hero).
+- **No bottom navigation bar.** The app is a unified, vertically scrollable Home experience. Put the functionality directly into successive on-page sections in importance order instead of relying on bottom tabs.
+- **Proposed section order:** 1) Today + +1/+10/+20/+25 logging, 2) pending/saved state and Undo, 3) official challenge progress, 4) Recent sets, 5) history/calendar preview, 6) account/preferences/year archive and secondary options. More advanced details can be below fold.
+- Preserve the fictional Home data contract: 60 confirmed today, 445/2,000 official, Feb 10 2027, last set 20; do not invent streaks, targets or unrelated features.
+- Request next **one focused, standalone Home-screen mockup** on this selected direction; subsequent revisions should compare meaningful layout choices, not change all features at once.
+
+**Implementation implications:** The prior #33 assumption of bottom-tab navigation is superseded by this design preference; assess accessible headings, anchor/section navigation if needed, scroll behavior, safe-area/one-handed reach, and route/state design before implementation. No production code change approved.
