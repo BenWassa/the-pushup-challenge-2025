@@ -5,6 +5,7 @@ import {
   createChangeOperation,
   applyActivityOperation,
   validateActivity,
+  recordAtRevision,
 } from '../src/data/activityRepository.js';
 import { createMemoryRepository, resetMemoryActivities } from '../src/data/memoryRepository.js';
 
@@ -162,5 +163,22 @@ test('malformed IANA metadata blocks edit but allows a safe owner tombstone', ()
   });
   assert.throws(() => validateActivity({ ...removed, timeZone: 'x'.repeat(101) }, 'owner', 2027), {
     code: 'invalid-activity',
+  });
+});
+
+test('stale edit and removal confirmations cannot silently use a newer revision', () => {
+  const first = createAddOperation(input, 'owner', 2027, 'bound-record', 1000).record;
+  const latest = { ...first, amount: 35, revision: 2, lastOperationId: 'change-two' };
+  assert.equal(recordAtRevision([first], first.id, 1), first);
+  assert.equal(recordAtRevision([latest], latest.id, 2), latest);
+  assert.throws(() => recordAtRevision([latest], latest.id, 1), {
+    code: 'conflict',
+  });
+  assert.throws(() => recordAtRevision([latest], latest.id, undefined), {
+    code: 'conflict',
+  });
+  assert.throws(() => recordAtRevision([], latest.id, 2), { code: 'conflict' });
+  assert.throws(() => recordAtRevision([{ ...latest, deleted: true }], latest.id, 2), {
+    code: 'conflict',
   });
 });
