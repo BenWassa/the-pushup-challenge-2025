@@ -159,3 +159,25 @@ test('only public built assets ignore Vary when matching precached responses', a
     assert.equal(app.matches[0].ignoreVary, expected, path);
   }
 });
+
+test('an HTML app-fallback answering a built asset is neither cached nor reused', async () => {
+  const asset = `${scope}assets/index-OLD.css`;
+  const html = {
+    ok: true,
+    headers: { get: () => 'text/html; charset=utf-8' },
+    clone: () => html,
+  };
+  const app = worker({ response: html });
+  assert.equal(await fetchFrom(app, asset, 'no-cors'), html);
+  assert.deepEqual(app.writes, []);
+
+  // A previously poisoned entry is bypassed in favour of a fresh network response.
+  const css = { ok: true, headers: { get: () => 'text/css' }, clone: () => css };
+  const healed = worker({ response: css, entries: new Map([[asset, html]]) });
+  assert.equal(await fetchFrom(healed, asset, 'no-cors'), css);
+  assert.deepEqual(healed.writes, [asset]);
+
+  // Navigations legitimately return HTML and are still cached.
+  const page = await fetchFrom(worker({ response: html }), `${scope}`, 'navigate');
+  assert.equal(page, html);
+});
