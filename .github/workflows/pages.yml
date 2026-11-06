@@ -16,10 +16,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: "pages-${{ github.ref }}"
-  cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -60,8 +56,8 @@ jobs:
           java-version: '21'
       - name: Install dependencies
         run: npm ci
-      - name: Install Chromium for Playwright
-        run: npx playwright install --with-deps chromium
+      - name: Verify hosted Chrome
+        run: google-chrome --version
       - name: Run isolated Firestore rules and real-browser journeys
         run: npm run test:integration
       - name: Upload browser diagnostics on failure
@@ -78,6 +74,9 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.deploy == true
     needs: build
     runs-on: ubuntu-latest
+    concurrency:
+      group: pushup-pages-live-deployment
+      cancel-in-progress: false
     permissions:
       pages: write
       id-token: write
