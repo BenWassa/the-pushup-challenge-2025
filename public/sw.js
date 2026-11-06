@@ -47,26 +47,54 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-const networkFirst = async (request) => {
+// Cache storage is optional: quota/private-mode failures must not break online use.
+const openRuntimeCache = async () => {
   try {
-    const response = await fetch(request);
-    const cache = await caches.open(CACHE_NAME);
-    if (response.ok) await cache.put(request, response.clone());
-    return response;
-  } catch (error) {
-    const cache = await caches.open(CACHE_NAME);
-    const cached =
-      (await cache.match(request)) || (await cache.match(new URL('index.html', SCOPE_URL).href));
-    return cached || Promise.reject(error);
+    return await caches.open(CACHE_NAME);
+  } catch {
+    return null;
   }
 };
 
+const matchCached = async (cache, request) => {
+  try {
+    return cache ? await cache.match(request) : null;
+  } catch {
+    return null;
+  }
+};
+
+const storeResponse = async (cache, request, response) => {
+  if (!cache || !response.ok) return;
+  try {
+    await cache.put(request, response.clone());
+  } catch {
+    // Preserve the successful network response when storage is unavailable.
+  }
+};
+
+const networkFirst = async (request) => {
+  let response;
+  try {
+    response = await fetch(request);
+  } catch (error) {
+    const cache = await openRuntimeCache();
+    const cached =
+      (await matchCached(cache, request)) ||
+      (await matchCached(cache, new URL('index.html', SCOPE_URL).href));
+    if (cached) return cached;
+    throw error;
+  }
+  await storeResponse(await openRuntimeCache(), request, response);
+  return response;
+};
+
 const cacheFirst = async (request) => {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
+  const cache = await openRuntimeCache();
+  const cached = await matchCached(cache, request);
   if (cached) return cached;
   const response = await fetch(request);
-  if (response.ok) await cache.put(request, response.clone());
+  await storeResponse(cache, request, response);
   return response;
 };
 

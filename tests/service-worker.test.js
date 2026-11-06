@@ -7,15 +7,25 @@ const source = await readFile(new URL('../public/sw.js', import.meta.url), 'utf8
 const scope = 'https://example.test/the-pushup-challenge-2025/';
 const current = 'pushup-pwa-/the-pushup-challenge-2025/-v2';
 
-const worker = ({ names = [], entries = new Map(), response, offline = false } = {}) => {
+const worker = ({
+  names = [],
+  entries = new Map(),
+  response,
+  offline = false,
+  failCache = '',
+} = {}) => {
   const listeners = {};
   const deleted = [];
   const writes = [];
   const opened = [];
   const key = (request) => (typeof request === 'string' ? request : request.url);
   const cache = {
-    match: async (request) => entries.get(key(request)),
+    match: async (request) => {
+      if (failCache === 'match') throw new Error('cache read failed');
+      return entries.get(key(request));
+    },
     put: async (request, value) => {
+      if (failCache === 'put') throw new Error('quota exceeded');
       writes.push(key(request));
       entries.set(key(request), value);
     },
@@ -32,6 +42,7 @@ const worker = ({ names = [], entries = new Map(), response, offline = false } =
       keys: async () => names,
       delete: async (name) => deleted.push(name),
       open: async (name) => {
+        if (failCache === 'open') throw new Error('cache unavailable');
         opened.push(name);
         return cache;
       },
@@ -85,3 +96,13 @@ test('successful requests cache and reuse responses; unrelated requests are unto
   assert.equal(fetchFrom(app, 'https://example.test/another-app/'), undefined);
   assert.equal(fetchFrom(app, `${scope}submit`, 'cors', 'POST'), undefined);
 });
+
+for (const operation of ['open', 'match', 'put']) {
+  test(`cache ${operation} failure preserves successful navigation and asset responses`, async () => {
+    const response = { ok: true, clone: () => response };
+    for (const mode of ['navigate', 'cors']) {
+      const app = worker({ response, failCache: operation });
+      assert.equal(await fetchFrom(app, `${scope}file`, mode), response);
+    }
+  });
+}

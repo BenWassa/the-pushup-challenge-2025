@@ -32,4 +32,4 @@
 - Repository-level Actions variables/secrets were absent during read-only audit; workflow has no Firebase build environment. Environment/organization configuration was not established. Cloud login in a newly built Actions artifact is unverified.
 - [Release and rollback checklist](../release-checklist.md) records precise cutover gates, baseline asset identity and recovery procedures.
 
-Local validation: lint, 7 native Node tests (including disposable build), production build passed. No generated legacy docs assets changed. Real-device PWA, real cloud authorization, backup restoration and final integrated UI validation are still required. Keep #6 open.
+Local validation: lint, 23 native Node tests across the integrated baseline (including disposable build), production build passed. Cache open/read/write failures are tested to preserve successful network responses. No generated legacy docs assets changed. Real-device PWA, real cloud authorization, backup restoration and final integrated UI validation are still required. Keep #6 open.

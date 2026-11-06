@@ -30,5 +30,5 @@ With approval, record and change Pages Source to GitHub Actions, dispatch the re
 ## Current evidence and outstanding gates
 
 - PR #7 CI and local checks passed; PR #8 gates further publication. Existing legacy assets remain tracked.
-- This batch adds worker behavior tests for cache ownership, scope, offline query navigation, successful cache reuse and HTTP error handling. It does not simulate full browser lifecycle, installation, cache quota or Firebase persistence.
+- This batch adds worker behavior tests for cache ownership, scope, offline query navigation, successful cache reuse, HTTP error handling and cache open/read/write failures preserving online responses. It does not simulate full browser lifecycle, installation, cache quota or Firebase persistence.
 - No production Firebase records, rules or settings were changed. Live rules, owner identity, actual historical record inventory, verified backup restoration, real-device logging and final 2027 UI integration remain outstanding.
