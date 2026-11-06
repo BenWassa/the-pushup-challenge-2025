@@ -31,7 +31,36 @@ jobs:
         run: npm run lint
       - name: Unit tests
         run: npm test
+      - name: Validate production Firebase web configuration
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.deploy == true
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ vars.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+        run: |
+          for name in VITE_FIREBASE_API_KEY VITE_FIREBASE_PROJECT_ID VITE_FIREBASE_AUTH_DOMAIN VITE_FIREBASE_APP_ID; do
+            value="$(printenv "$name" || true)"
+            if [ -z "$value" ]; then
+              echo "::error::$name must be set as a reviewed GitHub Actions variable before publishing."
+              exit 1
+            fi
+          done
+          case "$VITE_FIREBASE_PROJECT_ID" in
+            demo-*) echo "::error::Cannot publish with an emulator project ID."; exit 1 ;;
+          esac
       - name: Production build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ vars.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          # The v2 adapter is enabled only for an explicitly dispatched release.
+          VITE_ENABLE_V2_CLOUD: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy == true && 'true' || 'false' }}
         run: npm run build
       - name: Upload site artifact
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.deploy == true
