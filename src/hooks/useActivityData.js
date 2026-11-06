@@ -203,10 +203,7 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
   const remove = useCallback(
     (id, viewedRevision) =>
       prepare(() =>
-        createChangeOperation(
-          'remove',
-          recordAtRevision(recordsRef.current, id, viewedRevision)
-        )
+        createChangeOperation('remove', recordAtRevision(recordsRef.current, id, viewedRevision))
       ),
     [prepare]
   );
