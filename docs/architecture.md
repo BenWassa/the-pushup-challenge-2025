@@ -40,3 +40,21 @@ Previously Vite output to `docs/` and `build:pages` ran `rm -rf docs`. On issue 
 - [#6](https://github.com/BenWassa/the-pushup-challenge-2025/issues/6): test and release gates.
 
 Do not change production Firebase documents or permissions based solely on this baseline.
+
+## Agreed implementation boundary (November 5, 2026)
+
+The first implementation batch is additive: pure annual calendar and read-only activity normalization/aggregation modules. Existing cloud hooks remain on their legacy contract until UID ownership, backup and conflict-safe persistence are verified. Passing utility tests does not establish production authorization or complete #3/#4.
+
+Canonical activity proposal: `schemaVersion`, stable `id`, `ownerUid`, `challengeYear`, `phase` (`TRAINING`, `OFFICIAL`, `OFF_SEASON`), `localDate` (`YYYY-MM-DD`), explicit IANA timezone, positive integer `amount`, and `createdAt`. Persisted timezone spelling must be aligned with the calendar adapter before runtime integration. Legacy `season` remains provenance; ambiguous dates or identity must be quarantined rather than guessed. Recompute year/phase totals from validated records, never from legacy lifetime counters.
+
+The annual engine receives an explicit edition and instant or calendar date. It returns local date, phase, known daily target/rest-day state and schedule status. Unknown targets remain null. January 1 through February 2 is an app training default for 2027, not an organizer requirement. Toronto is the initial participant timezone, not a claim that Canada has one timezone.
+
+### Integration sequence
+1. Review additive module PRs and deterministic tests independently.
+2. Connect read-only historical views through an explicit normalization adapter and reconcile against a verified export.
+3. Test UID-scoped rules and transactional/idempotent add/undo in an emulator.
+4. Connect the mobile logging UI with saving, confirmed and failed states.
+5. Approve production backup/configuration and deployment cutover separately.
+
+### Production release blocker
+Pages currently uses legacy `main/docs`; the new Actions build has no configured Firebase build environment. A successful generic Vite build is insufficient evidence that cloud login works. Keep the legacy publication source until a candidate artifact has the intended public Firebase client configuration, security checks, preview smoke tests and an approved rollback. Never include passwords, service-account credentials or private keys in client build variables.
