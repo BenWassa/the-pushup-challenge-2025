@@ -45,7 +45,7 @@ Do not change production Firebase documents or permissions based solely on this 
 
 The first implementation batch is additive: pure annual calendar and read-only activity normalization/aggregation modules. Existing cloud hooks remain on their legacy contract until UID ownership, backup and conflict-safe persistence are verified. Passing utility tests does not establish production authorization or complete #3/#4.
 
-Canonical activity proposal: `schemaVersion`, stable `id`, `ownerUid`, `challengeYear`, `phase` (`TRAINING`, `OFFICIAL`, `OFF_SEASON`), `localDate` (`YYYY-MM-DD`), explicit IANA timezone, positive integer `amount`, and `createdAt`. Persisted timezone spelling must be aligned with the calendar adapter before runtime integration. Legacy `season` remains provenance; ambiguous dates or identity must be quarantined rather than guessed. Recompute year/phase totals from validated records, never from legacy lifetime counters.
+Canonical activity proposal: `schemaVersion`, stable `id`, `ownerUid`, `challengeYear`, `phase` (`TRAINING`, `OFFICIAL`, `OFF_SEASON`), `localDate` (`YYYY-MM-DD`), explicit IANA `timeZone`, positive integer `amount`, and `createdAt`. Both modules now use `timeZone`; runtime adapters must preserve it. Legacy `season` remains provenance; ambiguous dates or identity must be quarantined rather than guessed. Recompute year/phase totals from validated records, never from legacy lifetime counters.
 
 The annual engine receives an explicit edition and instant or calendar date. It returns local date, phase, known daily target/rest-day state and schedule status. Unknown targets remain null. January 1 through February 2 is an app training default for 2027, not an organizer requirement. Toronto is the initial participant timezone, not a claim that Canada has one timezone.
 
@@ -58,3 +58,11 @@ The annual engine receives an explicit edition and instant or calendar date. It 
 
 ### Production release blocker
 Pages currently uses legacy `main/docs`; the new Actions build has no configured Firebase build environment. A successful generic Vite build is insufficient evidence that cloud login works. Keep the legacy publication source until a candidate artifact has the intended public Firebase client configuration, security checks, preview smoke tests and an approved rollback. Never include passwords, service-account credentials or private keys in client build variables.
+
+## First batch review and integration
+
+Merged PRs: [#7 foundation](https://github.com/BenWassa/the-pushup-challenge-2025/pull/7), [#8 deployment gate](https://github.com/BenWassa/the-pushup-challenge-2025/pull/8), [#9 annual engine](https://github.com/BenWassa/the-pushup-challenge-2025/pull/9), [#10 mobile proposals and accessibility](https://github.com/BenWassa/the-pushup-challenge-2025/pull/10), [#11 read-only activity contract](https://github.com/BenWassa/the-pushup-challenge-2025/pull/11).
+
+`tests/annual-data-integration.test.js` exercises the actual annual engine as the legacy classifier: Toronto midnight, training, official, rest-day activity, off-season and prior-year quarantine. A rest day has zero target but can still contain recorded physical activity. Records outside the selected edition cannot be silently reassigned. These are fictional fixtures and establish module compatibility, not real-data reconciliation.
+
+The existing application still uses legacy `getSeason`, lifetime counters and hardcoded daily goals. This first batch does not claim PushUp 2027 is deployed or ready. Next integrate emulator-tested UID ownership and idempotent persistence, then connect edition-specific progress and the reviewed mobile states. Do not move #2–#6 records to closed until their remaining acceptance gates pass.
