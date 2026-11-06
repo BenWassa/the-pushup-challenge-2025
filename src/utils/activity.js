@@ -1,5 +1,16 @@
 // Read-only migration helpers. Never writes Firebase or trusts legacy cached totals.
 const PHASES = new Set(['TRAINING', 'OFFICIAL', 'OFF_SEASON']);
+const nonemptyString = (value) => typeof value === 'string' && value.trim().length > 0;
+const supportedYear = (value) => Number.isInteger(value) && value >= 1000 && value <= 9999;
+const validTimeZone = (value) => {
+  if (!nonemptyString(value)) return false;
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 export const isActivityDate = (value) => {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -37,10 +48,8 @@ export const normalizeLegacyActivity = (log, options) => {
   const { ownerUid, timeZone, sourceId, index, classifyDate } = options;
   const reject = (reason) => ({ record: null, reason });
   if (
-    typeof ownerUid !== 'string' ||
-    !ownerUid ||
-    typeof sourceId !== 'string' ||
-    !sourceId ||
+    !nonemptyString(ownerUid) ||
+    !nonemptyString(sourceId) ||
     !Number.isInteger(index) ||
     index < 0
   )
@@ -53,7 +62,7 @@ export const normalizeLegacyActivity = (log, options) => {
     // Also validates the caller-supplied timezone when a historical date has no timestamp.
     const formatted = dateInZone(createdAt ?? 0, timeZone);
     timestampDate = createdAt === null ? null : formatted;
-    if (!timeZone) return reject('timezone');
+    if (!validTimeZone(timeZone)) return reject('timezone');
   } catch {
     return reject('timezone');
   }
@@ -62,8 +71,17 @@ export const normalizeLegacyActivity = (log, options) => {
   if (submitted && timestampDate && submitted !== timestampDate) return reject('conflicting-dates');
   const localDate = submitted || timestampDate;
   if (!isActivityDate(localDate)) return reject('date');
-  const classification = classifyDate?.(localDate);
-  if (!Number.isInteger(classification?.challengeYear) || !PHASES.has(classification?.phase)) {
+  let classification;
+  try {
+    classification = classifyDate?.(localDate);
+  } catch {
+    return reject('classification');
+  }
+  if (
+    !supportedYear(classification?.challengeYear) ||
+    Number(localDate.slice(0, 4)) !== classification.challengeYear ||
+    !PHASES.has(classification?.phase)
+  ) {
     return reject('classification');
   }
   return {
@@ -90,11 +108,13 @@ export const summarizeActivities = (
   { ownerUid, challengeYear, officialStart, officialEnd }
 ) => {
   if (
-    !ownerUid ||
-    !Number.isInteger(challengeYear) ||
+    !nonemptyString(ownerUid) ||
+    !supportedYear(challengeYear) ||
     !isActivityDate(officialStart) ||
     !isActivityDate(officialEnd) ||
-    officialStart > officialEnd
+    officialStart > officialEnd ||
+    Number(officialStart.slice(0, 4)) !== challengeYear ||
+    Number(officialEnd.slice(0, 4)) !== challengeYear
   ) {
     throw new TypeError('An explicit owner, challenge year and valid official window are required');
   }
@@ -109,6 +129,12 @@ export const summarizeActivities = (
       record.ownerUid !== ownerUid ||
       record.challengeYear !== challengeYear ||
       !isActivityDate(record.localDate) ||
+      Number(record.localDate.slice(0, 4)) !== challengeYear ||
+      !validTimeZone(record.timeZone) ||
+      !(
+        (typeof record.createdAt === 'number' && timestampMillis(record.createdAt) !== null) ||
+        (record.createdAt === null && nonemptyString(record.provenance?.sourceId))
+      ) ||
       !PHASES.has(record.phase) ||
       !Number.isSafeInteger(record.amount) ||
       record.amount <= 0
@@ -122,7 +148,8 @@ export const summarizeActivities = (
       (previous.amount !== record.amount ||
         previous.localDate !== record.localDate ||
         previous.phase !== record.phase ||
-        previous.timeZone !== record.timeZone)
+        previous.timeZone !== record.timeZone ||
+        previous.createdAt !== record.createdAt)
     ) {
       conflicts.add(record.id);
     }

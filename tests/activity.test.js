@@ -18,6 +18,7 @@ const options = {
 };
 const record = (overrides = {}) => ({
   schemaVersion: 2,
+  createdAt: Date.parse('2027-02-03T12:00:00Z'),
   id: 'a',
   ownerUid: 'fixture-owner',
   challengeYear: 2027,
@@ -110,4 +111,57 @@ test('conflicting duplicate IDs are quarantined instead of picking a winner', ()
   assert.equal(summary.totals.OFFICIAL, 0);
   assert.deepEqual(summary.conflictingIds, ['a']);
   assert.throws(() => summarizeActivities([], { ...selection, officialEnd: 'invalid' }), TypeError);
+});
+
+test('aggregation rejects invalid canonical metadata and mismatched calendar years in every phase', () => {
+  const invalid = [
+    { timeZone: undefined },
+    { timeZone: 'bad-zone' },
+    { createdAt: undefined },
+    { createdAt: NaN },
+    { createdAt: null },
+    { localDate: '2026-02-03', phase: 'TRAINING' },
+    { localDate: '2028-02-03', phase: 'OFF_SEASON' },
+  ];
+  const summary = summarizeActivities(
+    invalid.map((values, index) => record({ ...values, id: String(index) })),
+    selection
+  );
+  assert.equal(summary.rejected, invalid.length);
+  assert.deepEqual(summary.totals, { TRAINING: 0, OFFICIAL: 0, OFF_SEASON: 0 });
+  assert.throws(
+    () => summarizeActivities([], { ...selection, officialEnd: '2028-02-26' }),
+    TypeError
+  );
+  assert.throws(() => summarizeActivities([], { ...selection, challengeYear: 999 }), TypeError);
+  assert.throws(() => summarizeActivities([], { ...selection, ownerUid: '  ' }), TypeError);
+});
+
+test('legacy classifier exceptions and unsupported years are quarantined', () => {
+  const log = { amount: 10, submitted_date: '2027-02-03' };
+  assert.equal(
+    normalizeLegacyActivity(log, {
+      ...options,
+      classifyDate: () => {
+        throw new Error('unknown edition');
+      },
+    }).reason,
+    'classification'
+  );
+  assert.equal(
+    normalizeLegacyActivity(log, {
+      ...options,
+      classifyDate: () => ({ challengeYear: 99999, phase: 'OFFICIAL' }),
+    }).reason,
+    'classification'
+  );
+  assert.equal(
+    normalizeLegacyActivity(log, {
+      ...options,
+      classifyDate: () => ({ challengeYear: 2026, phase: 'TRAINING' }),
+    }).reason,
+    'classification'
+  );
+  assert.equal(normalizeLegacyActivity(log, { ...options, ownerUid: {} }).reason, 'identity');
+  assert.equal(normalizeLegacyActivity(log, { ...options, sourceId: '  ' }).reason, 'identity');
 });

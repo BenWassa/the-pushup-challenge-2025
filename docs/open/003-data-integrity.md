@@ -68,6 +68,8 @@ For the initial UI, online-only writes with explicit saving/saved/failed feedbac
 
 ## Validation for this batch
 
-`npm run lint`, `npm test` (7 tests including 5 activity contract tests), and `npm run build` pass locally. Tests cover Toronto local-midnight conversion, literal historical dates, leap-day validity, unknown/contradictory fields, selected-owner/year isolation, out-of-window official entries, duplicate IDs and conflicting duplicates. The build still warns about an existing large bundle and stale Browserslist data.
+`npm run lint`, `npm test` (9 tests including 7 activity contract tests), and `npm run build` pass locally. Tests cover Toronto local-midnight conversion, literal historical dates, leap-day validity, unknown/contradictory fields, selected-owner/year isolation, out-of-window official entries, duplicate IDs and conflicting duplicates. The build still warns about an existing large bundle and stale Browserslist data.
 
 Remaining acceptance gates: authenticated edition/rules audit, actual anonymized inventory, emulator authorization tests, reviewed mapping and timezone decisions, verified backup restoration, approved migration and safe runtime add/undo integration. Issue #3 stays open.
+
+Review hardening: canonical totals reject missing/invalid timezone and creation instant, mismatched date/year in every phase, and official windows from another year. Supported challenge years are 1000–9999; imported unknown creation instants require source provenance. Classifier exceptions quarantine the record rather than aborting the dry run. Identity/source IDs must be nonempty strings.
