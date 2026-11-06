@@ -111,3 +111,10 @@ view, use a normal dev build with your own Firebase sign-in; nothing here change
 
 Revert the PR; there are no data migrations, rule changes or deployments. The old UI is intact on
 `style/app-ui-v2` and `main`.
+
+## Owner decisions applied (recommendations accepted)
+
+1. **Imported history** leaves Recent sets and sits in a collapsed "Imported archive · N sets" group (open when a year has no current sets). Nothing is deleted or edited; imported sets stay read-only.
+2. **Empty squares** are slightly lighter (`--heat-0`). Heat thresholds unchanged until the organizer's schedule is known.
+3. **Undo** only removes the latest set from today; with an empty day the Undo control is hidden.
+4. **Streak** unchanged (official period only, resets each 1 January).

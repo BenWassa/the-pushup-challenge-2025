@@ -249,6 +249,29 @@
 .home .section-title {
   margin-bottom: var(--sp-2);
 }
+.imported-archive {
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+.imported-archive summary {
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  color: var(--c-text-muted);
+  font-weight: 650;
+  cursor: pointer;
+}
+.imported-archive summary::after {
+  content: '▾';
+  margin-left: var(--sp-2);
+  color: var(--c-text-faint);
+}
+.imported-archive[open] summary::after {
+  content: '▴';
+}
+.imported-archive[open] summary {
+  margin-bottom: var(--sp-2);
+}
 .breakdown {
   color: var(--c-text-faint);
   font-size: var(--fs-xs);

@@ -6,6 +6,7 @@ import { createChallengeModel } from './utils/challengeModel';
 import { getDemoFixture } from './data/demoFixture';
 import Home from './components/home/Home';
 import Settings from './components/app/Settings';
+import { latestUndoable } from './utils/recent';
 
 function Tally() {
   // Decorative tally marks: counted sets in accent, the next ones still to come in grey.
@@ -176,7 +177,7 @@ export default function App() {
   const records = [...challenge.yearRecords].sort(
     (a, b) => (b.createdAt || 0) - (a.createdAt || 0) || b.id.localeCompare(a.id)
   );
-  const latest = records.find((record) => !record.provenance && !record.id.startsWith('legacy_'));
+  const latest = latestUndoable(records, challenge.today);
   const updateApp = () => {
     if (saving || data.pendingOperation) return;
     const registration = window.__swRegistration;

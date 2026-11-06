@@ -6,6 +6,7 @@ import QuickLog from './QuickLog.jsx';
 import ActivitySquares from './ActivitySquares.jsx';
 import ActivityList from '../app/ActivityList.jsx';
 import { computeStreak } from '../../utils/streak.js';
+import { splitRecords } from '../../utils/recent.js';
 
 const phaseLabel = (phase) =>
   ({ TRAINING: 'Training', OFFICIAL: 'Official', OFF_SEASON: 'Off-season' })[phase];
@@ -56,7 +57,7 @@ export default function Home({
   const official = challenge.challenge
     ? { value: summary.official, target: challenge.challenge.totalTarget }
     : null;
-  const recent = records.filter((record) => record.localDate !== detailDate).slice(0, 5);
+  const { recent, hasCurrent, imported } = splitRecords(records, detailDate);
   const streak =
     canLog && challenge.day.phase === 'OFFICIAL'
       ? computeStreak(summary.byDate, challenge.today)
@@ -131,6 +132,20 @@ export default function Home({
             remove={data.remove}
           />
         </section>
+      )}
+      {imported.length > 0 && (
+        <details className="imported-archive" open={!hasCurrent}>
+          <summary>
+            Imported archive · {imported.length} {imported.length === 1 ? 'set' : 'sets'}
+          </summary>
+          <ActivityList
+            records={imported}
+            canEdit={false}
+            busy={busy}
+            edit={data.edit}
+            remove={data.remove}
+          />
+        </details>
       )}
       <section className="breakdown" aria-label={`${selectedYear} breakdown`}>
         <dl>
