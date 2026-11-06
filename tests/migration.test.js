@@ -196,3 +196,20 @@ test('restore rejects production endpoints and protects existing conflicting rec
   );
   assert.equal(writes, 1);
 });
+
+test('archive threshold advances explicitly for later annual editions', () => {
+  const backup = fixture();
+  backup.documents[0].fields = encodeFields({
+    logs: [{ amount: 15, submitted_date: '2027-02-03', season: 'OFFICIAL' }],
+  });
+  const result = planMigration({
+    backup,
+    mappings: { [profilePath]: { ...mapping[profilePath], challengeYear: 2027 } },
+    importedAt: 1825416000000,
+    archiveBeforeYear: 2028,
+    classifyDate: () => ({ challengeYear: 2027, phase: 'OFFICIAL' }),
+  });
+  assert.equal(result.entries.length, 1);
+  assert.equal(result.archiveBeforeYear, 2028);
+  assert.equal(result.entries[0].data.challengeYear, 2027);
+});
