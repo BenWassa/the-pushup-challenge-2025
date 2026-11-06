@@ -1,282 +1,58 @@
-# PushUp (2026)
+# PushUp — Annual Challenge Journal
 
-A lightweight, mobile-first app for tracking daily pushups during the PushUp Challenge.
+A mobile-first personal push-up tracker for training, the official Push-Up Challenge, and year-by-year history. This repository modernizes the existing app rather than creating a new codebase each year.
 
-Built to be fast, motivating, and simple. Optional account login, no noise, low friction.
+**2027 Canadian event:** February 3–26, 2027, 2,000 total push-ups. Official daily targets are shown only when verified with the organizer. The tracker is independent and **does not submit reps to the organizer**.
 
-Designed for personal use and small groups.
+## Current delivery status
 
----
+The new React/Vite annual app, year-scoped Firebase data adapter and candidate security rules exist in source. The current production site and existing Firestore records must remain protected until a coordinated release is explicitly approved. Do not assume a successful build means that production Firebase configuration, security rules or historical import is complete.
 
-## What It Does
+Review [product vision](docs/vision.md), [strategy](docs/strategy.md), [architecture](docs/architecture.md), [delivery plan](docs/delivery-plan.md), and the [release and rollback checklist](docs/release-checklist.md).
 
-PushUp helps participants log daily pushups across two phases of the challenge:
+## Participant experience
 
-- **Training Camp** (practice and warm-up period)
-- **Official Challenge** (2000 reps goal)
+- Email/password sign-in using an existing account; personal cloud data belongs to the Firebase Auth UID, not a username.
+- Large +1, +10, +20 and +25 logging controls, recent sets, corrections and safe undo.
+- Confirmed save/error/retry feedback; no unacknowledged write counts toward confirmed totals.
+- Training, official challenge and off-season shown separately using the dated annual challenge configuration.
+- History, calendar and past-year browsing; archived editions are read-only.
+- Installable PWA designed for mobile use. Group features are intentionally deferred.
 
-After the official challenge ends, the app continues to store data. Additional reps can still be logged and naturally function as post-challenge or future training data.
+## Development
 
-The app prioritizes momentum and clarity over gamification.
+Requires Node.js 22. Install dependencies with `npm ci`, then:
 
----
-
-## Core Features
-
-- Email/password login for cloud mode
-- Demo mode with local-only storage
-- One-tap rep logging (+1, +10, +20, +25)
-- Safe undo of last action
-- Daily progress tracking
-- Success toast when daily goal is hit or extended beyond goal
-- Monthly contribution calendar
-- Streak and average stats
-- Live leaderboard with real-time sync
-- Training vs Official phase logic
-
----
-
-## Design Philosophy
-
-- Mobile-first, one-handed use
-- Desktop supported but not optimized
-- PWA-first mindset for phone use
-- Orange equals action or progress
-- White cards on light grey sections
-- Asymmetrical rounded corners as a signature
-- Clear hierarchy, no clutter
-- Clarity over cleverness
-
-If something matters, make it obvious.  
-If it does not, make it quiet.
-
----
-
-## Intended Use
-
-- Personal tracking
-- Small private groups (friends, roommates, training partners)
-- Honour-system usernames
-- No moderation or identity enforcement
-
-Usernames are assumed to be unique by social agreement.
-
----
-
-## Project Structure
-
+```sh
+npm run dev             # Local Vite development
+npm run lint            # Source formatting and lint
+npm test                # Native unit/regression tests
+npm run build           # Non-destructive production output to dist/
+npm run test:integration  # Isolated Firebase emulator + Playwright browser tests
 ```
 
-/src
-/components
-Card.jsx
-Button.jsx
-ProgressBar.jsx
-ContributionCalendar.jsx
-/hooks
-useAuth.js
-useUserData.js
-useLeaderboard.js
-/utils
-date.js
-season.js
-format.js
-index.js
-App.jsx
-main.jsx
-index.css
-/public
-vite.svg
-tailwind.config.js
-postcss.config.js
-README.md
+The integration command additionally needs Java 21 and Playwright Chromium (`npx playwright install --with-deps chromium`). It uses Firebase project `demo-pushup-2027` and local emulators only; never substitute a production project for automated tests. `npm run test:rules` runs the isolated Firestore rules tests alone.
 
-```
+Visit `/the-pushup-challenge-2025/?mode=demo` for an entirely fictional in-memory demo. Demo activity resets on reload and cannot reach production Firestore.
 
----
+## Cloud configuration and release boundaries
 
-## Firebase Data Model
+The app reads Firebase web client configuration from `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` and `VITE_FIREBASE_APP_ID` (plus optional Firebase public web fields). These web identifiers are **not** service-account credentials. Never publish private keys, user passwords, raw backups, UID mappings or real participant records.
 
-```txt
-artifacts/{appId}/public/data/users/{username}
-  displayName: string
-  training_reps: number
-  official_reps: number
-  logs: [
-    {
-      amount: number
-      timestamp?: Date | number
-      submitted_date?: "YYYY-MM-DD"
-      source?: "historical"
-      season: "TRAINING" | "OFFICIAL"
-    }
-  ]
-  created_at: timestamp
-  last_active: timestamp
-```
+The v2 cloud adapter is disabled in ordinary builds unless `VITE_ENABLE_V2_CLOUD=true` is set. Local emulator mode uses `VITE_USE_FIREBASE_EMULATORS=true` on loopback only. Merely enabling v2 does **not** verify production security rules or migrate legacy history.
 
----
+The checked-in `firestore.rules` are a candidate owner-scoped policy for isolated review, **not permission to deploy**. Production Firestore access controls and legacy-account ownership require a reviewed cutover. Backups, migration tools and reconciliation reports must remain local and restricted.
 
-## Getting Started
+GitHub Pages publication is manually gated. Preserve existing `docs/` generated assets and live URL until the owner authorizes the new artifact, security-rule cutover and Pages source change. See [release checklist](docs/release-checklist.md) before any production action.
 
-### 1. Clone the Repo
+## Repository conventions
 
-```bash
-git clone https://github.com/your-username/the-pushup-challenge-2025.git
-cd the-pushup-challenge-2025
-```
+- `AGENTS.md`: agent working agreement.
+- `docs/open/`: issue-specific active work; `docs/closed/`: verified completed work.
+- `src/hooks/useChallenge.js` and `src/utils/challenges.js`: annual configuration and date logic.
+- `src/hooks/useActivityData.js`, `src/data/`: confirmed activity and storage.
+- `src/components/app/`: solo dashboard/history/account components.
+- `tests/` and `tests/emulator/`: unit, rules, migration and browser acceptance suites.
+- `scripts/`: read-only backup, pure migration planning and emulator-only rehearsals.
 
----
-
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
----
-
-### 3. Firebase Setup
-
-Create a Firebase project and enable:
-
-- **Firestore**
-- **Email/Password Authentication**
-
-This app is intended for a very small number of users (≈5 people).
-For this scale, Firebase provides more than enough performance and safety.
-
-The app supports two environments:
-
-- Injected runtime variables (Firebase Hosting or embedded environments)
-- Local development using environment variables
-
----
-
-### Local Development Setup
-
-1. **Create a Firebase project** at https://console.firebase.google.com/
-2. **Enable services:**
-   - Go to Authentication > Sign-in method > Enable "Email/Password"
-   - Go to Firestore Database > Create database (start in test mode)
-3. **Get your config:**
-   - Go to Project Settings > General > Your apps
-   - Click "Add app" > Web app (</>) if you haven't already
-   - Copy the config object from the SDK setup
-4. **Create `.env.local`** in the project root with your Firebase config:
-
-```bash
-# Copy these values from Firebase Console
-VITE_FIREBASE_API_KEY=your-api-key-here
-VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project-id
-VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
-VITE_FIREBASE_APP_ID=your-app-id
-VITE_DEMO_MODE=false
-```
-
----
-
-### Runtime Variables
-
-The app can receive the following injected variables when hosted:
-
-- `__firebase_config`
-- `__app_id`
-- `VITE_DEMO_MODE` (optional build-time demo override)
-
-For local development, these values are typically supplied via `.env.local` using `VITE_*` variables.
-
-This hybrid approach allows future migration to stricter Firebase best practices without changing app logic.
-
----
-
-## Running Locally
-
-```bash
-npm run dev
-```
-
-The app is optimized for mobile screens but works on desktop.
-
----
-
-### Building for Production
-
-```bash
-npm run build
-```
-
-This creates ignored `dist/` output. `npm run build:pages` uses the same safe build. Source documentation and the legacy deployed site in `docs/` are preserved. See [the documentation index](docs/README.md) for the 2027 implementation and controlled Pages cutover.
-
----
-
-## Progressive Web App (PWA)
-
-The app is designed to be PWA-compatible and works well when added to a phone home screen.
-
-- Mobile-first layout
-- Offline-tolerant UI patterns
-- No reliance on desktop-only interactions
-
-Full offline write support is not guaranteed.
-
----
-
-## Architecture Rules
-
-- Firebase logic lives in hooks only
-- UI components are dumb and reusable
-- App-level state lives in `App.jsx`
-- Tailwind first, CSS only for shapes and animations
-- No premature abstraction
-- Keep dependencies minimal
-
----
-
-## MVP Scope
-
-Included:
-
-- Rep logging
-- Undo
-- Progress bars
-- Calendar heatmap
-- Leaderboards
-- Stats
-
-Explicitly excluded:
-
-- Accounts or passwords
-- Notifications
-- Social feeds
-- Complex gamification
-- Overdesigned UI
-- Admin dashboards
-
----
-
-## Deployment
-
-Recommended:
-
-- **Firebase Hosting**
-- **Vercel**
-
-Single environment only until stable.
-No CI/CD until the app settles.
-
----
-
-## License
-
-MIT
-
----
-
-## Status
-
-Active development
-Focused on clarity, speed, and daily usability
-Current release: `v1.12.0`
+Keep issues and pull requests scoped, with tests and acceptance evidence. Historic Firebase data is not disposable.
