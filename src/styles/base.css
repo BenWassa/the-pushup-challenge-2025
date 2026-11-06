@@ -234,7 +234,7 @@ footer a {
   margin: var(--sp-4) 0;
   padding: var(--sp-3) var(--sp-4);
   border-radius: var(--r-md);
-  border-left: 3px solid var(--c-warn);
+  border: 1px solid var(--c-warn);
   background: var(--c-surface);
   font-size: var(--fs-sm);
   overflow-wrap: anywhere;
@@ -244,7 +244,7 @@ footer a {
   margin: var(--sp-1) 0;
 }
 .error {
-  border-left-color: var(--c-red);
+  border-color: var(--c-red);
   background: var(--c-red-soft);
 }
 .actions {

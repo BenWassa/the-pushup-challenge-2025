@@ -83,8 +83,8 @@
   place-items: center;
   width: 100%;
   min-width: 24px;
-  height: 28px;
-  min-height: 28px;
+  height: 40px;
+  min-height: 40px;
   margin: 0;
   padding: 4px 2px;
   border: 0;
@@ -202,17 +202,18 @@
   align-items: center;
   gap: var(--sp-1);
   min-height: var(--tap);
-  padding: 0;
+  padding: 0 var(--sp-1);
   border: 0;
   background: transparent;
-  color: var(--c-text);
+  color: var(--c-red-text);
   font: inherit;
-  text-align: left;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-align: right;
 }
 .as-history-chevron {
-  width: 1em;
-  height: 1em;
-  color: var(--c-red-text);
+  width: 1.25em;
+  height: 1.25em;
 }
 .history .as-cell {
   height: auto;

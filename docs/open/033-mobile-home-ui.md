@@ -10,7 +10,7 @@
 
 | Area          | Change                                                                                                                                                                                                                                           |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Home          | One vertically scrolling page, no bottom navigation: compact header → Today + official progress → 2×2 quick-add → Activity Squares → Recent sets → quiet year breakdown.                                                                         |
+| Home          | One vertically scrolling page, no bottom navigation: compact header → Today + official progress → 2×2 quick-add → Activity Squares → quiet year breakdown (no Recent sets list; the heatmap day detail and History show sets).                   |
 | Settings      | Gear in the header opens a secondary screen: Past years (read-only archive) and Account. Replaces the Log / History / Account tab bar.                                                                                                           |
 | Heatmap       | New Activity Squares month view (replaces the number-in-cell calendar from `History.jsx`, now deleted).                                                                                                                                          |
 | Design system | `src/styles/tokens.css` (colour, type, spacing, radii, motion, heat scale), `base.css` (elements, forms, notices, lists), `home.css`. The old 1,270-line layered stylesheet is gone.                                                             |
@@ -44,8 +44,9 @@ argument (defaults to the real clock) so the fixture's pinned date can pass the 
    charcoal. Revisit against real data.
 3. **Past years** open as the same Home, read-only (no quick-add), with a "Back to 2027" bar. The
    old year dropdown and month dropdown are gone; months use previous/next arrows in the heatmap.
-4. **Selected-day sets and Recent** never list the same set twice: Recent skips the day currently
-   shown in the heatmap detail.
+4. **Recent sets removed from Home** (owner decision, critique 2026-11-06): sets are reviewed via the
+   heatmap day detail and History. The Official dates / Sundays rest and Imported footnotes were also
+   dropped; the Imported figure stays in the breakdown.
 5. **Brand mark** is a heavy italic wordmark with a red dry-brush stroke drawn in SVG/CSS, not the
    supplied brush artwork (which is orange and a full-bleed image).
 6. The breakdown line keeps Training / Off-season / Imported / Active days visible but quiet, and

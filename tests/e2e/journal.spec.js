@@ -219,7 +219,7 @@ test('current month blocks future month navigation by button and keyboard', asyn
   await expect(page.getByRole('button', { name: 'Next month' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Previous month' })).toHaveCount(0);
   await expect(page.getByText('Daily push-up activity', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'February 2027' }).click();
+  await page.getByRole('button', { name: 'History' }).click();
   await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible();
   const monthTitle = page.getByRole('heading', { name: 'February 2027' });
   await expect(monthTitle).toBeVisible();

@@ -287,7 +287,6 @@ export default function App() {
                 data={data}
                 auth={auth}
                 busy={busy}
-                records={records}
                 latest={latest}
                 onAdd={add}
                 onSettings={() => setView('settings')}

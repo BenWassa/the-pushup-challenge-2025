@@ -119,17 +119,14 @@ function MonthActivity({
     <section className="as-root" aria-label="Daily push-up activity">
       <header className="as-header">
         <div className="as-heading">
-          <h2 className="as-title">
-            {onOpenHistory ? (
-              <button className="as-history-link" type="button" onClick={onOpenHistory}>
-                {formatMonthTitle(year, month)}
-                <ChevronRight className="as-history-chevron" aria-hidden="true" />
-              </button>
-            ) : (
-              formatMonthTitle(year, month)
-            )}
-          </h2>
+          <h2 className="as-title">{formatMonthTitle(year, month)}</h2>
         </div>
+        {onOpenHistory && (
+          <button className="as-history-link" type="button" onClick={onOpenHistory}>
+            History
+            <ChevronRight className="as-history-chevron" aria-hidden="true" />
+          </button>
+        )}
         {!onOpenHistory && (
           <div className="as-navigation">
             <button

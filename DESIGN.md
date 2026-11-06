@@ -3,10 +3,10 @@
 This records the proposed preview direction for issue #5, not a completed redesign.
 
 ## Theme and scene
-A participant checks the phone in an ordinary lit room between sets, with one hand free and little patience for navigation. Use a light warm neutral surface and clear dark text.
+A participant checks the phone in an ordinary lit room between sets, with one hand free and little patience for navigation. Shipped as a near-black surface (#0a0a0b) with light text, per the Athletic Bold / Brush Impact direction in src/styles/tokens.css.
 
 ## Color strategy
-Restrained. Orange identifies action/current selection, with neutral surfaces and separate textual save states. Preview tokens use OKLCH: canvas 0.97 0.008 70; text 0.25 0.015 65; accent 0.65 0.16 48; muted 0.46 0.015 65. Error and success always have text as well as color.
+Restrained. Red (#e4322c, the brand colour) identifies action, progress and current selection, with neutral surfaces. Tokens live in src/styles/tokens.css. Error and success always have text as well as color.
 
 ## Typography
 System sans, 16px body, 14px secondary text, 24px screen headings. Numeric totals use tabular figures. No gradient text.

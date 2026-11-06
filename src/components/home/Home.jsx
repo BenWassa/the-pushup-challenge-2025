@@ -1,10 +1,8 @@
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
 import HomeHeader from './HomeHeader.jsx';
 import ProgressSummary from './ProgressSummary.jsx';
 import QuickLog from './QuickLog.jsx';
 import ActivitySquares from './ActivitySquares.jsx';
-import ActivityList from '../app/ActivityList.jsx';
 import { computeStreak } from '../../utils/streak.js';
 
 const phaseLabel = (phase) =>
@@ -35,7 +33,6 @@ export default function Home({
   data,
   auth,
   busy,
-  records,
   latest,
   onAdd,
   onSettings,
@@ -43,8 +40,6 @@ export default function Home({
   onBackToCurrent,
 }) {
   const { summary, selectedYear, canLog } = challenge;
-  // Sets on the date shown in the heatmap detail are listed there, so Recent skips them.
-  const [detailDate, setDetailDate] = useState(null);
   const canEdit = challenge.canLog && data.canWrite && !busy;
   const primary = canLog
     ? {
@@ -55,7 +50,6 @@ export default function Home({
   const official = challenge.challenge
     ? { value: summary.official, target: challenge.challenge.totalTarget }
     : null;
-  const recent = records.filter((record) => record.localDate !== detailDate).slice(0, 5);
   const streak =
     canLog && challenge.day.phase === 'OFFICIAL'
       ? computeStreak(summary.byDate, challenge.today)
@@ -115,22 +109,7 @@ export default function Home({
         busy={busy}
         edit={data.edit}
         remove={data.remove}
-        onSelectedChange={setDetailDate}
       />
-      {(recent.length > 0 || records.length === 0) && (
-        <section className="recent" aria-labelledby="recent-title">
-          <h2 id="recent-title" className="section-title">
-            Recent sets
-          </h2>
-          <ActivityList
-            records={recent}
-            canEdit={challenge.canLog && data.canWrite}
-            busy={busy}
-            edit={data.edit}
-            remove={data.remove}
-          />
-        </section>
-      )}
       <section className="breakdown" aria-label={`${selectedYear} breakdown`}>
         <dl>
           {others.map(([label, value]) => (
@@ -140,13 +119,6 @@ export default function Home({
             </div>
           ))}
         </dl>
-        {challenge.challenge && (
-          <p>
-            Official {challenge.challenge.official.start} – {challenge.challenge.official.end} ·
-            Sundays rest
-          </p>
-        )}
-        {summary.legacy > 0 && <p>Imported · original classification kept</p>}
       </section>
     </div>
   );

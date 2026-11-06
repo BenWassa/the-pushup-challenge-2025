@@ -47,7 +47,10 @@
   position: relative;
   margin: -12px 0 0.5rem; /* tuck up under the lettering (px: the wordmark is a fixed-size image) */
   color: var(--c-red-text);
-  font-size: min(1.5rem, 24px); /* sized to the brush lettering above; capped like the fixed-size wordmark image */
+  font-size: min(
+    1.5rem,
+    24px
+  ); /* sized to the brush lettering above; capped like the fixed-size wordmark image */
   /* Match the upward slant of the brush lettering */
   transform: rotate(-10deg);
   transform-origin: center;
@@ -251,11 +254,7 @@
   color: var(--c-text);
 }
 
-/* E. Recent sets */
-.recent .section-title,
-.home .section-title {
-  margin-bottom: var(--sp-2);
-}
+/* E. Year breakdown */
 .breakdown {
   color: var(--c-text-faint);
   font-size: var(--fs-xs);
