@@ -152,3 +152,27 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await page.getByRole('button', { name: 'Log', exact: true }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
 });
+
+test('calendar names include visible day and count for keyboard and voice access', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(new Date('2027-02-03T15:00:00Z'));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${appPath}?mode=demo`);
+  await expect(page.getByText('Official daily target pending.', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'History', exact: true }).click();
+  const empty = page.getByRole('button', { name: 'Day 3 0 push-ups on 2027-02-03', exact: true });
+  const active = page.getByRole('button', { name: 'Day 1 25 push-ups on 2027-02-01', exact: true });
+  await expect(empty).toBeVisible();
+  await expect(active).toBeVisible();
+  await active.focus();
+  await page.keyboard.press('Space');
+  await expect(page.getByRole('heading', { name: '2027-02-01', exact: true })).toBeVisible();
+  await expect(active).toHaveAttribute('aria-pressed', 'true');
+  const findings = await new AxeBuilder({ page }).analyze();
+  expect(
+    findings.violations
+      .filter((v) => ['critical', 'serious'].includes(v.impact))
+      .map((v) => ({ id: v.id, nodes: v.nodes.length }))
+  ).toEqual([]);
+});
