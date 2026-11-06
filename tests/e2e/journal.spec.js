@@ -126,14 +126,12 @@ test('isolated Firebase emulator confirms add, reload, history, two-tab sync and
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
   await expect(second.locator('.daily-summary strong')).toHaveText('0');
   await independentSession.close();
-  await page.getByRole('combobox', { name: 'Challenge year' }).selectOption(
-    String(currentYear - 1)
-  );
+  await page
+    .getByRole('combobox', { name: 'Challenge year' })
+    .selectOption(String(currentYear - 1));
   await expect(page.getByText('Read-only edition')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toHaveCount(0);
-  await page.getByRole('combobox', { name: 'Challenge year' }).selectOption(
-    String(currentYear)
-  );
+  await page.getByRole('combobox', { name: 'Challenge year' }).selectOption(String(currentYear));
   await page.getByRole('button', { name: 'Account', exact: true }).click();
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
