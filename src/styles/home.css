@@ -49,7 +49,7 @@
   color: var(--c-red-text);
   font-size: 1.125rem;
   /* Match the upward slant of the brush lettering */
-  transform: rotate(-7deg);
+  transform: rotate(-10deg);
   transform-origin: center;
 }
 .brand-stroke {
