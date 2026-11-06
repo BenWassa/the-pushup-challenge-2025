@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
-import { signInWithGoogle } from './googleSignIn.js';
+import { approveEmail, signInWithGoogle } from './googleSignIn.js';
 
 const appPath = '/the-pushup-challenge-2025/';
 const rulesEndpoint = 'http://127.0.0.1:8080/emulator/v1/projects/demo-pushup-2027:securityRules';
@@ -12,6 +12,7 @@ test('denied write survives reload and retries once without claiming an unconfir
   context,
 }) => {
   const email = `retry-${Date.now()}@example.test`;
+  await approveEmail(request, email);
   await page.goto(appPath);
   await signInWithGoogle(page, email);
   await expect(page.getByRole('button', { name: 'Add 20 push-ups', exact: true })).toBeEnabled();

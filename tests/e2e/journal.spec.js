@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { signInWithGoogle } from './googleSignIn.js';
+import { approveEmail, signInWithGoogle } from './googleSignIn.js';
 
 const appPath = '/the-pushup-challenge-2025/';
 const currentYear = new Date().getFullYear();
@@ -81,8 +81,10 @@ test('mobile viewports do not overflow and show no serious automated accessibili
 test('isolated Firebase emulator confirms add, reload, history, independent-device conflict and undo', async ({
   page,
   browser,
+  request,
 }) => {
   const email = `pushup-test-${Date.now()}@example.test`;
+  await approveEmail(request, email);
 
   await page.goto(appPath);
   await expect(page.getByRole('button', { name: 'Sign in with Google' })).toBeVisible();
@@ -139,6 +141,19 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await signInWithGoogle(page, email);
   await page.getByRole('button', { name: 'Log', exact: true }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
+});
+
+test('signed-in people who are not on the closed-beta allowlist see a waiting screen and no journal', async ({
+  page,
+}) => {
+  const email = `stranger-${Date.now()}@example.test`;
+  await page.goto(appPath);
+  await signInWithGoogle(page, email);
+  await expect(page.getByRole('heading', { name: 'You’re not on the list yet' })).toBeVisible();
+  await expect(page.getByText(email)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page.getByRole('button', { name: 'Sign in with Google' })).toBeVisible();
 });
 
 test('calendar names include visible day and count for keyboard and voice access', async ({

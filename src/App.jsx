@@ -37,8 +37,26 @@ function SignIn({ auth }) {
         </p>
       )}
       <p className="quiet">
-        Existing accounts only. This independent tracker does not submit activity to the organizer.
+        Private beta: only approved accounts can continue. This independent tracker does not submit
+        activity to the organizer.
       </p>
+    </section>
+  );
+}
+
+function AccessPending({ auth }) {
+  return (
+    <section>
+      <h1>You’re not on the list yet</h1>
+      <p>
+        PushUp is in a private beta. You’re signed in as <strong>{auth.user.email}</strong>, but
+        this account hasn’t been approved yet.
+      </p>
+      <p className="quiet">
+        Ask the owner to add this email address, then sign in again. Nothing has been saved or
+        shared.
+      </p>
+      <button onClick={auth.logoutAuth}>Sign out</button>
     </section>
   );
 }
@@ -51,7 +69,7 @@ export default function App() {
   const { selectedYear, setSelectedYear } = calendar;
   const data = useActivityData({
     db: auth.db,
-    user: auth.user,
+    user: auth.accessStatus === 'approved' ? auth.user : null,
     isDemoMode: auth.isDemoMode,
     year: selectedYear,
     timeZone: calendar.timeZone,
@@ -157,6 +175,8 @@ export default function App() {
           </section>
         ) : !auth.user ? (
           <SignIn auth={auth} />
+        ) : auth.accessStatus === 'pending' ? (
+          <AccessPending auth={auth} />
         ) : (
           <>
             <div className="edition-controls">

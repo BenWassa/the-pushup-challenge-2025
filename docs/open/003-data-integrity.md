@@ -124,3 +124,11 @@ No production rules, records, Pages configuration or publication was changed. #3
 Review hardening: seeded demo creation instants use their original activity dates so undo targets the newest actual set. Year options derive from configured editions/current year. A 15-second confirmation timeout retains the same pending operation and permits idempotent retry; the original transaction is not cancelled and only server acknowledgement can establish success.
 
 The retry journal preserves multiple outstanding operation IDs and clears only the confirmed operation, avoiding accidental removal of another tab's pending change. Each operation uses a separate atomic browser-storage key, so concurrent tabs cannot overwrite each other's journal slots. The durable cloud transaction ID and server reconciliation remain authoritative.
+
+## Google sign-in and closed-beta allowlist (candidate, not deployed)
+
+- Sign-in is Google only, using a full-page redirect (no popup). Anyone can sign in with Google; only approved people get access.
+- Approval is a document at `allowlist/{lowercase email}` in Firestore. Clients cannot write or list it; a signed-in person can read only their own entry (the app uses that to show the "not on the list yet" screen). `participants/**` reads and writes require a verified email with an allowlist entry.
+- To approve someone: add a document with ID equal to their lowercase Google email (any field, e.g. `approved: true`) in the Firebase console. To revoke: delete it.
+- `firestore.rules` is still candidate-only. Deploying it, and enabling the Google provider and authorized domain in the Firebase console, need owner approval. Add your own email to the allowlist **before** deploying the rules, or you lose access to your own data.
+- Existing email/password users keep their UID only if Firebase's "one account per email" setting is on and the Google address matches; verify before relying on history.
