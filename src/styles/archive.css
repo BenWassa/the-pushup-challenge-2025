@@ -1,0 +1,101 @@
+/* A static ledger, deliberately separate from the logging screen. */
+.year-archive {
+  display: grid;
+  gap: var(--sp-5);
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+.year-archive > *,
+.year-archive dd {
+  min-width: 0;
+}
+.year-archive h1 {
+  margin: 0;
+  font-size: var(--fs-xl);
+}
+.year-archive h2 {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-md);
+}
+.year-archive p {
+  margin: 0;
+}
+.year-archive button {
+  min-height: var(--tap);
+  white-space: normal;
+}
+.year-archive .back-button {
+  justify-self: start;
+}
+.archive-total {
+  display: grid;
+  gap: var(--sp-1);
+}
+.archive-total strong {
+  font-size: var(--fs-total);
+  color: var(--c-red-text);
+  overflow-wrap: anywhere;
+}
+.archive-total span {
+  color: var(--c-text-muted);
+}
+.archive-ledger {
+  margin: 0;
+}
+.archive-ledger > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--c-line-strong);
+}
+.archive-ledger dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.archive-ledger small {
+  display: block;
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+.archive-bricks {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: var(--sp-1);
+  padding: 0;
+  margin: var(--sp-3) 0 0;
+  list-style: none;
+}
+.archive-bricks li {
+  aspect-ratio: 1.8;
+  background: var(--c-red);
+  border-radius: var(--sp-1);
+}
+.archive-months {
+  display: grid;
+  gap: var(--sp-2);
+}
+.archive-month {
+  display: grid;
+  grid-template-columns: 3ch minmax(0, 1fr);
+  gap: var(--sp-2);
+  align-items: center;
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+}
+.archive-days {
+  display: grid;
+  grid-template-columns: repeat(31, minmax(0, 1fr));
+  gap: 1px;
+}
+.archive-days span {
+  height: var(--sp-3);
+}
+
+/* Text-style controls align with the content edge instead of being indented by button padding */
+.year-archive .back-button,
+.year-archive .link-button {
+  padding-inline: 0;
+  justify-self: start;
+}
