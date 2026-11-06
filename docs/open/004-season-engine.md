@@ -1,12 +1,12 @@
 # #4 — Configurable challenge seasons
 
 **Issue:** https://github.com/BenWassa/the-pushup-challenge-2025/issues/4  
-**Status:** Planned — design can proceed in parallel with #3  
+**Status:** Configurable engine and active UI integration complete; remaining official daily targets await organizer publication  
 **Depends on:** #2 foundation; #3 data contract for integration
 
 ## Verified 2027 assumptions
 - The Push-Up Challenge Canada: 3–26 February 2027, cumulative target 2,000.
-- Official daily schedule, daily facts and rest days not yet established in the project; obtain organizer evidence before populating.
+- Organizer-confirmed Sundays are rest days (February 7, 14 and 21); other official daily target values remain unpublished and must not be invented.
 - Source: https://www.thepushupchallenge.ca/ and https://www.thepushupchallenge.ca/how-it-works
 
 ## Design tasks
