@@ -56,20 +56,15 @@ const ContributionCalendar = ({ logs, onDateClick }) => {
 
     days.push(
       <div key={d} className="flex flex-col items-center justify-center mb-2">
-        <div
+        <button
+          type="button"
           onClick={() => onDateClick?.(clickDate)}
           className={`calendar-day calendar-day-${level} cursor-pointer hover:ring-2 hover:ring-brand-orange transition-all`}
           title={`${count} reps`}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              onDateClick?.(clickDate);
-            }
-          }}
+          aria-label={`${clickDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}: ${count} reps`}
         >
           {d}
-        </div>
+        </button>
       </div>
     );
   }

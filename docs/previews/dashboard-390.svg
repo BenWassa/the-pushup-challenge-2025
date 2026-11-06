@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844" role="img" aria-labelledby="title">
+<title id="title">Log a set: 390 pixel design proposal, fictional sample data</title>
+<rect width="390" height="844" fill="#f8f5f0"/>
+<g font-family="system-ui, sans-serif" fill="#302923">
+<text x="20" y="34" font-size="14">Design proposal · Fictional sample data</text>
+<text x="20" y="84" font-size="24" font-weight="700">PushUp 2027</text>
+<text x="20" y="119" font-size="20" font-weight="600">Log a set</text>
+<text x="20" y="150" font-size="16">Wednesday, February 3, 2027</text>
+<text x="20" y="186" font-size="16">Official challenge · 2027</text>
+<text x="20" y="240" font-size="16">Today: 45 push-ups</text>
+<text x="20" y="280" font-size="16">Official daily target pending</text>
+<text x="20" y="318" font-size="16">Challenge: 45 / 2,000</text>
+<text x="20" y="374" font-size="16">Add push-ups</text>
+<text x="20" y="560" font-size="16">Saved +20 · 10:42 AM</text>
+<text x="20" y="600" font-size="16">Undo last set</text>
+<text x="20" y="660" font-size="16">Recent sets</text>
+<text x="20" y="700" font-size="14">10:42 AM                         +20</text>
+<text x="20" y="738" font-size="14">10:30 AM                         +25</text>
+<rect x="20" y="392" width="169" height="60" rx="12" fill="#f4d6ba" stroke="#a94d12"/>
+<text x="104" y="430" font-size="24" font-weight="700" text-anchor="middle">+1</text>
+<rect x="201" y="392" width="169" height="60" rx="12" fill="#f4d6ba" stroke="#a94d12"/>
+<text x="285" y="430" font-size="24" font-weight="700" text-anchor="middle">+10</text>
+<rect x="20" y="464" width="169" height="60" rx="12" fill="#f4d6ba" stroke="#a94d12"/>
+<text x="104" y="502" font-size="24" font-weight="700" text-anchor="middle">+20</text>
+<rect x="201" y="464" width="169" height="60" rx="12" fill="#f4d6ba" stroke="#a94d12"/>
+<text x="285" y="502" font-size="24" font-weight="700" text-anchor="middle">+25</text>
+<path d="M20 779H370" stroke="#c7bdb1"/>
+<text x="65" y="816" font-size="16">Log</text><text x="245" y="816" font-size="16">History</text>
+</g></svg>
