@@ -18,25 +18,78 @@ const displayDate = (date) =>
     timeZone: 'UTC',
   });
 
+function Tally() {
+  // Decorative tally marks: counted sets in accent, the next ones still to come in grey.
+  const group = (x, tone) => (
+    <g className={tone} key={x}>
+      {[6, 18, 30, 42].map((dx) => (
+        <line key={dx} x1={x + dx} y1="4" x2={x + dx} y2="44" />
+      ))}
+      <line x1={x} y1="38" x2={x + 50} y2="10" />
+    </g>
+  );
+  return (
+    <svg className="tally" viewBox="0 0 176 48" aria-hidden="true" focusable="false">
+      {group(0, 'done')}
+      {group(64, 'done')}
+      <g className="next">
+        <line x1="134" y1="4" x2="134" y2="44" />
+        <line x1="146" y1="4" x2="146" y2="44" />
+      </g>
+    </svg>
+  );
+}
+
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"
+      />
+    </svg>
+  );
+}
+
 function SignIn({ auth }) {
   return (
-    <section className="sign-in">
+    <section className="sign-in" aria-labelledby="sign-in-title">
+      <Tally />
       <p className="eyebrow">Your annual push-up journal</p>
-      <h1>
+      <h1 id="sign-in-title">
         A little stronger,
         <br />
         one set at a time.
       </h1>
-      <p>Sign in to see your personal history and record your next set.</p>
-      <button className="primary" disabled={auth.authActionLoading} onClick={auth.signInWithGoogle}>
-        {auth.authActionLoading ? 'Signing in…' : 'Sign in with Google'}
-      </button>
-      {auth.authActionError && (
-        <p role="alert" className="error">
-          {auth.authActionError}
-        </p>
-      )}
-      <p className="quiet">
+      <p className="lede">Sign in to see your personal history and record your next set.</p>
+      <div className="sign-in-action">
+        <button
+          className="google-button"
+          disabled={auth.authActionLoading}
+          onClick={auth.signInWithGoogle}
+        >
+          <GoogleMark />
+          {auth.authActionLoading ? 'Signing in…' : 'Sign in with Google'}
+        </button>
+        {auth.authActionError && (
+          <p role="alert" className="error">
+            {auth.authActionError}
+          </p>
+        )}
+      </div>
+      <p className="quiet sign-in-note">
         Private beta: only approved accounts can continue. This independent tracker does not submit
         activity to the organizer.
       </p>
