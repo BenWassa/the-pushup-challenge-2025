@@ -127,3 +127,36 @@ test('leap-day archive selection and unknown future editions stay valid', () => 
   assert.equal(classifyChallengeDate('2030-02-03').scheduleStatus, 'UNCONFIGURED');
   assert.throws(() => createChallengeModel({ now, year: NaN }), RangeError);
 });
+
+test('configured edition derives reporting phase from dates without changing original records', () => {
+  const records = [
+    record('spoof-official', '2027-03-01', 'OFFICIAL', 10),
+    record('spoof-offseason', '2027-02-03', 'OFF_SEASON', 20),
+    record('spoof-training', '2027-01-10', 'OFFICIAL', 30),
+  ];
+  const original = JSON.stringify(records);
+  // Inspect a future edition while real time is still the preceding calendar year.
+  const model = createChallengeModel({ records, year: 2027, now: '2026-11-05T12:00:00Z' });
+  assert.equal(model.canLog, false);
+  assert.equal(model.summary.official, 20);
+  assert.equal(model.summary.training, 30);
+  assert.equal(model.summary.offSeason, 10);
+  assert.equal(model.summary.metadataWarnings.length, 3);
+  assert.equal(JSON.stringify(records), original);
+  assert.equal(model.yearRecords[0].phase, 'OFFICIAL');
+});
+
+test('invalid metadata remains visible with warnings while physical activity is retained', () => {
+  const invalid = {
+    ...record('invalid-zone', '2027-02-03', 'unknown-phase', 25),
+    timeZone: 'Not_A_Zone',
+  };
+  const model = createChallengeModel({ now, records: [invalid] });
+  assert.equal(model.summary.total, 25);
+  assert.equal(model.summary.official, 25);
+  assert.equal(model.summary.rejected, 0);
+  assert.deepEqual(model.summary.metadataWarnings, [
+    { id: 'invalid-zone', issues: ['timeZone', 'phase'] },
+  ]);
+  assert.equal(model.yearRecords[0], invalid);
+});

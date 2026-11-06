@@ -9,6 +9,15 @@ import { normalizeLegacyActivity } from './activity.js';
 
 export const DEFAULT_TIME_ZONE = 'America/Toronto';
 const PHASES = new Set(['TRAINING', 'OFFICIAL', 'OFF_SEASON']);
+const validTimeZone = (value) => {
+  if (typeof value !== 'string' || !value || value.length > 100) return false;
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+};
 export const isChallengeYear = (year) => Number.isInteger(year) && year >= 1000 && year <= 9999;
 
 export function classifyChallengeDate(localDate, timeZone = DEFAULT_TIME_ZONE) {
@@ -77,7 +86,6 @@ export function createChallengeModel({
       Number(record.localDate.slice(0, 4)) !== record.challengeYear ||
       !Number.isSafeInteger(record.amount) ||
       record.amount <= 0 ||
-      !PHASES.has(record.phase) ||
       record.deleted
     ) {
       rejected += 1;
@@ -109,26 +117,24 @@ export function createChallengeModel({
     byDate,
     rejected,
     conflictingIds: [...conflicting].sort(),
+    metadataWarnings: [],
   };
   for (const record of yearRecords) {
     summary.total += record.amount;
     byDate[record.localDate] = (byDate[record.localDate] ?? 0) + record.amount;
+    // Dates and reviewed edition config determine reporting; stored metadata is provenance.
+    const reportingPhase = challenge
+      ? getChallengeDay(challenge, record.localDate).phase
+      : 'OFF_SEASON';
+    const issues = [];
+    if (!validTimeZone(record.timeZone)) issues.push('timeZone');
+    if (!PHASES.has(record.phase) || (challenge && record.phase !== reportingPhase))
+      issues.push('phase');
+    if (issues.length) summary.metadataWarnings.push({ id: record.id, issues });
     // Unconfigured historical editions retain provenance; do not assert official credit.
     if (record.provenance && !challenge) summary.legacy += record.amount;
-    else if (
-      record.phase === 'OFFICIAL' &&
-      challenge &&
-      record.localDate >= challenge.official.start &&
-      record.localDate <= challenge.official.end
-    )
-      summary.official += record.amount;
-    else if (
-      record.phase === 'TRAINING' &&
-      challenge?.training &&
-      record.localDate >= challenge.training.start &&
-      record.localDate <= challenge.training.end
-    )
-      summary.training += record.amount;
+    else if (reportingPhase === 'OFFICIAL') summary.official += record.amount;
+    else if (reportingPhase === 'TRAINING') summary.training += record.amount;
     else summary.offSeason += record.amount;
   }
   summary.todayTotal = byDate[today] ?? 0;
