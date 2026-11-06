@@ -4,11 +4,23 @@ import { normalizeLegacyActivity } from '../src/utils/activity.js';
 const safeId = (value) => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
 
 /** Pure dry run. Explicit mapping and classifier are mandatory; no username guessing. */
-export function planMigration({ backup, mappings, importedAt, classifyDate }) {
+export function planMigration({ backup, mappings, importedAt, classifyDate, archiveBeforeYear }) {
   if (!Number.isSafeInteger(importedAt) || importedAt < 0)
     throw new TypeError('Explicit importedAt required');
-  if (!mappings || typeof classifyDate !== 'function')
-    throw new TypeError('Mapping and classifier required');
+  if (
+    !mappings ||
+    Array.isArray(mappings) ||
+    Object.keys(mappings).length === 0 ||
+    typeof classifyDate !== 'function'
+  )
+    throw new TypeError('At least one explicit mapping and classifier required');
+  if (
+    !Number.isInteger(archiveBeforeYear) ||
+    archiveBeforeYear < 1001 ||
+    archiveBeforeYear > 10000
+  ) {
+    throw new TypeError('Explicit archiveBeforeYear threshold required');
+  }
   const sourceRoot = `${firestoreRoot(backup.project, backup.database)}/`;
   const snapshotId = checksum(backup);
   const entries = [];
@@ -22,9 +34,18 @@ export function planMigration({ backup, mappings, importedAt, classifyDate }) {
     if (
       !safeId(mapping.ownerUid) ||
       !Number.isInteger(mapping.challengeYear) ||
-      mapping.challengeYear >= 2027
+      mapping.challengeYear < 1000 ||
+      mapping.challengeYear > 9999 ||
+      mapping.challengeYear >= archiveBeforeYear
     )
       throw new Error('Reviewed owner and archived year required');
+    if (typeof mapping.timeZone !== 'string' || !mapping.timeZone.trim())
+      throw new Error('Reviewed timezone required');
+    try {
+      new Intl.DateTimeFormat('en', { timeZone: mapping.timeZone });
+    } catch {
+      throw new Error('Reviewed timezone required');
+    }
     const ownerYear = `${mapping.ownerUid}/${mapping.challengeYear}`;
     if (seenOwners.has(ownerYear))
       throw new Error(
@@ -118,6 +139,7 @@ export function planMigration({ backup, mappings, importedAt, classifyDate }) {
     .map((document) => document.name.slice(sourceRoot.length));
   return {
     formatVersion: 1,
+    archiveBeforeYear,
     snapshotId,
     importedAt,
     entries,

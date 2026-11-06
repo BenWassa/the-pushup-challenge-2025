@@ -44,7 +44,13 @@ const classifyDate = (date) => ({
   phase: date < '2026-02-05' ? 'TRAINING' : 'OFFICIAL',
 });
 const plan = (backup = fixture(), mappings = mapping) =>
-  planMigration({ backup, mappings, importedAt: 1793880000000, classifyDate });
+  planMigration({
+    backup,
+    mappings,
+    importedAt: 1793880000000,
+    classifyDate,
+    archiveBeforeYear: 2027,
+  });
 
 test('backup traverses pagination and missing ancestors at one readTime', async () => {
   const readTime = '2026-11-05T12:00:00Z';
@@ -121,7 +127,26 @@ test('explicit archive plan is stable, preserves provenance and reconciles sourc
 });
 
 test('missing ownership stays unmapped and malformed/contradictory logs stay quarantined', () => {
-  assert.equal(plan(fixture(), {}).unmappedProfiles.length, 1);
+  assert.throws(() => plan(fixture(), {}), /explicit mapping/);
+  const other = fixture();
+  other.documents.push({
+    ...other.documents[0],
+    name: `${root}/artifacts/fixture/public/data/users/unmapped`,
+  });
+  assert.equal(plan(other).unmappedProfiles.length, 1);
+  for (const challengeYear of [999, 10000])
+    assert.throws(
+      () => plan(fixture(), { [profilePath]: { ...mapping[profilePath], challengeYear } }),
+      /archived year/
+    );
+  assert.throws(
+    () => plan(fixture(), { [profilePath]: { ...mapping[profilePath], timeZone: 'invalid' } }),
+    /timezone/
+  );
+  assert.throws(
+    () => planMigration({ backup: fixture(), mappings: mapping, importedAt: 1, classifyDate }),
+    /archiveBeforeYear/
+  );
   assert.throws(
     () => plan(fixture(), { [profilePath]: { ...mapping[profilePath], ownerUid: '' } }),
     /Reviewed owner/

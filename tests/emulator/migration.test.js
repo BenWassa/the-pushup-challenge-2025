@@ -52,6 +52,7 @@ test('restores a frozen logical backup then imports/reconciles archive entries i
       },
     },
     importedAt: 1793880000000,
+    archiveBeforeYear: 2027,
     // The old organizer schedule is unverified; source season survives as provenance.
     classifyDate: (date) => ({ challengeYear: Number(date.slice(0, 4)), phase: 'OFF_SEASON' }),
   });

@@ -12,8 +12,14 @@ const args = Object.fromEntries(
     return [arg.slice(2, separator), arg.slice(separator + 1)];
   })
 );
-if (!args.backup || !args.mapping || !args.classifier || !args.output)
-  throw new Error('--backup, --mapping, --classifier and --output required');
+if (
+  !args.backup ||
+  !args.mapping ||
+  !args.classifier ||
+  !args.output ||
+  !args['archive-before-year']
+)
+  throw new Error('--backup, --mapping, --classifier, --archive-before-year and --output required');
 const { backup } = await readBackup(args.backup);
 const mappings = JSON.parse(await readFile(args.mapping, 'utf8'));
 const { classifyDate } = await import(pathToFileURL(path.resolve(args.classifier)).href);
@@ -21,6 +27,7 @@ const plan = planMigration({
   backup,
   mappings,
   importedAt: Number(args['imported-at']),
+  archiveBeforeYear: Number(args['archive-before-year']),
   classifyDate,
 });
 await mkdir(args.output, { mode: 0o700 });
