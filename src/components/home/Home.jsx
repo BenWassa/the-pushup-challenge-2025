@@ -41,6 +41,7 @@ export default function Home({
   const canEdit = challenge.canLog && data.canWrite && !busy;
   const primary = canLog
     ? {
+        label: `Today · ${displayDate(challenge.today)}`,
         value: summary.todayTotal,
         note: dayNote(challenge),
       }
@@ -56,7 +57,6 @@ export default function Home({
     <div className="home">
       <HomeHeader
         year={selectedYear}
-        dateLabel={canLog ? displayDate(challenge.today) : ''}
         phaseLabel={canLog ? phaseLabel(challenge.day.phase) : 'Archive · read-only'}
         onSettings={onSettings}
       />

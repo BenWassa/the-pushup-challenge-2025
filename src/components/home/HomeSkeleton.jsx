@@ -9,9 +9,9 @@ export default function HomeSkeleton({ label = 'Opening your journal…' }) {
       <div aria-hidden="true">
         <div className="boot-head">
           <img className="boot-word" src={wordmark} width="320" height="147" alt="" />
+          <span className="boot-block boot-patch" />
           <span className="boot-block boot-gear" />
         </div>
-        <div className="boot-block boot-meta" />
         <div className="boot-block boot-label" />
         <div className="boot-block boot-total" />
         <div className="boot-block boot-bar" />

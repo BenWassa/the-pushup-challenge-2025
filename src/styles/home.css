@@ -15,9 +15,10 @@
 }
 .home-header-top {
   display: flex;
+  flex-wrap: wrap; /* at 200% text the patch drops under the wordmark rather than overflowing */
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--sp-3);
+  gap: var(--sp-2) var(--sp-3);
 }
 .brand-heading {
   min-width: 0;
@@ -63,24 +64,60 @@
   height: 0.24em;
   fill: var(--c-red);
 }
-.home-header-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sp-2) var(--sp-3);
-  margin: var(--sp-1) 0 0;
-  color: var(--c-text-muted);
-  font-size: var(--fs-sm);
+/* Equipment label: the current phase as a sportswear patch. One size for every phase. */
+.home-header .icon-button {
+  margin-right: -10px; /* icon sits on the gutter edge, which frees room for the patch at 320px */
 }
-.phase-chip {
-  padding: 2px var(--sp-3);
-  border-radius: var(--r-pill);
-  background: var(--c-red-soft);
-  color: var(--c-red-text);
-  font-size: var(--fs-xs);
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.phase-patch {
+  --patch-bg: var(--c-red-fill);
+  --patch-ink: oklch(0.98 0.007 35);
+  flex: 0 1 7.375rem; /* rem: the patch grows with enlarged text, so its labels never overflow */
+  min-width: 6.5625rem;
+  max-width: 100%;
+  margin: var(--sp-2) 0 0 auto;
+  padding: 0.5625rem 0.6875rem 0.4375rem;
+  background: var(--patch-bg);
+  color: var(--patch-ink);
+  transform: rotate(3deg);
+}
+.phase-patch.is-off-season {
+  --patch-bg: oklch(0.38 0.055 220); /* deep petrol */
+}
+.phase-patch.is-training {
+  --patch-bg: oklch(0.8 0.14 80); /* warm amber, dark text */
+  --patch-ink: oklch(0.2 0.025 65);
+}
+.phase-patch.is-archive {
+  --patch-bg: var(--c-surface-press);
+  --patch-ink: var(--c-text-muted);
+}
+.patch-kicker,
+.patch-foot {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.patch-name {
+  display: flex;
+  flex-direction: column;
+  margin: 7px 0 8px;
+  font-size: 1.375rem; /* 22px, same for every phase */
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+.patch-foot {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 5px;
+  border-top: 1px solid color-mix(in oklab, var(--patch-ink) 45%, transparent);
+  white-space: nowrap;
+}
+.patch-foot > span {
+  font-size: 0.75rem;
+  line-height: 0.8;
 }
 .archive-banner {
   display: flex;
@@ -307,6 +344,11 @@
   margin: var(--sp-1) 0;
 }
 
+@media (max-width: 360px) {
+  .phase-patch {
+    flex-basis: 6.5625rem;
+  }
+}
 @media (min-width: 600px) {
   .app-shell {
     max-width: 38rem;

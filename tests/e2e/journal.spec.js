@@ -20,7 +20,7 @@ test('fictional demo remains isolated, supports one-handed logging and resets on
   await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('0');
 
   // One scrolling Home: the activity heatmap is rendered in place, no tabs to open.
-  await expect(page.getByRole('heading', { name: /^[A-Z][a-z]+ \d{4}$/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Last 30 days' })).toBeVisible();
   await page.getByRole('button', { name: 'Settings' }).click();
   await expect(page.getByText('Demo participant')).toBeVisible();
 
@@ -216,6 +216,24 @@ test('fictional Feb 10 2027 fixture shows 60 today, 445 / 2,000 and a streak, an
   await expect(page.getByTestId('official-total')).toHaveText('470 / 2,000');
   await page.getByRole('button', { name: /Undo latest set \(25\)/ }).click();
   await expect(today).toHaveText('60');
+});
+
+test('the header names the current phase as a patch in each phase', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  for (const [fixture, name, lines] of [
+    ['jan-15-2027', 'Training', 'TRAINING'],
+    ['feb-10-2027', 'Competition', 'COMPETITION'],
+    ['nov-6-2026', 'Off season', 'OFFSEASON'],
+  ]) {
+    await page.goto(`${appPath}?mode=demo&fixture=${fixture}`);
+    const patch = page.getByTestId('phase-patch');
+    await expect(patch).toContainText(`Current phase: ${name}`);
+    await expect(patch.locator('.patch-name')).toHaveText(new RegExp(lines.slice(0, 3)));
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+    );
+    expect(overflow).toBe(false);
+  }
 });
 
 test('current month blocks future month navigation by button and keyboard', async ({ page }) => {
