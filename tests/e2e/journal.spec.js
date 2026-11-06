@@ -43,6 +43,30 @@ test('mobile viewports do not overflow and show no serious automated accessibili
       metrics.viewport + 1
     );
   }
+  // The full navigation is exercised at enlarged text, not only the logging screen.
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = '200%';
+  });
+  for (const tab of ['Log', 'History', 'Account']) {
+    await page.getByRole('button', { name: tab, exact: true }).click();
+    const widths = await page.evaluate(() => ({
+      content: document.documentElement.scrollWidth,
+      viewport: document.documentElement.clientWidth,
+    }));
+    expect(widths.content, `${tab}: horizontal overflow at 320px / 200% text`).toBeLessThanOrEqual(
+      widths.viewport + 1
+    );
+  }
+  await page.getByRole('button', { name: 'Account', exact: true }).click();
+  await page.getByLabel('Timezone').fill('America/Vancouver');
+  await page.getByRole('button', { name: 'Save preferences' }).click();
+  await expect(page.getByText('Preferences saved on this device.')).toBeVisible();
+  await page.reload();
+  await page.getByRole('button', { name: 'Account', exact: true }).click();
+  await expect(page.getByLabel('Timezone')).toHaveValue('America/Vancouver');
+  await page.getByRole('button', { name: 'Log', exact: true }).click();
+
   const findings = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
     .analyze();
@@ -55,7 +79,7 @@ test('mobile viewports do not overflow and show no serious automated accessibili
 
 test('isolated Firebase emulator confirms add, reload, history, two-tab sync and undo', async ({
   page,
-  context,
+  browser,
   request,
 }) => {
   const email = `pushup-test-${Date.now()}@example.test`;
@@ -82,15 +106,38 @@ test('isolated Firebase emulator confirms add, reload, history, two-tab sync and
 
   await page.reload();
   await expect(page.locator('.daily-summary strong')).toHaveText('10');
+  await page.getByRole('button', { name: /Edit set of 10 on/ }).click();
+  await page.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('15');
+  await page.getByRole('button', { name: 'Save correction' }).click();
+  await expect(page.locator('.daily-summary strong')).toHaveText('15');
   await page.getByRole('button', { name: 'History' }).click();
-  await expect(page.getByText('10 confirmed push-ups')).toBeVisible();
+  await expect(page.getByText('15 confirmed push-ups')).toBeVisible();
 
-  const second = await context.newPage();
+  // A second browser context is a separate device session, not a shared-auth tab.
+  const independentSession = await browser.newContext();
+  const second = await independentSession.newPage();
   await second.goto(appPath);
-  await expect(second.locator('.daily-summary strong')).toHaveText('10');
+  await second.getByLabel('Email').fill(email);
+  await second.getByLabel('Password').fill(password);
+  await second.getByRole('button', { name: 'Sign in' }).click();
+  await expect(second.locator('.daily-summary strong')).toHaveText('15');
   await page.getByRole('button', { name: 'Log' }).click();
   await page.getByRole('button', { name: /Undo latest set/ }).click();
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
   await expect(second.locator('.daily-summary strong')).toHaveText('0');
-  await second.close();
+  await independentSession.close();
+  await page
+    .getByRole('combobox', { name: 'Challenge year' })
+    .selectOption(String(currentYear - 1));
+  await expect(page.getByText('Read-only edition')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toHaveCount(0);
+  await page.getByRole('combobox', { name: 'Challenge year' }).selectOption(String(currentYear));
+  await page.getByRole('button', { name: 'Account', exact: true }).click();
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByRole('button', { name: 'Log', exact: true }).click();
+  await expect(page.locator('.daily-summary strong')).toHaveText('0');
 });
