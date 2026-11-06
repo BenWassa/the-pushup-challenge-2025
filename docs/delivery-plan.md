@@ -1,30 +1,39 @@
-# PushUp 2027 delivery plan
+# PushUp 2027 delivery and release status
 
-Updated November 5, 2026. Tracker: issues #2–#6. This plan covers delivery through release, not a stopping point after the next PR.
+Updated November 5, 2026. Tracker: [issues #2–#6](https://github.com/BenWassa/the-pushup-challenge-2025/issues). Scope: full delivery through an owner-approved, verified production launch.
 
-## Baseline
+## Integrated baseline
 
-Main `65fc942` contains PRs #7–#13: immutable annual config, read-only import/aggregation, previews, small accessibility fixes, service-worker safeguards and 24 tests. Runtime still uses legacy lifetime counters, username profile selection and recurring dates. No completed production migration, UI integration or device acceptance exists. Issue #6 was automatically closed despite outstanding criteria and has been reopened.
+After PRs #7–#22, current `main` (merge commit `7cd22e6`) includes:
+- Configurable annual calendar, explicit training/official/off-season phases, derived date-correct yearly progress and unknown daily-target safeguards.
+- UID/year-scoped v2 activity repository, idempotent add/edit/remove, revision conflict handling, pending retry journal and source-preserving metadata warnings.
+- Mobile-first solo logging, history/calendar, past-year read-only views, account settings, demo isolation, safe saved/error feedback and corrected PWA asset paths.
+- Candidate owner-scoped Firestore rules and private backup/migration planning + emulator restore tooling; **not deployed**, with legacy history still pending actual approved import.
+- Browser acceptance on 320/390/430px, automated accessibility checks, Firebase emulator authorization/concurrency/migration tests and GitHub PR/push CI.
+- Reviewed annual app/PWA version 1.13.0 and manual-only release configuration guards.
 
-## Contracts and ownership
+The integrated `main` [Actions run 42145594256](https://github.com/BenWassa/the-pushup-challenge-2025/actions/runs/42145594256) passed source build and Firebase emulator/browser jobs; deploy was deliberately skipped. This is not proof of real production user access or phone installability.
 
-- Data agent (#3): UID/year entry repository, revision/idempotency protocol, memory demo adapter, activity hook, Auth emulator connection, candidate rules and authorization tests. No production writes/rules changes.
-- Annual agent (#4): annual view model and hook, explicit timezone/day/phase, archive-safe totals, personal goal preferences. App controls selected year to avoid cyclic hook dependencies.
-- Mobile agent (#5): application shell, CSS and app components using those hooks. Complete dashboard, month/day history, corrections, account/settings, save/error/offline states. No direct Firebase calls.
-- Lead (#6/#2): dependencies, integrated browser journeys, emulator runner, CI, manifest/version/cache/release artifacts, migration rehearsal, review and integration. After independent implementation agents finish, assign focused defect remediation and final review.
+## Outcomes
 
-`useActivityData({db,user,isDemoMode,year,timeZone})` returns confirmed records, loading/error, save state, pending operation, add/edit/remove/retry and canWrite. `useChallenge({records,selectedYear,onYearChange})` supplies edition/date/phase/progress and archive-safe controls. Stable operation IDs survive retry; revision preconditions prevent lost edits. Calendar date remains literal, timezone explicit. Confirmed totals never include pending writes. Production v2 cloud access is opt-in and cannot be enabled for release until rules/ownership/backup approval gates pass.
+| Milestone | Status | Evidence or remaining exit condition |
+| --- | --- | --- |
+| Foundation, safe `dist/` builds and issue/PR structure | Source complete; Pages cutover pending | #2, #7–#8 |
+| UID-owned annual activity and correct phase reporting | Implemented, emulator-tested; production cutover pending | #3, #11, #17–#19 |
+| 2027 calendar and year-specific progress | Implemented; unconfirmed daily schedule remains pending | #4, #9, #13–#14 |
+| Mobile solo logging/history/account and warning UX | Implemented and browser-tested; physical phone pending | #5, #10, #16, #20–#21 |
+| Automated release, security, backups and rollback preparation | Implemented in source; independent production proof pending | #6, #12, #15, #18, #20, #22 |
+| Live 2027 publication, historical import and verified recovery | **Blocked by owner-controlled approval and checks** | [Production cutover](production-cutover.md) |
 
-## Successive phases and exit evidence
+## Remaining release sequence
 
-1. Baseline/architecture: reconcile tracker, inspect actual database edition and deployed rules read-only, record live publication baseline. Exit: shared interfaces and file ownership agreed; unsafe operations gated.
-2. Functional implementation in parallel: persistence/rules candidate, annual read model, actual mobile UI. Exit: add/edit/undo and retry correct in memory/emulator; selected year and date drive every rendered total; no legacy hook in active app.
-3. Integration: merge reviewed PRs after checks; run auth, add, edit, undo, reload, two-client sync, logout, year/history and denial journeys against isolated emulators. Exit: journeys pass with no false saved state, duplicate or cross-account exposure.
-4. Refinement: fix findings; run 320/390/430/desktop, text scaling, keyboard and automated accessibility checks. Exit: no overflow or serious accessibility violations; screenshots reviewed; public metadata consistent.
-5. Assurance: clean install/build, CI emulator/browser checks, candidate artifact with correct base, PWA/cache/update tests, backup/import/reconciliation rehearsal using fictional fixtures. Exit: reproducible candidate and precise remaining live/device gates.
-6. Launch approval: present candidate commit, rule diff, ownership mapping/reconciliation, verified backup and rollback evidence. Obtain separate explicit approvals for production rules/migration, Pages source switch and publication. Without approval, finish all isolated checks and retain release candidate; do not dispatch publication.
-7. Closure: after authorized release, verify served hashes, sign-in/persistence/history and installed clients; move only fully verified issue records to closed. Preserve legacy deployed assets until cutover verified. Establish annual config/update checklist.
+1. **Privately identify and verify** the actual Firebase project/database, deployed rules, existing account UID-to-legacy-profile mapping, record inventory, year/timezone interpretations, and any unresolved/duplicate/quarantined logs.
+2. **Rehearse recoverability** against an isolated snapshot: checksum, exact collection scope, reconciled dry-run import, restored records and secure rollback evidence. No raw user data or identifiers in issues/PRs.
+3. **Review the coordinated release candidate** against expected public Firebase web settings, candidate rules, real-device installation/update, accessibility, login, confirmed save, undo, reload and cross-device sync. Automated browser checks are not physical-device proof.
+4. **Seek separate explicit owner approval** for changing live Firestore rules, any historical import, GitHub Pages source switch, and publication. Do not treat this plan as consent.
+5. **Perform an approved coordinated cutover** with bounded interruption, no automatic rollback to legacy permissive rules, retained last-known-good artifact, and actual served version/persistence checks.
+6. Only after successful production verification close the corresponding issues and move their working records from `docs/open/` to `docs/closed/`. Retire tracked old static `docs/` output via a separate safe PR.
 
-## External gates, not reasons to stop implementation
+## Invariants
 
-Production permissions/rule changes, destructive migration, historical deletion, Pages source switch and publication require owner approval. Physical iOS/Android installation and actual account ownership may need owner participation. Missing access or approval does not block emulator/UI/testing work. Record exact evidence and limitations rather than claiming completion from PR merges.
+No production database writes, rule changes, destructive migration, Pages source switch, repository rename or public release without explicit authorization. Preserve existing records and the currently deployed app until coordinated replacement. CI can show code quality; only actual rule, backup and device verification can establish release readiness.
