@@ -45,7 +45,7 @@
 }
 .brand-year {
   position: relative;
-  margin: 0.15rem 0 0.4rem;
+  margin: -14px 0 0.4rem; /* tuck up under the lettering (px: the wordmark is a fixed-size image) */
   color: var(--c-red-text);
   font-size: 1.125rem;
   /* Match the upward slant of the brush lettering */
@@ -235,13 +235,6 @@
   gap: var(--sp-1) var(--sp-3);
   margin-top: var(--sp-2);
   min-height: var(--tap);
-}
-.save-status {
-  margin: 0;
-  min-height: 1.4em;
-  color: var(--c-ok);
-  font-size: var(--fs-sm);
-  font-weight: 600;
 }
 .undo {
   display: inline-flex;
