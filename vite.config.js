@@ -17,7 +17,7 @@ export default defineConfig(({ command }) => {
       __APP_VERSION__: JSON.stringify(pkg.version),
     },
     build: {
-      outDir: 'docs',
+      outDir: 'dist',
     },
   };
 
