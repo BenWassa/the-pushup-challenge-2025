@@ -168,6 +168,8 @@ export function useActivityData({
         ) {
           if (!isDemoMode) clearPending(journalStorage(), pendingKey, pending.current.operationId);
           pending.current = null;
+          // A late confirmation resolves the earlier failure, so new taps must not stay blocked.
+          failed.current = false;
           setState((current) => ({
             ...current,
             error: '',
