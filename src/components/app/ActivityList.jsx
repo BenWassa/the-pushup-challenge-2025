@@ -46,10 +46,13 @@ export default function ActivityList({ records, canEdit, busy, edit, remove }) {
                     set of {record.amount} on {record.localDate}
                   </span>
                 </button>
-                <button disabled={busy} onClick={() => {
+                <button
+                  disabled={busy}
+                  onClick={() => {
                     setRemoving(record.id);
                     setRemoveRevision(record.revision);
-                  }}>
+                  }}
+                >
                   Remove
                   <span className="sr-only">
                     {' '}
