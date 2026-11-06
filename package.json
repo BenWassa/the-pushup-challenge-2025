@@ -1,7 +1,7 @@
 {
   "name": "the-pushup-challenge-2025",
   "private": true,
-  "version": "1.13.0",
+  "version": "1.14.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,9 @@
     "build:pages": "npm run build",
     "test:rules": "firebase emulators:exec --project demo-pushup-2027 --only auth,firestore \"node --test --test-concurrency=1 tests/emulator/*.test.js\"",
     "test:e2e": "playwright test",
-    "test:integration": "firebase emulators:exec --project demo-pushup-2027 --only auth,firestore \"node --test --test-concurrency=1 tests/emulator/*.test.js && playwright test\""
+    "test:integration": "firebase emulators:exec --project demo-pushup-2027 --only auth,firestore \"node --test --test-concurrency=1 tests/emulator/*.test.js && playwright test\"",
+    "build:hosting": "VITE_BASE=/ VITE_ENABLE_V2_CLOUD=true vite build --outDir dist-hosting",
+    "deploy:hosting": "npm run lint && npm test && npm run build:hosting && firebase deploy --only hosting --project pushup2025-df07b"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.2.1",
