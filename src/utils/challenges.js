@@ -28,6 +28,8 @@ export function isLocalDate(value) {
 
 /** Date-only values are already local dates, never parse them as UTC instants. */
 export function toLocalDate(instant, timeZone) {
+  if (typeof timeZone !== 'string' || !timeZone) throw new RangeError('Explicit timezone required');
+  new Intl.DateTimeFormat('en-CA', { timeZone });
   if (isLocalDate(instant)) return instant;
   if (
     !(instant instanceof Date) &&
@@ -53,6 +55,8 @@ const inWindow = (date, window) => window && date >= window.start && date <= win
 export function validateChallenge(challenge) {
   if (!Number.isInteger(challenge?.year) || challenge.year < 1 || challenge.year > 9999)
     throw new RangeError('Invalid challenge year');
+  if (typeof challenge.timeZone !== 'string' || !challenge.timeZone)
+    throw new RangeError('Explicit timezone required');
   new Intl.DateTimeFormat('en-CA', { timeZone: challenge.timeZone });
   for (const window of [challenge.official, challenge.training].filter(Boolean)) {
     if (

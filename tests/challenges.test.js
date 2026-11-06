@@ -82,7 +82,9 @@ test('malformed dates, ambiguous instants, invalid schedules and overlap fail cl
   for (const input of ['2027-02-29', '2027-02-30', '2027-02-03T12:00:00', null, new Date(NaN)])
     assert.throws(() => toLocalDate(input, 'America/Toronto'), RangeError);
   assert.throws(() => toLocalDate(new Date(0), 'invalid/timezone'), RangeError);
+  assert.throws(() => toLocalDate('2027-02-03'), RangeError);
   for (const config of [
+    { ...challenge, timeZone: undefined },
     { ...challenge, training: { start: '2027-01-01', end: '2027-02-03' } },
     { ...challenge, dailyTargets: { '2027-02-27': 1 } },
     { ...challenge, dailyTargets: { '2027-02-03': -1 } },
