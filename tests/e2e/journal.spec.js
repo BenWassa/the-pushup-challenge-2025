@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { approveEmail, signInWithGoogle } from './googleSignIn.js';
 
 const appPath = '/the-pushup-challenge-2025/';
 const currentYear = new Date().getFullYear();
@@ -8,24 +9,24 @@ test('fictional demo remains isolated, supports one-handed logging and resets on
   page,
 }) => {
   await page.goto(`${appPath}?mode=demo`);
-  await expect(page.getByText(/Fictional demo · changes reset on reload/)).toBeVisible();
+  await expect(page.getByText(/Demo · resets on reload/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add 20 push-ups' })).toBeEnabled();
-  await expect(page.locator('.daily-summary strong')).toHaveText('0');
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('0');
 
   await page.getByRole('button', { name: 'Add 20 push-ups' }).click();
-  await expect(page.locator('.daily-summary strong')).toHaveText('20');
-  await expect(page.getByText('Saved in this demo. Resets on reload.')).toBeVisible();
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('20');
+  await expect(page.getByText('Saved · demo resets on reload')).toBeVisible();
   await page.getByRole('button', { name: /Undo latest set/ }).click();
-  await expect(page.locator('.daily-summary strong')).toHaveText('0');
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('0');
 
-  await page.getByRole('button', { name: 'History' }).click();
-  await expect(page.getByRole('heading', { name: 'History' })).toBeVisible();
-  await page.getByRole('button', { name: 'Account' }).click();
-  await expect(page.getByText('Fictional demo participant')).toBeVisible();
+  // One scrolling Home: the activity heatmap is rendered in place, no tabs to open.
+  await expect(page.getByRole('heading', { name: /^[A-Z][a-z]+ \d{4}$/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await expect(page.getByText('Demo participant')).toBeVisible();
 
   await page.reload();
-  await expect(page.locator('.daily-summary strong')).toHaveText('0');
-  await expect(page.getByText(/Fictional demo · changes reset on reload/)).toBeVisible();
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('0');
+  await expect(page.getByText(/Demo · resets on reload/)).toBeVisible();
 });
 
 test('mobile viewports do not overflow and show no serious automated accessibility issues', async ({
@@ -48,8 +49,9 @@ test('mobile viewports do not overflow and show no serious automated accessibili
   await page.evaluate(() => {
     document.documentElement.style.fontSize = '200%';
   });
-  for (const tab of ['Log', 'History', 'Account']) {
-    await page.getByRole('button', { name: tab, exact: true }).click();
+  for (const screen of ['Home', 'Settings']) {
+    if (screen === 'Settings') await page.getByRole('button', { name: 'Settings' }).click();
+    const tab = screen;
     const widths = await page.evaluate(() => ({
       content: document.documentElement.scrollWidth,
       viewport: document.documentElement.clientWidth,
@@ -58,14 +60,13 @@ test('mobile viewports do not overflow and show no serious automated accessibili
       widths.viewport + 1
     );
   }
-  await page.getByRole('button', { name: 'Account', exact: true }).click();
   await page.getByLabel('Timezone').fill('America/Vancouver');
-  await page.getByRole('button', { name: 'Save preferences' }).click();
-  await expect(page.getByText('Preferences saved on this device.')).toBeVisible();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('Saved on this device.')).toBeVisible();
   await page.reload();
-  await page.getByRole('button', { name: 'Account', exact: true }).click();
+  await page.getByRole('button', { name: 'Settings' }).click();
   await expect(page.getByLabel('Timezone')).toHaveValue('America/Vancouver');
-  await page.getByRole('button', { name: 'Log', exact: true }).click();
+  await page.getByRole('button', { name: 'Home', exact: true }).click();
 
   const findings = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -83,96 +84,131 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   request,
 }) => {
   const email = `pushup-test-${Date.now()}@example.test`;
-  const password = 'LocalEmulatorTest2027!';
-  const response = await request.post(
-    'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key',
-    { data: { email, password, returnSecureToken: true } }
-  );
-  expect(response.ok(), await response.text()).toBeTruthy();
+  await approveEmail(request, email);
 
   await page.goto(appPath);
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.getByRole('button', { name: 'Sign in with Google' })).toBeVisible();
+  await signInWithGoogle(page, email);
   await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toBeEnabled();
 
-  await expect(page.getByRole('combobox', { name: 'Challenge year' })).toHaveValue(
-    String(currentYear)
-  );
+  // The challenge year is automatic: no year picker on the Log screen.
+  await expect(page.getByRole('combobox', { name: 'Challenge year' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Add 10 push-ups' }).click();
-  await expect(page.getByText('Saved to your account.')).toBeVisible();
-  await expect(page.locator('.daily-summary strong')).toHaveText('10');
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('10');
 
   await page.reload();
-  await expect(page.locator('.daily-summary strong')).toHaveText('10');
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('10');
   await page.getByRole('button', { name: /Edit set of 10 on/ }).click();
   await page.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('15');
-  await page.getByRole('button', { name: 'Save correction' }).click();
-  await expect(page.locator('.daily-summary strong')).toHaveText('15');
-  await page.getByRole('button', { name: 'History' }).click();
-  await expect(page.getByText('15 confirmed push-ups')).toBeVisible();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('15');
+  await expect(page.getByText('15 push-ups', { exact: true })).toBeVisible();
 
   // A second browser context is a separate device session, not a shared-auth tab.
   const independentSession = await browser.newContext();
   const second = await independentSession.newPage();
   await second.goto(appPath);
-  await second.getByLabel('Email').fill(email);
-  await second.getByLabel('Password').fill(password);
-  await second.getByRole('button', { name: 'Sign in' }).click();
-  await expect(second.locator('.daily-summary strong')).toHaveText('15');
-  await page.getByRole('button', { name: 'Log' }).click();
-  await page.getByRole('button', { name: /Edit set of 15 on/ }).click();
+  await signInWithGoogle(second, email);
+  await expect(second.getByTestId('primary-total').locator('strong')).toHaveText('15');
+  await page
+    .getByRole('button', { name: /Edit set of 15 on/ })
+    .first()
+    .click();
   await page.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('99');
   await second.getByRole('button', { name: /Edit set of 15 on/ }).click();
   await second.getByRole('spinbutton', { name: 'Push-ups', exact: true }).fill('22');
-  await second.getByRole('button', { name: 'Save correction' }).click();
-  await expect(second.locator('.daily-summary strong')).toHaveText('22');
-  await expect(page.locator('.daily-summary strong')).toHaveText('22');
-  await page.getByRole('button', { name: 'Save correction' }).click();
+  await second.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(second.getByTestId('primary-total').locator('strong')).toHaveText('22');
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('22');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('This set changed on another device.');
-  await expect(page.locator('.daily-summary strong')).toHaveText('22');
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('22');
   await page.getByRole('button', { name: 'Cancel' }).click();
   await page.getByRole('button', { name: /Undo latest set/ }).click();
-  await expect(page.locator('.daily-summary strong')).toHaveText('0');
-  await expect(second.locator('.daily-summary strong')).toHaveText('0');
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('0');
+  await expect(second.getByTestId('primary-total').locator('strong')).toHaveText('0');
   await independentSession.close();
-  await page
-    .getByRole('combobox', { name: 'Challenge year' })
-    .selectOption(String(currentYear - 1));
-  await expect(page.getByText('Read-only edition')).toBeVisible();
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('button', { name: String(currentYear - 1), exact: true }).click();
+  await expect(page.getByText(`Viewing ${currentYear - 1} · read-only`)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toHaveCount(0);
-  await page.getByRole('combobox', { name: 'Challenge year' }).selectOption(String(currentYear));
-  await page.getByRole('button', { name: 'Account', exact: true }).click();
+  await page.getByRole('button', { name: `Back to ${currentYear}` }).click();
+  await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Settings' }).click();
   await page.getByRole('button', { name: 'Sign out' }).click();
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await page.getByRole('button', { name: 'Log', exact: true }).click();
-  await expect(page.locator('.daily-summary strong')).toHaveText('0');
+  await expect(page.getByRole('button', { name: 'Sign in with Google' })).toBeVisible();
+  await signInWithGoogle(page, email);
+  await expect(page.getByTestId('primary-total').locator('strong')).toHaveText('0');
 });
 
-test('calendar names include visible day and count for keyboard and voice access', async ({
+test('signed-in people who are not on the closed-beta allowlist see a waiting screen and no journal', async ({
+  page,
+}) => {
+  const email = `stranger-${Date.now()}@example.test`;
+  await page.goto(appPath);
+  await signInWithGoogle(page, email);
+  await expect(page.getByRole('heading', { name: 'You’re not on the list yet' })).toBeVisible();
+  await expect(page.getByText(email)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page.getByRole('button', { name: 'Sign in with Google' })).toBeVisible();
+});
+
+test('activity squares are named with date and total and work from the keyboard', async ({
   page,
 }) => {
   await page.clock.setFixedTime(new Date('2027-02-03T15:00:00Z'));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${appPath}?mode=demo`);
-  await expect(page.getByText('Official daily target pending.', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'History', exact: true }).click();
-  const empty = page.getByRole('button', { name: 'Day 3 0 push-ups on 2027-02-03', exact: true });
-  const active = page.getByRole('button', { name: 'Day 1 25 push-ups on 2027-02-01', exact: true });
-  await expect(empty).toBeVisible();
+  await expect(page.getByText('Official daily target pending', { exact: true })).toBeVisible();
+  const empty = page.getByRole('button', { name: /^Wednesday, February 3, 2027: No push-ups/ });
+  const active = page.getByRole('button', {
+    name: /^Monday, February 1, 2027: 25 push-ups\. Training\./,
+  });
+  await expect(empty).toHaveAttribute('aria-current', 'date');
   await expect(active).toBeVisible();
-  await active.focus();
-  await page.keyboard.press('Space');
-  await expect(page.getByRole('heading', { name: '2027-02-01', exact: true })).toBeVisible();
+  // Weekday alignment: Feb 1, 2027 is a Monday, so it is the second column of the first row.
+  const first = await active.boundingBox();
+  const grid = await page.locator('.as-grid').boundingBox();
+  expect(first.x - grid.x).toBeGreaterThan(grid.width / 7 - 4);
+  expect(first.x - grid.x).toBeLessThan((grid.width / 7) * 2);
+  await active.click();
+  await expect(page.getByRole('heading', { name: 'Monday, February 1, 2027' })).toBeVisible();
   await expect(active).toHaveAttribute('aria-pressed', 'true');
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('heading', { name: 'Tuesday, February 2, 2027' })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: /^Tuesday, February 2, 2027: 20 push-ups/ })
+  ).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByRole('heading', { name: 'Tuesday, February 9, 2027' })).toBeVisible();
+  await page.keyboard.press('PageDown');
+  await expect(page.getByRole('heading', { name: 'March 2027' })).toBeVisible();
   const findings = await new AxeBuilder({ page }).analyze();
   expect(
     findings.violations
       .filter((v) => ['critical', 'serious'].includes(v.impact))
       .map((v) => ({ id: v.id, nodes: v.nodes.length }))
   ).toEqual([]);
+});
+
+test('fictional Feb 10 2027 fixture shows 60 today, 445 / 2,000 and a streak, and logs/undoes', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${appPath}?mode=demo&fixture=feb-10-2027`);
+  const today = page.getByTestId('primary-total').locator('strong');
+  await expect(today).toHaveText('60');
+  await expect(page.getByTestId('official-total')).toHaveText('445 / 2,000');
+  await expect(
+    page.getByRole('progressbar', { name: 'Official challenge progress' })
+  ).toHaveAttribute('aria-valuetext', '445 of 2000 push-ups');
+  await expect(page.locator('.streak')).toHaveText(/7\s*day streak/);
+  await expect(page.getByRole('button', { name: /Undo latest set \(20\)/ })).toBeEnabled();
+  await page.getByRole('button', { name: 'Add 25 push-ups' }).click();
+  await expect(today).toHaveText('85');
+  await expect(page.getByTestId('official-total')).toHaveText('470 / 2,000');
+  await page.getByRole('button', { name: /Undo latest set \(25\)/ }).click();
+  await expect(today).toHaveText('60');
 });

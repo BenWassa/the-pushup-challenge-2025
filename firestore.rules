@@ -1,12 +1,18 @@
 rules_version = '2';
-// Candidate v2 rules for emulator verification only. Never deploy without owner approval.
+// v2 rules. Deployed 2026-11-06 with owner approval; see docs/open/003-data-integrity.md for rollback.
 // participants/{authUID}/challenges/{year}/entries/{stableID}
 // Required canonical fields plus revision(int), deleted(bool), updatedAt(epoch ms),
 // lastOperationId(bounded string). UID, year, date, phase, timezone and createdAt immutable.
 // Deletes are tombstones, preserving provenance and making retries safe.
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isOwner(uid) { return request.auth != null && request.auth.uid == uid; }
+    // Closed beta: anyone may sign in with Google, but only emails listed in
+    // allowlist/{lowercase email} (added by the owner in the console/Admin SDK) get access.
+    function isApproved() {
+      return request.auth != null && request.auth.token.email_verified == true &&
+        exists(/databases/$(database)/documents/allowlist/$(request.auth.token.email.lower()));
+    }
+    function isOwner(uid) { return request.auth != null && request.auth.uid == uid && isApproved(); }
     function boundedString(value, limit) { return value is string && value.size() > 0 && value.size() <= limit; }
     // Accept the real local-calendar year across UTC+14 through UTC-12 boundaries.
     function writableYear(year) {
@@ -36,6 +42,12 @@ service cloud.firestore {
         data.revision is int && data.revision >= 1 && data.revision <= 1000000 &&
         data.deleted is bool && boundedString(data.lastOperationId, 128);
     }
+    // A signed-in person may check only their own allowlist entry; nobody can write it from a client.
+    match /allowlist/{email} {
+      allow get: if request.auth != null && request.auth.token.email_verified == true &&
+        request.auth.token.email.lower() == email;
+      allow list, write: if false;
+    }
     match /participants/{uid}/challenges/{year}/entries/{entryId} {
       allow read: if isOwner(uid);
       allow create: if isOwner(uid) && writableYear(year) && !entryId.matches('^legacy_.*') && validEntry(request.resource.data, uid, year, entryId) &&
@@ -49,6 +61,11 @@ service cloud.firestore {
         request.resource.data.updatedAt >= resource.data.updatedAt;
       allow delete: if false;
     }
+    // TRANSITIONAL: the original site still reads and writes these two legacy trees, and the live
+    // rules have always been fully open. Kept exactly as open as before so the old site and its
+    // irreplaceable history keep working. Tighten only with a migration plan and owner approval.
+    match /artifacts/{document=**} { allow read, write: if true; }
+    match /users/{document=**} { allow read, write: if true; }
     match /{document=**} { allow read, write: if false; }
   }
 }

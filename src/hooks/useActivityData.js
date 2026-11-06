@@ -31,7 +31,14 @@ const friendlyError = (error) => {
   return 'Activity could not be confirmed. Retry when your connection is available.';
 };
 
-export function useActivityData({ db, user, isDemoMode, year, timeZone = 'America/Toronto' }) {
+export function useActivityData({
+  db,
+  user,
+  isDemoMode,
+  year,
+  timeZone = 'America/Toronto',
+  now, // fixed clock for fictional demo fixtures only; real sessions use the current time
+}) {
   const ownerUid = user?.uid;
   const enabled =
     isDemoMode || localEmulatorEnabled() || import.meta.env.VITE_ENABLE_V2_CLOUD === 'true';
@@ -114,7 +121,7 @@ export function useActivityData({ db, user, isDemoMode, year, timeZone = 'Americ
     state.scope === repository &&
     !state.loading &&
     !state.readError &&
-    year === Number(toLocalDate(new Date(), timeZone).slice(0, 4));
+    year === Number(toLocalDate(now ?? new Date(), timeZone).slice(0, 4));
   const execute = useCallback(
     async (operation) => {
       if (!repository || busy.current) return false;

@@ -1,4 +1,5 @@
 import { getChallenge, getChallengeDay, toLocalDate } from '../utils/challenges.js';
+import { getDemoFixture } from './demoFixture.js';
 import {
   applyActivityOperation,
   createAddOperation,
@@ -14,7 +15,24 @@ export function createMemoryRepository(ownerUid, year) {
   const key = `${ownerUid}:${year}`;
   if (!stores.has(key)) {
     const entries = new Map();
-    if (ownerUid === 'demo-user') {
+    const fixture = ownerUid === 'demo-user' ? getDemoFixture() : null;
+    if (fixture) {
+      if (fixture.year === year) {
+        const challenge = getChallenge(year);
+        fixture.sets.forEach(([localDate, amount], index) => {
+          const phase = challenge ? getChallengeDay(challenge, localDate).phase : 'OFF_SEASON';
+          // Seeds are stamped in early 2026 so sets logged during review always sort as newest.
+          const operation = createAddOperation(
+            { amount, localDate, phase, challengeYear: year, timeZone: 'America/Toronto' },
+            ownerUid,
+            year,
+            `fixture-${year}-${index}`,
+            Date.UTC(2026, 0, 1) + index * 60000
+          );
+          entries.set(operation.id, operation.record);
+        });
+      }
+    } else if (ownerUid === 'demo-user') {
       const now = Date.now();
       const currentYear = Number(toLocalDate(now, 'America/Toronto').slice(0, 4));
       const dates =

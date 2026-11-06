@@ -124,3 +124,27 @@ No production rules, records, Pages configuration or publication was changed. #3
 Review hardening: seeded demo creation instants use their original activity dates so undo targets the newest actual set. Year options derive from configured editions/current year. A 15-second confirmation timeout retains the same pending operation and permits idempotent retry; the original transaction is not cancelled and only server acknowledgement can establish success.
 
 The retry journal preserves multiple outstanding operation IDs and clears only the confirmed operation, avoiding accidental removal of another tab's pending change. Each operation uses a separate atomic browser-storage key, so concurrent tabs cannot overwrite each other's journal slots. The durable cloud transaction ID and server reconciliation remain authoritative.
+
+## Google sign-in and closed-beta allowlist (candidate, not deployed)
+
+- Sign-in is Google only. It uses a popup first; browsers block full-page redirect sign-in when the app (github.io) and Firebase's handler (firebaseapp.com) are on different domains, so redirect is only the fallback when a popup is blocked. Anyone can sign in with Google; only approved people get access.
+- Approval is a document at `allowlist/{lowercase email}` in Firestore. Clients cannot write or list it; a signed-in person can read only their own entry (the app uses that to show the "not on the list yet" screen). `participants/**` reads and writes require a verified email with an allowlist entry.
+- To approve someone: add a document with ID equal to their lowercase Google email (any field, e.g. `approved: true`) in the Firebase console. To revoke: delete it.
+- **Deployed 2026-11-06 with owner approval** to project `pushup2025-df07b`. Before this, the live rules were fully open (`allow read, write: if true`). The deployed rules keep `artifacts/**` and `users/**` (the original site's legacy data) exactly as open as before so the old site keeps working; everything else is denied except the allowlist and approved `participants/**` paths. Owner emails `haddonbenjamin@gmail.com` and `haddonbenjamin@googlemail.com` were added to `allowlist` first.
+- **Rollback:** redeploy the previous rules: `rules_version = '2'; service cloud.firestore { match /databases/{database}/documents { match /{document=**} { allow read, write: if true; } } }`.
+- Still open risk: the legacy trees remain world-readable and writable. Tightening them needs a migration plan and owner approval.
+- Enabling the Google provider and the GitHub Pages domain under Authorized domains is a console step for the owner.
+- Existing email/password users keep their UID only if Firebase's "one account per email" setting is on and the Google address matches; verify before relying on history.
+
+### Production Auth changes (2026-11-06, owner-approved)
+
+- Google provider was already enabled; `benwassa.github.io` added to authorized domains.
+- All 76 anonymous Auth accounts deleted; only `haddonbenjamin@gmail.com` kept. Firestore data was not touched (history is stored by profile name, not account ID). Pre-delete export kept locally in the gitignored `backups.local/`.
+
+### 2026 history import (2026-11-06, owner-approved)
+
+- The owner's legacy `ben` profile (99 sets, 1,630 push-ups, archive years only) was imported into the owner's Google-sign-in account namespace as immutable `legacy_*` entries using `scripts/migration-production.js` (dry-run by default; one atomic create-only batch; read-back verified; refuses to overwrite). Rehearsed twice in the emulator first, including the refusal on re-run.
+- Independent production check: 99 unique entries, sum 1,630, equal to the source reconciliation. The empty `tim` profile (0 logs) had nothing to import. All legacy documents were left untouched and read-only in place.
+- The previous email/password account was disabled (archived, reversible by re-enabling), not deleted. The UID mapping and snapshots stay in the gitignored `backups.local/` and are not recorded here.
+- Rollback: delete only the 99 `legacy_*` documents under the owner's namespace (IDs are in the plan), re-enable the old account if needed. The legacy trees were never modified.
+- Imported history appears in the app once the cloud release flag (`VITE_ENABLE_V2_CLOUD=true`) is on in the published build.

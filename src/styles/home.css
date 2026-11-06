@@ -1,0 +1,298 @@
+/* Home screen: masthead, progress, quick logging, recent sets. Tokens only. */
+.home > * {
+  min-width: 0;
+}
+.home {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-5);
+  padding-bottom: var(--sp-4);
+}
+
+/* A. Masthead */
+.home-header {
+  padding-top: max(var(--sp-3), env(safe-area-inset-top));
+}
+.home-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.brand-heading {
+  min-width: 0;
+  margin: 0;
+  font-size: inherit;
+}
+.brand {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4em;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.brand-year {
+  position: relative;
+  color: var(--c-red-text);
+}
+.brand-stroke {
+  position: absolute;
+  left: -2%;
+  bottom: -0.28em;
+  width: 104%;
+  height: 0.24em;
+  fill: var(--c-red);
+}
+.home-header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+  margin: var(--sp-1) 0 0;
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+.phase-chip {
+  padding: 2px var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--c-red-soft);
+  color: var(--c-red-text);
+  font-size: var(--fs-xs);
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.archive-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* B. Today and challenge progress */
+.summary {
+  display: grid;
+  gap: var(--sp-5);
+}
+.summary-label {
+  margin: 0;
+  color: var(--c-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.summary-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--sp-3);
+  margin: var(--sp-1) 0 0;
+  line-height: 0.95;
+}
+.summary-hero strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+.summary-hero span {
+  color: var(--c-text-muted);
+  font-size: var(--fs-lg);
+  font-weight: 650;
+}
+.summary-note {
+  margin: var(--sp-2) 0 0;
+  color: var(--c-text-faint);
+  font-size: var(--fs-sm);
+}
+.summary-official {
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--c-line);
+}
+.summary-official-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.summary-total {
+  margin: var(--sp-1) 0 0;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.summary-total strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-total);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+.summary-total span {
+  display: inline-block;
+  white-space: nowrap;
+  color: var(--c-text-muted);
+  font-size: var(--fs-lg);
+  font-weight: 650;
+}
+.streak {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: 0 0 var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--c-surface-raised);
+  color: var(--c-text);
+  font-size: var(--fs-sm);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.streak svg {
+  color: var(--c-red-text);
+}
+.streak-unit {
+  color: var(--c-text-muted);
+  font-weight: 600;
+}
+.progress {
+  height: 10px;
+  margin-top: var(--sp-3);
+  overflow: hidden;
+  border-radius: var(--r-pill);
+  background: var(--c-surface-raised);
+}
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--c-red);
+  transition: width var(--dur) var(--ease);
+}
+
+/* C. Quick logging: 2×2, equal size */
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+.quick-button {
+  min-height: clamp(5rem, 22vw, 6.5rem);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--r-lg);
+  background: var(--c-surface-raised);
+  box-shadow:
+    var(--shadow-raise),
+    inset 0 -3px 0 var(--c-red);
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 9vw, 2.5rem);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.quick-button:hover:not(:disabled) {
+  background: var(--c-surface-press);
+}
+.quick-button:active:not(:disabled) {
+  transform: scale(0.98);
+  background: var(--c-red-fill);
+  border-color: transparent;
+}
+.quick-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-1) var(--sp-3);
+  margin-top: var(--sp-2);
+  min-height: var(--tap);
+}
+.save-status {
+  margin: 0;
+  min-height: 1.4em;
+  color: var(--c-ok);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.undo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-left: auto;
+  border-color: transparent;
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+.undo:hover:not(:disabled) {
+  background: transparent;
+  color: var(--c-text);
+}
+
+/* E. Recent sets */
+.recent .section-title,
+.home .section-title {
+  margin-bottom: var(--sp-2);
+}
+.breakdown {
+  color: var(--c-text-faint);
+  font-size: var(--fs-xs);
+}
+.breakdown dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-5);
+  margin: 0 0 var(--sp-2);
+}
+.breakdown dl div {
+  display: flex;
+  gap: var(--sp-2);
+}
+.breakdown dt {
+  color: var(--c-text-faint);
+}
+.breakdown dd {
+  margin: 0;
+  color: var(--c-text-muted);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.breakdown p {
+  margin: var(--sp-1) 0;
+}
+
+@media (min-width: 600px) {
+  .app-shell {
+    max-width: 38rem;
+  }
+  .quick-button {
+    min-height: 6.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  button:active:not(:disabled) {
+    transform: none;
+  }
+}

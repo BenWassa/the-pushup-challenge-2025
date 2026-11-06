@@ -7,12 +7,9 @@ export default function Account({ auth, challenge, busy }) {
   const [error, setError] = useState('');
   return (
     <section aria-labelledby="account-title">
-      <h2 id="account-title">Account & preferences</h2>
-      <p>{auth.isDemoMode ? 'Fictional demo participant' : auth.user?.email}</p>
-      <p className="quiet">
-        Preferences stay on this device. Existing sets keep their original calendar date and
-        timezone.
-      </p>
+      <h2 id="account-title">Account</h2>
+      <p>{auth.isDemoMode ? 'Demo participant' : auth.user?.email}</p>
+      <p className="quiet">Device-only preferences. Saved dates and timezones stay unchanged.</p>
       <form
         className="preferences"
         onSubmit={(e) => {
@@ -22,9 +19,9 @@ export default function Account({ auth, challenge, busy }) {
             challenge.setTimeZone(zone);
             challenge.setTrainingGoal(goal === '' ? null : Number(goal));
             setError('');
-            setMessage('Preferences saved on this device.');
+            setMessage('Saved on this device.');
           } catch {
-            setError('Enter a valid IANA timezone, such as America/Toronto.');
+            setError('Use a timezone like America/Toronto.');
             setMessage('');
           }
         }}
@@ -47,7 +44,7 @@ export default function Account({ auth, challenge, busy }) {
           </datalist>
         </label>
         <label>
-          Personal daily training goal (optional)
+          Daily training goal (optional)
           <input
             type="number"
             min="1"
@@ -56,9 +53,9 @@ export default function Account({ auth, challenge, busy }) {
             onChange={(e) => setGoal(e.target.value)}
           />
         </label>
-        <p className="quiet">This personal goal never replaces the organizer’s official target.</p>
+        <p className="quiet">Personal goal; official target unchanged.</p>
         <button className="primary" disabled={busy}>
-          Save preferences
+          Save
         </button>
       </form>
       <p role="status">{message}</p>
@@ -69,12 +66,9 @@ export default function Account({ auth, challenge, busy }) {
       )}
       {auth.isDemoMode ? (
         <div className="notice">
-          <p>
-            Demo sets exist only in memory and reset on reload. No Firebase records are read or
-            written.
-          </p>
+          <p>Demo: memory only; resets on reload. No Firebase reads or writes.</p>
           <button disabled={busy} onClick={() => window.location.reload()}>
-            Reset fictional demo
+            Reset demo
           </button>
         </div>
       ) : (
@@ -84,7 +78,7 @@ export default function Account({ auth, challenge, busy }) {
             try {
               await auth.logoutAuth();
             } catch {
-              setError('Could not sign out. Please try again.');
+              setError('Sign-out failed. Try again.');
             }
           }}
         >

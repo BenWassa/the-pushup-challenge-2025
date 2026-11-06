@@ -4,10 +4,13 @@ import {
   getAuth,
   connectAuthEmulator,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
 } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, doc, getDoc } from 'firebase/firestore';
 import { getStorageMode, isDemoStorageMode } from '../utils/mode';
 
 // Move appId outside hook to avoid recalculating on every render
@@ -82,32 +85,25 @@ const getFriendlyAuthError = (error) => {
   const code = error?.code || '';
 
   if (
-    code.includes('invalid-credential') ||
-    code.includes('user-not-found') ||
-    code.includes('wrong-password')
-  ) {
-    return 'Invalid email or password.';
-  }
-  if (code.includes('email-already-in-use')) {
-    return 'That email is already registered. Try signing in instead.';
-  }
-  if (code.includes('weak-password')) {
-    return 'Password must be at least 6 characters.';
-  }
-  if (code.includes('too-many-requests')) {
-    return 'Too many login attempts. Try again shortly.';
-  }
-
+    code.includes('cancelled-popup-request') ||
+    code.includes('popup-closed-by-user') ||
+    code.includes('user-cancelled')
+  )
+    return '';
   if (code.includes('network-request-failed'))
     return 'Cannot connect. Check your connection and try again.';
-  return 'Unable to sign in. Check your details and try again.';
+  if (code.includes('too-many-requests')) return 'Too many sign-in attempts. Try again shortly.';
+  return 'Unable to sign in with Google. Try again.';
 };
 
+const DEMO_USER = { uid: 'demo-user', isDemo: true };
+
 export const useAuth = () => {
-  const [user, setUser] = useState(null);
+  const [signedInUser, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [authActionLoading, setAuthActionLoading] = useState(false);
   const [authActionError, setAuthActionError] = useState('');
+  const [access, setAccess] = useState({ uid: null, status: 'checking' });
 
   const storageMode = useMemo(() => getStorageMode(), []);
   const isDemoMode = isDemoStorageMode(storageMode);
@@ -142,16 +138,9 @@ export const useAuth = () => {
   const appId = APP_ID;
 
   useEffect(() => {
-    if (isDemoMode) {
-      setUser({ uid: 'demo-user', isDemo: true });
-      setAuthReady(true);
-      return undefined;
-    }
+    if (isDemoMode) return undefined;
 
-    if (!auth) {
-      setAuthReady(true);
-      return undefined;
-    }
+    if (!auth) return undefined;
 
     const unsubAuth = onAuthStateChanged(auth, (u) => {
       setUser(u || null);
@@ -161,25 +150,77 @@ export const useAuth = () => {
     return () => unsubAuth();
   }, [auth, isDemoMode]);
 
-  const signInWithEmail = useCallback(
-    async (email, password) => {
-      if (!auth || isDemoMode) return false;
+  // Reports a failed return from Google's full-page sign-in. Success arrives via onAuthStateChanged.
+  useEffect(() => {
+    if (!auth || isDemoMode) return;
+    getRedirectResult(auth).catch((redirectError) =>
+      setAuthActionError(getFriendlyAuthError(redirectError))
+    );
+  }, [auth, isDemoMode]);
 
-      setAuthActionLoading(true);
-      setAuthActionError('');
+  // Closed beta: anyone can sign in with Google, but only emails the owner has added to the
+  // allowlist get in. Firestore rules enforce this; this check only chooses which screen to show.
+  const userUid = signedInUser?.uid || null;
+  const userEmail = signedInUser?.email || '';
+  useEffect(() => {
+    if (isDemoMode || !userUid || !db) return undefined;
+    let cancelled = false;
+    getDoc(doc(db, 'allowlist', userEmail.toLowerCase()))
+      .then(
+        (entry) =>
+          !cancelled && setAccess({ uid: userUid, status: entry.exists() ? 'approved' : 'pending' })
+      )
+      .catch((accessError) => {
+        if (cancelled) return;
+        // Only a clear refusal blocks the screen; offline or flaky checks stay optimistic
+        // because the rules still guard every read and write.
+        setAccess({
+          uid: userUid,
+          status: accessError?.code === 'permission-denied' ? 'pending' : 'approved',
+        });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [db, isDemoMode, userEmail, userUid]);
+  const accessStatus = isDemoMode
+    ? 'approved'
+    : !userUid
+      ? 'none'
+      : access.uid === userUid
+        ? access.status
+        : 'checking';
 
+  const signInWithGoogle = useCallback(async () => {
+    if (!auth || isDemoMode) return false;
+
+    setAuthActionLoading(true);
+    setAuthActionError('');
+
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        // A popup works when the app and Firebase's sign-in handler are on different domains
+        // (GitHub Pages vs firebaseapp.com), where browsers now block redirect sign-in storage.
+        await signInWithPopup(auth, provider);
+      } catch (popupError) {
+        const code = popupError?.code || '';
+        if (!code.includes('popup-blocked') && !code.includes('operation-not-supported')) {
+          throw popupError;
+        }
+        await signInWithRedirect(auth, provider);
+        // The page is leaving for Google, so keep the button disabled until it returns.
         return true;
-      } catch (signInError) {
-        setAuthActionError(getFriendlyAuthError(signInError));
-        return false;
-      } finally {
-        setAuthActionLoading(false);
       }
-    },
-    [auth, isDemoMode]
-  );
+      setAuthActionLoading(false);
+      return true;
+    } catch (signInError) {
+      setAuthActionError(getFriendlyAuthError(signInError));
+      setAuthActionLoading(false);
+      return false;
+    }
+  }, [auth, isDemoMode]);
 
   const logoutAuth = useCallback(async () => {
     if (!auth || isDemoMode) return;
@@ -191,7 +232,9 @@ export const useAuth = () => {
     }
   }, [auth, isDemoMode]);
 
-  const loading = !error && !authReady;
+  const user = isDemoMode ? DEMO_USER : signedInUser;
+  const loading =
+    !error && !isDemoMode && Boolean(auth) && (!authReady || accessStatus === 'checking');
 
   return {
     user,
@@ -201,9 +244,10 @@ export const useAuth = () => {
     error,
     storageMode,
     isDemoMode,
+    accessStatus,
     authActionLoading,
     authActionError,
-    signInWithEmail,
+    signInWithGoogle,
     logoutAuth,
   };
 };
