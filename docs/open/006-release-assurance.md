@@ -1,7 +1,7 @@
 # #6 — Test, security, deployment and release readiness
 
 **Issue:** https://github.com/BenWassa/the-pushup-challenge-2025/issues/6  
-**Status:** Initial automated assurance implemented; launch gates remain open
+**Status:** Integrated build/emulator/browser CI green; live security, backup, Firebase configuration, physical phones and publication approval outstanding
 **Depends on:** #2 through #5 for final launch
 
 ## Test plan
@@ -40,3 +40,13 @@ Local validation: lint, 23 native Node tests across the integrated baseline (inc
 Added read-only logical backup enumeration with fixed readTime and typed document values, restricted checksummed files, explicit ownership/timezone mapping, pure migration/quarantine/reconciliation reports, deterministic immutable legacy entry IDs, and emulator-only create/readback restore. See [release checklist](../release-checklist.md#recovery-tooling-and-approval-packet).
 
 An actual isolated STANDARD Firestore emulator rehearsal restored fictional source documents, imported archive entries, verified idempotence, rejected a conflicting import without overwrite, and verified retained values. This is evidence for tooling, not a completed production backup or owner mapping. The backup CLI was not executed against production by this agent. Actual project-wide scope, Auth export, production restore and approved ownership remain open. Root's read-only production audit identified permissive deployed rules and no UID ownership fields; the coordinated release must address that exposure without breaking the preserved legacy application.
+
+## Integrated acceptance evidence — November 5, 2026
+
+- [PR #19](https://github.com/BenWassa/the-pushup-challenge-2025/pull/19): derive reporting phase from the annual calendar, preserve and warn on inconsistent metadata, permit safe bad-timezone tombstones.
+- [PR #20](https://github.com/BenWassa/the-pushup-challenge-2025/pull/20): surface metadata warnings in the actual UI; run Firestore rules/emulator and browser journeys in GitHub Actions. Browser coverage includes fictional demo add/undo/reset, 320/390/430px overflow, serious automated accessibility findings, emulator sign-in/add/reload/history/two-tab synchronization/undo.
+- [PR #21](https://github.com/BenWassa/the-pushup-challenge-2025/pull/21): annual PWA identity, Pages base-path-safe icons and manifest, updated README.
+- [PR #22](https://github.com/BenWassa/the-pushup-challenge-2025/pull/22): version 1.13.0 and an explicit manual-deployment guard requiring reviewed Firebase web client variables; `VITE_ENABLE_V2_CLOUD` true only in a manually approved publication build. [Controlled cutover procedure](../production-cutover.md).
+- Integrated `main` [workflow run 42145594256](https://github.com/BenWassa/the-pushup-challenge-2025/actions/runs/42145594256) completed build **success** and Firebase emulator/browser acceptance **success**, while production deploy was **skipped** as intended.
+
+Automated success is **not** proof of physical iOS/Android installation, permission-safe deployed rules, actual legacy mapping, private backup restoration or a production-configured artifact. Existing Pages assets and production Firebase data/rules remain unchanged. **Keep this issue open** until production release and rollback have been explicitly approved and independently verified.

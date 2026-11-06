@@ -1,68 +1,46 @@
-# Architecture baseline — source review, November 2026
+# PushUp architecture — integrated source, November 5, 2026
 
-This is a review of the current `main` source, **not** a claim that deployed runtime or Firestore security was tested.
+**Scope:** This documents the current `main` source after PRs #7–#22, not the legacy app still served at the live GitHub Pages URL. Production Firebase rules, records and Pages cutover remain separate approval gates.
 
-## Observed stack
-- React 19, Vite 7, JavaScript, Tailwind CSS, Firebase Auth and Firestore.
-- Entry `src/main.jsx`; app coordination in `src/App.jsx`.
-- Authentication and Firebase initialization: `src/hooks/useAuth.js`.
-- Profile loading, rep logging, undo and stats: `src/hooks/useUserData.js`.
-- Live leaderboard: `src/hooks/useLeaderboard.js`.
-- Seasonal classification: `src/utils/season.js`.
-- Date/timestamp logic: `src/utils/timestamp.js`.
-- Demo sample data in memory: `src/utils/localStore.js`.
-- Static PWA manifest and service worker: `public/manifest.webmanifest`, `public/sw.js`.
+## Runtime
 
-## Current storage shape
-Firestore documents are selected by username at `artifacts/{appId}/public/data/users/{username}`. A profile contains `training_reps`, `official_reps` and an array of log objects. Existing logs distinguish TRAINING and OFFICIAL but lack a guaranteed challenge-year key and explicit off-season categorization. Historical logs may use `submitted_date` rather than timestamp.
+- React 19, Vite 7, Tailwind CSS and Firebase 12; `src/main.jsx` mounts `src/App.jsx`.
+- `src/hooks/useAuth.js`: existing-account Firebase email/password sign-in, Auth UID, Firestore instance and isolated local emulator mode.
+- `src/hooks/useChallenge.js`, `src/utils/challenges.js` and `src/utils/challengeModel.js`: selected edition/year, timezone, calendar phase, daily/rest-day schedule and derived totals. Reported phase follows the configured date, not untrusted saved metadata.
+- `src/hooks/useActivityData.js`: confirmed record subscription, saving/saved/error states, pending-operation journal, idempotent retry, correction/removal and selected-current-year write gating.
+- `src/data/activityRepository.js`: one Firestore document per activity with transactional conflict checks and tombstone removals; `src/data/activityJournal.js` retains operation IDs for retries.
+- `src/data/memoryRepository.js`: fictional, reload-reset demo entries that never use Firestore.
+- `src/components/app/{ActivityList,History,Account}.jsx` and `src/App.jsx`: mobile-first solo journal, quick-add, year selection, recent sets, calendar, editing, account preferences, explicit warning/failure UI.
+- `public/sw.js`, `public/manifest.webmanifest`: scoped PWA caches, offline navigation fallback and year-neutral install metadata.
 
-## Proven design risks to address
-- `getSeason()` hardcodes January training and Feb 5–27 for official activity without year check.
-- `App.jsx` hardcodes 87 daily reps and 2,000 cumulative, regardless of date/organizer daily schedule.
-- `useUserData` and leaderboard treat every non-training day as OFFICIAL; off-season increments can contaminate official total.
-- Logs do not consistently carry calendar year or unambiguous local-day information. UTC and local date comparisons are mixed in multiple paths.
-- `calculateStreak()` counts unique active days rather than consecutive days; the Stats view calls this 'Active Days', but its denominator can mix phases.
-- `useAuth` authenticates an email but `loadCloudProfile(name)` selects documents by a user-entered username; Firestore rules and backend authorization must be examined before trusting isolation.
-- Cloud writes catch/log some errors without displaying save failure to users. Undo rewrites logs array while other writes use `arrayUnion` / `increment`; concurrent updates require testing.
-- Demo mode uses in-memory fictional users and should stay isolated from real accounts.
-- App/PWA metadata still names 2025, login names 2026; update carefully with deployment and cache behavior.
+Old `src/hooks/useUserData.js`, `useLeaderboard.js`, `src/utils/season.js`, and several old components remain in the repository for historical context but are **not imported by the current `src/App.jsx`**. Do not mistake their legacy design for active runtime behavior.
 
-## Build and release transition
-Previously Vite output to `docs/` and `build:pages` ran `rm -rf docs`. On issue #2 planning branch it instead outputs `dist/` and uses a non-destructive build alias; a PR validation and Pages Actions workflow is staged. Leave old published `docs/` artifacts in place until GitHub Pages source has been switched and a deployment validated.
+## Activity record contract
 
-## Testing baseline
-`tests/demo-storage.test.js` uses native `node:test` and checks demo reset/isolation and timestamp seeding. No comprehensive date, data, auth, or integration test suite was found in reviewed files. CI must run lint/build/tests as a first step; current environment has not run them.
+Path: `participants/{authUID}/challenges/{year}/entries/{stableID}`.
 
-## Decisions deferred to their issues
-- [#3](https://github.com/BenWassa/the-pushup-challenge-2025/issues/3): schema migration, backups, access rules, identity contract, conflict handling.
-- [#4](https://github.com/BenWassa/the-pushup-challenge-2025/issues/4): annual schedule schema, phase engine and verified daily targets.
-- [#5](https://github.com/BenWassa/the-pushup-challenge-2025/issues/5): UI design and accessibility.
-- [#6](https://github.com/BenWassa/the-pushup-challenge-2025/issues/6): test and release gates.
+Each canonical entry carries `schemaVersion:2`, stable ID, `ownerUid`, `challengeYear`, `localDate` (literal YYYY-MM-DD), `phase`, IANA `timeZone`, positive integer amount, created/updated timestamps, revision, deleted tombstone and last operation ID. Imported archives can additionally retain provenance. The authorization boundary is the authenticated UID in the document path, not a username supplied by the client.
 
-Do not change production Firebase documents or permissions based solely on this baseline.
+The app derives totals from confirmed entries only, separated by year and configured training/official/off-season windows. Suspicious phase/timezone metadata is surfaced; records are not silently modified to match an interpretation. Duplicate/replayed IDs and revisions cannot count twice. Archived years and imported `legacy_` entries are read-only to clients.
 
-## Agreed implementation boundary (November 5, 2026)
+2027 official dates: Feb 3–26; goal 2,000. Sundays Feb 7, 14, 21 are verified rest days with zero targets; the remaining organizer daily targets are pending. Personal January training defaults are not organizer facts.
 
-The first implementation batch is additive: pure annual calendar and read-only activity normalization/aggregation modules. Existing cloud hooks remain on their legacy contract until UID ownership, backup and conflict-safe persistence are verified. Passing utility tests does not establish production authorization or complete #3/#4.
+## Production data and security distinction
 
-Canonical activity proposal: `schemaVersion`, stable `id`, `ownerUid`, `challengeYear`, `phase` (`TRAINING`, `OFFICIAL`, `OFF_SEASON`), `localDate` (`YYYY-MM-DD`), explicit IANA `timeZone`, positive integer `amount`, and `createdAt`. Both modules now use `timeZone`; runtime adapters must preserve it. Legacy `season` remains provenance; ambiguous dates or identity must be quarantined rather than guessed. Recompute year/phase totals from validated records, never from legacy lifetime counters.
+The **legacy** source data remains at `artifacts/{appId}/public/data/users/{lowercaseUsername}` with embedded logs and lifetime counters. Those records have not been imported into the new UID-based collection. The explicit-project read-only audit reported permissive deployed rules; the checked-in `firestore.rules` are a candidate deny-by-default, UID-scoped policy tested in emulators, **not deployed production rules**. Deploying new rules before replacing the old runtime can break the old app; deploying only the new runtime under old rules leaves the access risk unresolved.
 
-The annual engine receives an explicit edition and instant or calendar date. It returns local date, phase, known daily target/rest-day state and schedule status. Unknown targets remain null. January 1 through February 2 is an app training default for 2027, not an organizer requirement. Toronto is the initial participant timezone, not a claim that Canada has one timezone.
+`scripts/backup*.js` and `scripts/migration*.js` provide checksum-backed read-only logical snapshotting, pure mapping/quarantine/reconciliation planning and isolated emulator restoration. They are not authorization to run a live migration. Real account-to-profile mapping, production recovery proof, and production rule cutover require explicit owner approval.
 
-### Integration sequence
-1. Review additive module PRs and deterministic tests independently.
-2. Connect read-only historical views through an explicit normalization adapter and reconcile against a verified export.
-3. Test UID-scoped rules and transactional/idempotent add/undo in an emulator.
-4. Connect the mobile logging UI with saving, confirmed and failed states.
-5. Approve production backup/configuration and deployment cutover separately.
+## Tests and deployment
 
-### Production release blocker
-Pages currently uses legacy `main/docs`; the new Actions build has no configured Firebase build environment. A successful generic Vite build is insufficient evidence that cloud login works. Keep the legacy publication source until a candidate artifact has the intended public Firebase client configuration, security checks, preview smoke tests and an approved rollback. Never include passwords, service-account credentials or private keys in client build variables.
+- `npm run lint`, `npm test`, `npm run build`: source checks and a non-destructive build to `dist/`.
+- `npm run test:integration`: local Firebase Auth/Firestore emulator suites and Chrome/Playwright browser journeys (never production).
+- `.github/workflows/pages.yml`: runs source + emulator/browser acceptance on PR/push. The integrated `main` run [42145594256](https://github.com/BenWassa/the-pushup-challenge-2025/actions/runs/42145594256) passed the build and integration jobs.
+- Publication requires an explicit `workflow_dispatch` on `main` with `deploy=true`. Manual release verifies required public Firebase web client variables and refuses demo project IDs; only that build enables `VITE_ENABLE_V2_CLOUD=true`. These build gates do **not** replace Firestore rules security or owner approval.
+- Existing tracked generated `docs/` assets and legacy Pages source are retained until authorized cutover and live verification. Do not erase them with a build or treat the source PR merge as a deployment.
 
-## First batch review and integration
+Release evidence, stop-ship criteria and rollback sequence: [production cutover](production-cutover.md), [release checklist](release-checklist.md), and [issue #6](https://github.com/BenWassa/the-pushup-challenge-2025/issues/6).
 
-Merged PRs: [#7 foundation](https://github.com/BenWassa/the-pushup-challenge-2025/pull/7), [#8 deployment gate](https://github.com/BenWassa/the-pushup-challenge-2025/pull/8), [#9 annual engine](https://github.com/BenWassa/the-pushup-challenge-2025/pull/9), [#10 mobile proposals and accessibility](https://github.com/BenWassa/the-pushup-challenge-2025/pull/10), [#11 read-only activity contract](https://github.com/BenWassa/the-pushup-challenge-2025/pull/11).
+## Remaining external acceptance
 
-`tests/annual-data-integration.test.js` exercises the actual annual engine as the legacy classifier: Toronto midnight, training, official, rest-day activity, off-season and prior-year quarantine. A rest day has zero target but can still contain recorded physical activity. Records outside the selected edition cannot be silently reassigned. These are fictional fixtures and establish module compatibility, not real-data reconciliation.
-
-The existing application still uses legacy `getSeason`, lifetime counters and hardcoded daily goals. This first batch does not claim PushUp 2027 is deployed or ready. Next integrate emulator-tested UID ownership and idempotent persistence, then connect edition-specific progress and the reviewed mobile states. Do not move #2–#6 records to closed until their remaining acceptance gates pass.
+Owner-controlled verification of the actual deployed project/rules and UID mapping; recoverable restricted backup; approved coordinated rules/Pages cutover; real Android/iOS PWA, persistence and accessibility checks; served artifact version and historical record reconciliation. Until then: **integrated source and automated test candidate, not verified production release**.
