@@ -17,7 +17,7 @@ export const CHALLENGES = Object.freeze({
 });
 
 export function getChallenge(year) {
-  return CHALLENGES[year] ?? null;
+  return Object.hasOwn(CHALLENGES, year) ? CHALLENGES[year] : null;
 }
 
 export function isLocalDate(value) {
@@ -38,6 +38,8 @@ export function toLocalDate(instant, timeZone) {
   ) {
     throw new RangeError('Expected a valid local date or an unambiguous instant');
   }
+  if (typeof instant === 'string' && !isLocalDate(instant.slice(0, 10)))
+    throw new RangeError('Invalid instant calendar date');
   const date = new Date(instant);
   if (!Number.isFinite(date.getTime())) throw new RangeError('Invalid instant');
   const parts = new Intl.DateTimeFormat('en-CA', {

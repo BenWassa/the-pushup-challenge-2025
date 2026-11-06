@@ -14,6 +14,9 @@ test('2027 configuration preserves pending targets and sourced rest days', () =>
   assert.equal(validateChallenge(challenge), challenge);
   assert.equal(challenge.totalTarget, 2000);
   assert.equal(getChallenge(2026), null);
+  assert.equal(getChallenge('toString'), null);
+  assert.equal(getChallenge('__proto__'), null);
+  assert.equal(getChallenge('2027'), challenge);
   assert.equal(Object.isFrozen(CHALLENGES[2027].dailyTargets), true);
   assert.deepEqual(getChallengeDay(challenge, '2027-02-03'), {
     challengeYear: 2027,
@@ -79,7 +82,15 @@ test('future editions and leap days require configuration rather than recurring 
 });
 
 test('malformed dates, ambiguous instants, invalid schedules and overlap fail closed', () => {
-  for (const input of ['2027-02-29', '2027-02-30', '2027-02-03T12:00:00', null, new Date(NaN)])
+  for (const input of [
+    '2027-02-29',
+    '2027-02-30',
+    '2027-02-30T12:00:00Z',
+    '2027-02-29T12:00:00-05:00',
+    '2027-02-03T12:00:00',
+    null,
+    new Date(NaN),
+  ])
     assert.throws(() => toLocalDate(input, 'America/Toronto'), RangeError);
   assert.throws(() => toLocalDate(new Date(0), 'invalid/timezone'), RangeError);
   assert.throws(() => toLocalDate('2027-02-03'), RangeError);
