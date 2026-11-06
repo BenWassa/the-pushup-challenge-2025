@@ -91,9 +91,8 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await signInWithGoogle(page, email);
   await expect(page.getByRole('button', { name: 'Add 10 push-ups' })).toBeEnabled();
 
-  await expect(page.getByRole('combobox', { name: 'Challenge year' })).toHaveValue(
-    String(currentYear)
-  );
+  // The challenge year is automatic: no year picker on the Log screen.
+  await expect(page.getByRole('combobox', { name: 'Challenge year' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Add 10 push-ups' }).click();
   await expect(page.getByText('Saved to your account.')).toBeVisible();
   await expect(page.locator('.daily-summary strong')).toHaveText('10');
@@ -129,6 +128,10 @@ test('isolated Firebase emulator confirms add, reload, history, independent-devi
   await expect(page.locator('.daily-summary strong')).toHaveText('0');
   await expect(second.locator('.daily-summary strong')).toHaveText('0');
   await independentSession.close();
+  await page.getByRole('button', { name: 'History', exact: true }).click();
+  await expect(page.getByRole('combobox', { name: 'Challenge year' })).toHaveValue(
+    String(currentYear)
+  );
   await page
     .getByRole('combobox', { name: 'Challenge year' })
     .selectOption(String(currentYear - 1));

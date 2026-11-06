@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CalendarDays, CircleUserRound, Dumbbell } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useActivityData } from './hooks/useActivityData';
 import { useChallenge } from './hooks/useChallenge';
@@ -138,7 +139,6 @@ export default function App() {
     }),
   };
   const [view, setView] = useState('log');
-  const [yearInput, setYearInput] = useState('');
   const [online, setOnline] = useState(() => navigator.onLine);
   const [update, setUpdate] = useState(false);
   const [updateError, setUpdateError] = useState('');
@@ -155,6 +155,12 @@ export default function App() {
       window.removeEventListener('sw-update', available);
     };
   }, []);
+  // The challenge year is automatic. Other years are history, reached from the History tab.
+  const currentYear = Number(challenge.today.slice(0, 4));
+  const go = (next) => {
+    if (next !== 'history' && selectedYear !== currentYear) setSelectedYear(currentYear);
+    setView(next);
+  };
   const saving = data.saveState === 'saving';
   const busy = saving || Boolean(data.pendingOperation) || (!online && !auth.isDemoMode);
   const canEdit = challenge.canLog && data.canWrite && !busy;
@@ -232,67 +238,36 @@ export default function App() {
           <AccessPending auth={auth} />
         ) : (
           <>
-            <div className="edition-controls">
-              <label>
-                Challenge year
-                <select
-                  aria-label="Challenge year"
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  disabled={saving || Boolean(data.pendingOperation)}
-                >
-                  {challenge.years.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <p>
-                {selectedYear === Number(challenge.today.slice(0, 4))
-                  ? 'Current year'
-                  : 'Read-only edition'}
-              </p>
-            </div>
-            <details className="year-jump">
-              <summary>Open another year</summary>
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const year = Number(yearInput);
-                  if (Number.isInteger(year) && year >= 1000 && year <= 9999) {
-                    setSelectedYear(year);
-                    setYearInput('');
-                  }
-                }}
-              >
-                <label>
-                  Year
-                  <input
-                    type="number"
-                    min="1000"
-                    max="9999"
-                    required
-                    value={yearInput}
-                    onChange={(event) => setYearInput(event.target.value)}
-                    placeholder="YYYY"
-                  />
-                </label>
-                <button disabled={saving || Boolean(data.pendingOperation)}>Open year</button>
-              </form>
-            </details>
             <nav className="main-nav" aria-label="Journal">
               {[
-                ['log', 'Log'],
-                ['history', 'History'],
-                ['account', 'Account'],
-              ].map(([id, label]) => (
+                [
+                  'log',
+                  'Log',
+                  <Dumbbell size={22} strokeWidth={2.2} aria-hidden="true" focusable="false" />,
+                ],
+                [
+                  'history',
+                  'History',
+                  <CalendarDays size={22} strokeWidth={2.2} aria-hidden="true" focusable="false" />,
+                ],
+                [
+                  'account',
+                  'Account',
+                  <CircleUserRound
+                    size={22}
+                    strokeWidth={2.2}
+                    aria-hidden="true"
+                    focusable="false"
+                  />,
+                ],
+              ].map(([id, label, icon]) => (
                 <button
                   key={id}
                   aria-current={view === id ? 'page' : undefined}
-                  onClick={() => setView(id)}
+                  onClick={() => go(id)}
                 >
-                  {label}
+                  <span className="tab-icon">{icon}</span>
+                  <span>{label}</span>
                 </button>
               ))}
             </nav>
@@ -359,56 +334,58 @@ export default function App() {
             )}
             {view === 'log' && (
               <section aria-labelledby="log-title">
-                <div className="today-heading">
-                  <p className="eyebrow">
-                    {displayDate(challenge.canLog ? challenge.today : challenge.day.localDate)}
-                  </p>
-                  <h1 id="log-title">
-                    {challenge.canLog ? 'Ready for your next set?' : `${selectedYear} activity`}
-                  </h1>
-                  <span className="phase-label">{phaseLabel(challenge.day.phase)}</span>
-                </div>
-                {!challenge.canLog && (
-                  <p className="notice">
-                    This edition is read-only. Select {challenge.today.slice(0, 4)} to record
-                    today’s activity.
-                  </p>
-                )}
-                {challenge.challenge && (
-                  <p className="event-dates">
-                    Official challenge: {challenge.challenge.official.start} to{' '}
-                    {challenge.challenge.official.end}
-                  </p>
-                )}
-                {challenge.challenge && (
-                  <p className="quiet">
-                    Official daily targets pending. Sundays are confirmed rest days.
-                  </p>
-                )}
-                <div className="daily-summary">
-                  <div>
-                    <span className="quiet">
-                      {challenge.canLog
-                        ? 'Today’s confirmed push-ups'
-                        : 'Confirmed push-ups this year'}
-                    </span>
-                    <strong>
-                      {challenge.canLog ? challenge.summary.todayTotal : challenge.summary.total}
-                    </strong>
+                <div className="hero">
+                  <div className="today-heading">
+                    <p className="eyebrow">
+                      {displayDate(challenge.canLog ? challenge.today : challenge.day.localDate)}
+                    </p>
+                    <h1 id="log-title">
+                      {challenge.canLog ? 'Ready for your next set?' : `${selectedYear} activity`}
+                    </h1>
+                    <span className="phase-label">{phaseLabel(challenge.day.phase)}</span>
                   </div>
-                  <p>
-                    {challenge.day.isRestDay
-                      ? 'Rest day. Any activity is optional.'
-                      : challenge.day.dailyTarget !== null
-                        ? `Daily target: ${challenge.day.dailyTarget}`
-                        : challenge.day.phase === 'TRAINING' && challenge.trainingGoal
-                          ? `Personal training goal: ${challenge.trainingGoal}`
-                          : challenge.day.phase === 'OFFICIAL'
-                            ? 'Official daily target pending.'
-                            : challenge.day.phase === 'TRAINING'
-                              ? 'Training counts separately from the challenge.'
-                              : 'Off-season activity stays separate from challenge totals.'}
-                  </p>
+                  {!challenge.canLog && (
+                    <p className="notice">
+                      This edition is read-only. Select {challenge.today.slice(0, 4)} to record
+                      today’s activity.
+                    </p>
+                  )}
+                  {challenge.challenge && (
+                    <p className="event-dates">
+                      Official challenge: {challenge.challenge.official.start} to{' '}
+                      {challenge.challenge.official.end}
+                    </p>
+                  )}
+                  {challenge.challenge && (
+                    <p className="quiet">
+                      Official daily targets pending. Sundays are confirmed rest days.
+                    </p>
+                  )}
+                  <div className="daily-summary">
+                    <div>
+                      <span className="quiet">
+                        {challenge.canLog
+                          ? 'Today’s confirmed push-ups'
+                          : 'Confirmed push-ups this year'}
+                      </span>
+                      <strong>
+                        {challenge.canLog ? challenge.summary.todayTotal : challenge.summary.total}
+                      </strong>
+                    </div>
+                    <p>
+                      {challenge.day.isRestDay
+                        ? 'Rest day. Any activity is optional.'
+                        : challenge.day.dailyTarget !== null
+                          ? `Daily target: ${challenge.day.dailyTarget}`
+                          : challenge.day.phase === 'TRAINING' && challenge.trainingGoal
+                            ? `Personal training goal: ${challenge.trainingGoal}`
+                            : challenge.day.phase === 'OFFICIAL'
+                              ? 'Official daily target pending.'
+                              : challenge.day.phase === 'TRAINING'
+                                ? 'Training counts separately from the challenge.'
+                                : 'Off-season activity stays separate from challenge totals.'}
+                    </p>
+                  </div>
                 </div>
                 {challenge.canLog && (
                   <div className="quick-add" aria-label="Add push-ups">
@@ -508,7 +485,7 @@ export default function App() {
                     remove={data.remove}
                   />
                   {records.length > 10 && (
-                    <button onClick={() => setView('history')}>See calendar history</button>
+                    <button onClick={() => go('history')}>See calendar history</button>
                   )}
                 </section>
               </section>

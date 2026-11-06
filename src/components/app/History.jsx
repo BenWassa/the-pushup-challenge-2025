@@ -13,6 +13,9 @@ export default function History({ challenge, data, busy }) {
     canLog ? today.slice(5, 7) : challenge.challenge?.official.start.slice(5, 7) || '01'
   );
   const [selected, setSelected] = useState(null);
+  const [yearInput, setYearInput] = useState('');
+  const currentYear = Number(today.slice(0, 4));
+  const locked = data.saveState === 'saving' || Boolean(data.pendingOperation);
   const month = `${selectedYear}-${chosenMonth}`;
   const days = new Date(Date.UTC(selectedYear, Number(chosenMonth), 0)).getUTCDate();
   const offset = new Date(`${month}-01T12:00:00Z`).getUTCDay();
@@ -24,6 +27,53 @@ export default function History({ challenge, data, busy }) {
   const records = yearRecords.filter((r) => r.localDate === selectedDate);
   return (
     <section aria-labelledby="history-title">
+      <div className="year-bar">
+        <label>
+          Challenge year
+          <select
+            aria-label="Challenge year"
+            value={selectedYear}
+            onChange={(e) => challenge.setSelectedYear(Number(e.target.value))}
+            disabled={locked}
+          >
+            {challenge.years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </label>
+        <span className="year-state">
+          {selectedYear === currentYear ? 'Current year' : 'Read-only edition'}
+        </span>
+      </div>
+      <details className="year-jump">
+        <summary>Open another year</summary>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            const year = Number(yearInput);
+            if (Number.isInteger(year) && year >= 1000 && year <= 9999) {
+              challenge.setSelectedYear(year);
+              setYearInput('');
+            }
+          }}
+        >
+          <label>
+            Year
+            <input
+              type="number"
+              min="1000"
+              max="9999"
+              required
+              value={yearInput}
+              onChange={(event) => setYearInput(event.target.value)}
+              placeholder="YYYY"
+            />
+          </label>
+          <button disabled={locked}>Open year</button>
+        </form>
+      </details>
       <div className="section-heading">
         <h2 id="history-title">History</h2>
         <label className="compact-label">
