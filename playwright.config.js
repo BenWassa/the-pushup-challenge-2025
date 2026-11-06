@@ -1,3 +1,4 @@
+/* global process */
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
@@ -10,6 +11,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     browserName: 'chromium',
+    // GitHub-hosted Ubuntu already provides Chrome; local runs use installed Chromium.
+    channel: process.env.CI ? 'chrome' : undefined,
   },
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 4173 --strictPort',
