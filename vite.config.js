@@ -11,7 +11,19 @@ const pkg = require('./package.json');
 // https://vite.dev/config/
 export default defineConfig(({ command }) => {
   const cfg = {
-    plugins: [react()],
+    plugins: [
+      react(),
+      {
+        name: 'pushup-precache-manifest',
+        generateBundle(_options, bundle) {
+          this.emitFile({
+            type: 'asset',
+            fileName: 'precache-manifest.json',
+            source: JSON.stringify(Object.keys(bundle).filter((file) => /\.(js|css)$/.test(file))),
+          });
+        },
+      },
+    ],
     base: '/the-pushup-challenge-2025/',
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),

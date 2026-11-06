@@ -20,9 +20,11 @@ const worker = ({
   const opened = [];
   const skipWaiting = [];
   const precached = [];
+  const matches = [];
   const key = (request) => (typeof request === 'string' ? request : request.url);
   const cache = {
-    match: async (request) => {
+    match: async (request, options) => {
+      matches.push({ request: key(request), ignoreVary: options?.ignoreVary });
       if (failCache === 'match') throw new Error('cache read failed');
       return entries.get(key(request));
     },
@@ -59,7 +61,7 @@ const worker = ({
       return response;
     },
   });
-  return { listeners, deleted, writes, opened, skipWaiting, precached };
+  return { listeners, deleted, writes, opened, skipWaiting, precached, matches };
 };
 
 const fetchFrom = (app, url, mode = 'navigate', method = 'GET') => {
@@ -69,13 +71,17 @@ const fetchFrom = (app, url, mode = 'navigate', method = 'GET') => {
 };
 
 test('install does not activate over a running app until the UI requests it', async () => {
-  const app = worker();
+  const app = worker({
+    response: { ok: true, json: async () => ['assets/main.js', 'assets/main.css'] },
+  });
   let install;
   app.listeners.install({ waitUntil: (value) => (install = value) });
   await install;
   assert.equal(app.skipWaiting.length, 0);
   assert.ok(app.precached.includes(`${scope}index.html`));
   assert.ok(app.precached.includes(`${scope}manifest.webmanifest`));
+  assert.ok(app.precached.includes(`${scope}assets/main.js`));
+  assert.ok(app.precached.includes(`${scope}assets/main.css`));
 
   app.listeners.message({ data: { type: 'OTHER' } });
   assert.equal(app.skipWaiting.length, 0);
@@ -128,3 +134,28 @@ for (const operation of ['open', 'match', 'put']) {
     }
   });
 }
+
+for (const assets of [['../other/app.js'], ['https://other.test/app.js'], null]) {
+  test(`install rejects an invalid offline asset manifest: ${JSON.stringify(assets)}`, async () => {
+    const app = worker({ response: { ok: true, json: async () => assets } });
+    let install;
+    app.listeners.install({ waitUntil: (value) => (install = value) });
+    await assert.rejects(install, /Invalid offline asset manifest/);
+    assert.equal(app.precached.length, 0);
+    assert.equal(app.skipWaiting.length, 0);
+  });
+}
+
+test('only public built assets ignore Vary when matching precached responses', async () => {
+  const response = { ok: true, clone: () => response };
+  for (const [path, expected] of [
+    ['assets/app-hash.js', true],
+    ['assets/app-hash.css', true],
+    ['manifest.webmanifest', false],
+    ['account.json', false],
+  ]) {
+    const app = worker({ response });
+    await fetchFrom(app, `${scope}${path}`, 'cors');
+    assert.equal(app.matches[0].ignoreVary, expected, path);
+  }
+});

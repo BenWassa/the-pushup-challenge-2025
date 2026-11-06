@@ -5,6 +5,7 @@
 **Depends on:** #2 through #5 for final launch
 
 ## Test plan
+
 - Phase dates, year selection, target sums, unknown daily schedule, off-season classification.
 - Create/undo/correction, reload consistency, duplicate prevention and write failure recovery.
 - Anonymized legacy records, timestamps and archived annual totals.
@@ -13,11 +14,13 @@
 - Mobile accessibility (keyboard, focus, contrast, text scaling, touch size and safe areas).
 
 ## Pages migration
+
 - PR #7 foundation introduced a `dist/` build and Pages workflow, but **Settings → Pages → Source: GitHub Actions** must be selected by the owner at cutover.
 - Verify replacement at https://benwassa.github.io/the-pushup-challenge-2025/ before removing legacy `docs/` build files.
 - Do not rename repository or URL in the same deployment cutover.
 
 ## Exit criteria
+
 - Lint, tests and build all pass in CI.
 - Real phone: sign in, log, see successful save, reload, verify totals, inspect past year.
 - Failure states, date boundaries and live rules checked.
@@ -34,7 +37,6 @@
 
 Local validation: lint, 23 native Node tests across the integrated baseline (including disposable build), production build passed. Cache open/read/write failures are tested to preserve successful network responses. No generated legacy docs assets changed. Real-device PWA, real cloud authorization, backup restoration and final integrated UI validation are still required. Keep #6 open.
 
-
 ## End-to-end recovery batch (November 5, 2026)
 
 Added read-only logical backup enumeration with fixed readTime and typed document values, restricted checksummed files, explicit ownership/timezone mapping, pure migration/quarantine/reconciliation reports, deterministic immutable legacy entry IDs, and emulator-only create/readback restore. See [release checklist](../release-checklist.md#recovery-tooling-and-approval-packet).
@@ -50,3 +52,11 @@ An actual isolated STANDARD Firestore emulator rehearsal restored fictional sour
 - Integrated `main` [workflow run 42145594256](https://github.com/BenWassa/the-pushup-challenge-2025/actions/runs/42145594256) completed build **success** and Firebase emulator/browser acceptance **success**, while production deploy was **skipped** as intended.
 
 Automated success is **not** proof of physical iOS/Android installation, permission-safe deployed rules, actual legacy mapping, private backup restoration or a production-configured artifact. Existing Pages assets and production Firebase data/rules remain unchanged. **Keep this issue open** until production release and rollback have been explicitly approved and independently verified.
+
+## Reconciliation after PRs #19–#28
+
+The newer mainline was retained after comparing the unfinished local implementation. Its revision-bound correction/removal checks, serialized emulator suites, hosted-Chrome CI, manual publication gates, dependency audit and annual metadata supersede the older local alternatives. The older local patch is preserved separately rather than applied wholesale.
+
+One additional built-artifact browser regression reproduced an offline-first-install defect: only HTML/icons were precached, so closing the first installed client before an online reload left its compiled JS/CSS unavailable offline. The follow-up generates a public asset manifest from the Vite bundle, validates its scope/completeness before publication and precaches those files during install. Static built assets alone ignore `Vary` matching, covering module-request Origin headers without weakening matching for other resources. Explicit user-triggered worker activation is retained.
+
+Local verification for the reconciliation: lint/build and Pages artifact preflight pass; 55 native tests, five mandatory emulator tests and five browser journeys pass, including built first-install/offline reopening and waiting-worker activation. This is Chromium automation, not physical iOS/Android installation proof. Production data/rules/publication remain unchanged.
