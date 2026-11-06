@@ -4,7 +4,9 @@ import AxeBuilder from '@axe-core/playwright';
 const appPath = '/the-pushup-challenge-2025/';
 const currentYear = new Date().getFullYear();
 
-test('fictional demo remains isolated, supports one-handed logging and resets on reload', async ({ page }) => {
+test('fictional demo remains isolated, supports one-handed logging and resets on reload', async ({
+  page,
+}) => {
   await page.goto(`${appPath}?mode=demo`);
   await expect(page.getByText(/Fictional demo · changes reset on reload/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add 20 push-ups' })).toBeEnabled();
@@ -41,7 +43,9 @@ test('mobile viewports do not overflow and show no serious automated accessibili
       metrics.viewport + 1
     );
   }
-  const findings = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  const findings = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+    .analyze();
   const serious = findings.violations.filter((v) => ['critical', 'serious'].includes(v.impact));
   expect(
     serious.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
