@@ -204,7 +204,7 @@ test('fictional Feb 10 2027 fixture shows 60 today, 445 / 2,000 and a streak, an
   await expect(
     page.getByRole('progressbar', { name: 'Official challenge progress' })
   ).toHaveAttribute('aria-valuetext', '445 of 2000 push-ups');
-  await expect(page.getByText('7 day streak')).toBeVisible();
+  await expect(page.locator('.streak')).toHaveText(/7\s*day streak/);
   await expect(page.getByRole('button', { name: /Undo latest set \(20\)/ })).toBeEnabled();
   await page.getByRole('button', { name: 'Add 25 push-ups' }).click();
   await expect(today).toHaveText('85');

@@ -14,7 +14,7 @@ export default function HomeHeader({ year, dateLabel, phaseLabel, onSettings }) 
         </button>
       </div>
       <p className="home-header-meta">
-        <span>{dateLabel}</span>
+        {dateLabel && <span>{dateLabel}</span>}
         <span className="phase-chip">{phaseLabel}</span>
       </p>
     </header>

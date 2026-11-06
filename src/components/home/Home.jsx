@@ -68,7 +68,7 @@ export default function Home({
     <div className="home">
       <HomeHeader
         year={selectedYear}
-        dateLabel={displayDate(canLog ? challenge.today : challenge.day.localDate)}
+        dateLabel={canLog ? displayDate(challenge.today) : ''}
         phaseLabel={canLog ? phaseLabel(challenge.day.phase) : 'Archive · read-only'}
         onSettings={onSettings}
       />

@@ -9,8 +9,8 @@
   "scope": ".",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
-  "background_color": "#f5f2ee",
-  "theme_color": "#f5f2ee",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b",
   "categories": ["health", "fitness", "lifestyle"],
   "prefers_related_applications": false,
   "launch_handler": {

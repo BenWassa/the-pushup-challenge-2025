@@ -397,6 +397,17 @@ footer a {
 .settings section {
   margin-bottom: var(--sp-6);
 }
+.settings section > h2 {
+  margin: 0 0 var(--sp-3);
+  color: var(--c-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.year-jump form {
+  margin-top: var(--sp-2);
+}
 .section-title {
   margin: 0 0 var(--sp-3);
   color: var(--c-text-muted);

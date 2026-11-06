@@ -1,6 +1,10 @@
 /* Home screen: masthead, progress, quick logging, recent sets. Tokens only. */
+.home > * {
+  min-width: 0;
+}
 .home {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--sp-5);
   padding-bottom: var(--sp-4);
 }
@@ -16,11 +20,13 @@
   gap: var(--sp-3);
 }
 .brand-heading {
+  min-width: 0;
   margin: 0;
   font-size: inherit;
 }
 .brand {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 0.4em;
   font-family: var(--font-display);
@@ -127,7 +133,6 @@
 }
 .summary-total {
   margin: var(--sp-1) 0 0;
-  white-space: nowrap;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -138,6 +143,8 @@
   letter-spacing: -0.03em;
 }
 .summary-total span {
+  display: inline-block;
+  white-space: nowrap;
   color: var(--c-text-muted);
   font-size: var(--fs-lg);
   font-weight: 650;
@@ -181,7 +188,7 @@
 /* C. Quick logging: 2×2, equal size */
 .quick-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sp-3);
 }
 .quick-button {
@@ -193,7 +200,7 @@
     var(--shadow-raise),
     inset 0 -3px 0 var(--c-red);
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 9vw, 2.5rem);
+  font-size: clamp(1.6rem, 9vw, 2.5rem);
   font-weight: 900;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;

@@ -251,7 +251,9 @@ export default function App() {
                 Offline. Reconnect to load history or save.
               </p>
             )}
-            {data.blockedReason && <p className="notice">{data.blockedReason}</p>}
+            {data.blockedReason && challenge.canLog && (
+              <p className="notice">{data.blockedReason}</p>
+            )}
             {data.loading && (
               <p role="status">
                 {!online && !auth.isDemoMode
@@ -313,7 +315,13 @@ export default function App() {
             )}
             {view === 'settings' && (
               <Settings
-                auth={auth}
+                auth={{
+                  ...auth,
+                  logoutAuth: async () => {
+                    await auth.logoutAuth();
+                    setView('home');
+                  },
+                }}
                 challenge={challenge}
                 busy={saving || Boolean(data.pendingOperation)}
                 locked={saving || Boolean(data.pendingOperation)}
