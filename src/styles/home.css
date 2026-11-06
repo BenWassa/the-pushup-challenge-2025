@@ -202,10 +202,10 @@
   min-height: clamp(5rem, 22vw, 6.5rem);
   border: 1px solid var(--c-line-strong);
   border-radius: var(--r-lg);
-  background: var(--c-surface-raised);
-  box-shadow:
-    var(--shadow-raise),
-    inset 0 -3px 0 var(--c-red);
+  /* Brush artwork: the red sweep sits bottom-right, so anchor there at any aspect ratio */
+  background: url('../assets/brand/quick-button.webp') right bottom / cover no-repeat
+    var(--c-surface-raised);
+  box-shadow: var(--shadow-raise);
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 9vw, 2.5rem);
   font-weight: 900;
@@ -213,12 +213,12 @@
   letter-spacing: -0.02em;
 }
 .quick-button:hover:not(:disabled) {
-  background: var(--c-surface-press);
+  filter: brightness(1.25);
 }
 .quick-button:active:not(:disabled) {
   transform: scale(0.98);
-  background: var(--c-red-fill);
-  border-color: transparent;
+  filter: brightness(1.5) saturate(1.2);
+  border-color: var(--c-red);
 }
 .quick-foot {
   display: flex;
