@@ -70,7 +70,9 @@ jobs:
 
   integration:
     name: Firebase emulator and browser acceptance
-    if: github.event_name != 'workflow_dispatch'
+    # A manually approved release must pass the same isolated acceptance suite.
+    # These tests run exclusively against demo Firebase emulators.
+    if: always() && (github.event_name != 'workflow_dispatch' || inputs.deploy == true)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -101,7 +103,7 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.deploy == true
-    needs: build
+    needs: [build, integration]
     runs-on: ubuntu-latest
     concurrency:
       group: pushup-pages-live-deployment
