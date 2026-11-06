@@ -73,3 +73,50 @@ For the initial UI, online-only writes with explicit saving/saved/failed feedbac
 Remaining acceptance gates: authenticated edition/rules audit, actual anonymized inventory, emulator authorization tests, reviewed mapping and timezone decisions, verified backup restoration, approved migration and safe runtime add/undo integration. Issue #3 stays open.
 
 Review hardening: canonical totals reject missing/invalid timezone and creation instant, mismatched date/year in every phase, and official windows from another year. Supported challenge years are 1000–9999; imported unknown creation instants require source provenance. Classifier exceptions quarantine the record rather than aborting the dry run. Identity/source IDs must be nonempty strings.
+
+## End-to-end persistence implementation (2026-11-05)
+
+The v2 adapter and `useActivityData` now implement actual application persistence, not only read-only helpers. Runtime integration is in the mobile workstream. The adapter uses `participants/{authUID}/challenges/{year}/entries/{stableID}` with canonical fields plus `revision`, `deleted`, `updatedAt`, and `lastOperationId`. No username selects an owner. Add operations create one stable ID, edits require the revision originally displayed, and removal is an idempotent tombstone. Transactions never overwrite an unrelated entry or profile-wide array. Stale cross-device edits return a conflict rather than silently overwrite newer data.
+
+The hook exposes confirmed records, loading/error state, idle/saving/saved/error feedback, retryable pending operation, add/edit/remove/retry, and a current-year write gate. A cloud pending-operation journal is written before submission, scoped to Firebase project, UID and year. Reload restores the same operation ID; explicit retry is idempotent. Journal storage includes the activity operation, never credentials or email addresses. Demo uses only module memory and resets on reload. Demo samples are fictional and old unconfigured editions are classified off-season rather than inventing historical official windows.
+
+Server listeners ignore pending local snapshots and cache-only snapshots; successful transaction acknowledgement or a server-confirmed matching operation establishes success. A confirmed deletion retains its tombstone. There is no background offline write queue: offline submission stays failed/pending and requires retry. An unresolved operation blocks new submissions until retried or explicitly discarded. Account/year changes clear displayed records immediately; old asynchronous completions cannot replace a newly selected account's state. Archived years and reserved `legacy_` imported entries are read-only.
+
+### Isolated emulator and production gates
+
+`VITE_USE_FIREBASE_EMULATORS=true` connects only on localhost/127.0.0.1/::1, using project `demo-pushup-2027`, Auth 9099 and Firestore 8080. It never reuses the production Firebase app. Emulator accounts are created by isolated tests, not a public signup interface. Outside the emulator, v2 reads and writes require `VITE_ENABLE_V2_CLOUD=true`, which defaults off. Changing this flag does not by itself establish safe production rules or migrated ownership. The existing deployed publication remains untouched.
+
+The lead's explicit-project, read-only production audit identified the existing `(default)` database as STANDARD / FIRESTORE_NATIVE and found that live ownership controls failed audit. Production rule cutover is required before release; the private deployed rule source is retained only in the ignored backup. The read-only aggregate inventory contains dated legacy records without UID ownership fields. Raw personal data is not in this document or tests. An ignored local backup was taken by the lead; restoration/reconciliation and explicit owner-to-profile mapping remain release gates.
+
+`firestore.rules` is a **candidate for review and emulator verification only**. It default-denies other paths including legacy records, permits owner-scoped entry reads, validates every create/update, preserves immutable identity/date/phase/timezone, and enforces bounded values, revision increments, no hard deletes, and no resurrection. Writes are limited to the current local-calendar-year envelope: UTC+14 through UTC-12, allowing at most the global year-boundary overlap. Imported `legacy_` IDs can only be seeded by authorized administrative migration and cannot be client-created or edited. This policy deliberately requires a reviewed legacy access/cutover decision before production deployment.
+
+I've set up prototype Security Rules to keep the data in Firestore safe. They are designed to be secure for UID-owned records, strict entry schemas, revision-based corrections and private reads. However, you should review and verify them before broadly sharing your app. If you'd like, I can help you harden these rules.
+
+### Security review and attack checks
+
+The candidate's emulator tests attempt anonymous and second-account get/list/create/update/delete, owner collection discovery, legacy access, ownership/year changes, malformed calendar dates, missing fields, extra role/schema fields, invalid numeric types and bounds, oversized strings, future timestamps, revision replay, hard deletion, tombstone resurrection, archived-year updates and reserved imported-ID writes. These are rejected. Owner-scoped list and valid transactions pass; concurrent stale edits cannot lose another set.
+
+Remaining limitations: IANA timezone names and organizer phase/date relationships are validated by the application, while rules enforce bounded timezone strings and enumerated phases. A malicious owner could falsify their own activity classification through a direct client, but cannot access another UID's records under this candidate. Future shared-group support needs a separate authorization design. Production rules remain unchanged until an approved deployment addresses the failed ownership audit.
+
+Security-rules-auditor assessment (candidate only):
+
+```json
+{
+  "score": 4,
+  "summary": "Emulator-tested private owner scope and strict revision/schema controls; production ownership controls require an approved cutover.",
+  "findings": [
+    {
+      "check": "Business Logic vs. Rules",
+      "severity": "minor",
+      "issue": "Rules bound timezone strings and enumerate phases but do not independently verify IANA names or organizer phase windows; an owner can falsify their own metadata.",
+      "recommendation": "Before adding groups or relying on competitive totals, use authoritative server configuration/validation; retain current client phase validation and annual aggregation checks."
+    }
+  ]
+}
+```
+
+### Validation and remaining acceptance
+
+Local lint, 28 unit/regression tests and production build pass. Three emulator suites cover authorization/schema attacks, duplicate adds, concurrent stale edits, safe tombstone retry, and immutable archives. The rules compile in the Standard Firestore emulator. The existing bundle-size warning remains. Integrated browser login/reload/cross-device/offline journeys are owned by release assurance and must pass after the mobile adapter is connected.
+
+No production rules, records, Pages configuration or publication was changed. #3 remains open until real ownership mapping, backup restoration/reconciliation, approved rule cutover and verified production persistence are complete.
