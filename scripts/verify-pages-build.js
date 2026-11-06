@@ -37,9 +37,7 @@ export function verifyPagesBuild(directory, base = PAGES_BASE) {
   }
   if (scripts === 0) throw new Error('No built JavaScript entrypoint');
 
-  const manifest = JSON.parse(
-    readFileSync(requireFile(directory, 'manifest.webmanifest'), 'utf8')
-  );
+  const manifest = JSON.parse(readFileSync(requireFile(directory, 'manifest.webmanifest'), 'utf8'));
   if (manifest.start_url !== '.' || manifest.scope !== '.' || manifest.display !== 'standalone')
     throw new Error('PWA manifest must remain scoped to the Pages repository path');
   if (!manifest.name?.startsWith('PushUp') || /2025|2026/.test(manifest.name))
