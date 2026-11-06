@@ -40,7 +40,10 @@ const worker = ({
       registration: { scope },
       addEventListener: (name, listener) => (listeners[name] = listener),
       clients: { claim: async () => {} },
-      skipWaiting: () => { skipWaiting.push(true); return Promise.resolve(); },
+      skipWaiting: () => {
+        skipWaiting.push(true);
+        return Promise.resolve();
+      },
     },
     caches: {
       keys: async () => names,
