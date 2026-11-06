@@ -205,15 +205,16 @@ test('fictional Feb 10 2027 fixture shows 60 today, 445 / 2,000 and a streak, an
   await page.goto(`${appPath}?mode=demo&fixture=feb-10-2027`);
   const today = page.getByTestId('primary-total').locator('strong');
   await expect(today).toHaveText('60');
-  await expect(page.getByTestId('official-total')).toHaveText('445 / 2,000');
+  await expect(page.getByTestId('progress-total')).toHaveText('445 / 2,000');
   await expect(
-    page.getByRole('progressbar', { name: 'Official challenge progress' })
-  ).toHaveAttribute('aria-valuetext', '445 of 2000 push-ups');
+    page.getByRole('progressbar', { name: 'Official challenge progress to the next 100' })
+  ).toHaveAttribute('aria-valuetext', '45 of 100 push-ups toward the next block');
+  await expect(page.getByText('4 of 20 blocks')).toBeVisible();
   await expect(page.locator('.streak')).toHaveText(/7\s*day streak/);
   await expect(page.getByRole('button', { name: /Undo latest set \(20\)/ })).toBeEnabled();
   await page.getByRole('button', { name: 'Add 25 push-ups' }).click();
   await expect(today).toHaveText('85');
-  await expect(page.getByTestId('official-total')).toHaveText('470 / 2,000');
+  await expect(page.getByTestId('progress-total')).toHaveText('470 / 2,000');
   await page.getByRole('button', { name: /Undo latest set \(25\)/ }).click();
   await expect(today).toHaveText('60');
 });
@@ -234,6 +235,48 @@ test('the header names the current phase as a patch in each phase', async ({ pag
     );
     expect(overflow).toBe(false);
   }
+});
+
+test('a finished hundred waits for Compact, compacts into a block, and undo takes it back', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${appPath}?mode=demo&fixture=feb-10-2027`);
+  const compact = page.getByRole('button', { name: /^Compact 100 push-ups/ });
+  await expect(compact).toHaveCount(0); // hidden until a hundred is finished
+  for (const amount of [25, 25, 10]) {
+    await page.getByRole('button', { name: `Add ${amount} push-ups` }).click();
+  }
+  await expect(page.getByTestId('progress-total')).toHaveText('505 / 2,000');
+  await expect(compact).toBeEnabled();
+  await expect(page.getByText('4 of 20 blocks')).toBeVisible();
+  // Logging is never blocked by a waiting block: the extra reps carry to the next hundred.
+  await page.getByRole('button', { name: 'Add 1 push-ups' }).click();
+  await expect(page.getByText('+6 toward the next')).toBeVisible();
+  await compact.click();
+  await expect(page.getByText('5 of 20 blocks')).toBeVisible();
+  await expect(compact).toHaveCount(0);
+  await expect(page.getByText('6', { exact: true })).toBeVisible();
+  // Undoing back below the hundred removes the block; logging it again waits for Compact again.
+  for (let i = 0; i < 2; i += 1) {
+    await page.getByRole('button', { name: /Undo latest set/ }).click();
+  }
+  await expect(page.getByText('4 of 20 blocks')).toBeVisible();
+  await page.getByRole('button', { name: 'Add 10 push-ups' }).click();
+  await expect(compact).toBeEnabled();
+});
+
+test('off-season has progress too: blocks stack with no target', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${appPath}?mode=demo&fixture=nov-6-2026`);
+  await expect(page.getByTestId('progress-total')).toHaveText('140 this year');
+  await expect(page.getByText('1 block', { exact: true })).toBeVisible();
+  await expect(page.getByText('60 to the next block')).toBeVisible();
+  for (let i = 0; i < 3; i += 1) {
+    await page.getByRole('button', { name: 'Add 25 push-ups' }).click();
+  }
+  await page.getByRole('button', { name: /^Compact 100 push-ups/ }).click();
+  await expect(page.getByText('2 blocks', { exact: true })).toBeVisible();
 });
 
 test('current month blocks future month navigation by button and keyboard', async ({ page }) => {

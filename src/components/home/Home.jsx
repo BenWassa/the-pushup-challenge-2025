@@ -4,6 +4,7 @@ import ProgressSummary from './ProgressSummary.jsx';
 import QuickLog from './QuickLog.jsx';
 import ActivitySquares from './ActivitySquares.jsx';
 import { computeStreak } from '../../utils/streak.js';
+import { progressSubject } from '../../utils/century.js';
 
 const phaseLabel = (phase) =>
   ({ TRAINING: 'Training', OFFICIAL: 'Official', OFF_SEASON: 'Off-season' })[phase];
@@ -46,8 +47,22 @@ export default function Home({
         note: dayNote(challenge),
       }
     : { label: `${selectedYear} · confirmed`, value: summary.total };
-  const official = challenge.challenge
-    ? { value: summary.official, target: challenge.challenge.totalTarget }
+  // Progress in hundreds. Today's phase decides which total it is about; an archived year only
+  // shows the official total (read-only), and a year with no official challenge shows nothing.
+  const target = challenge.challenge?.totalTarget ?? null;
+  const subject = canLog
+    ? progressSubject({ phase: challenge.day.phase, summary, target })
+    : target
+      ? progressSubject({ phase: 'OFFICIAL', summary, target })
+      : null;
+  const century = subject
+    ? {
+        subject,
+        canCompact: canLog,
+        persist: canLog && !auth.isDemoMode,
+        loading: Boolean(data.loading),
+        storageKey: `pushup.century.${selectedYear}.${subject.category}`,
+      }
     : null;
   const streak =
     canLog && challenge.day.phase === 'OFFICIAL'
@@ -69,7 +84,7 @@ export default function Home({
           </button>
         </p>
       )}
-      <ProgressSummary primary={primary} official={official} streak={streak} />
+      <ProgressSummary primary={primary} century={century} streak={streak} />
       {canLog && (
         <QuickLog
           disabled={!canEdit || data.loading}

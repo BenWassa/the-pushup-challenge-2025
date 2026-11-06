@@ -323,3 +323,31 @@ identical text size and no overflow.
 **Status:** design selected and mockup refined. Applying this composition to the app
 header and verifying that implementation are the next steps. This selection does not
 record a deployment or completion of production implementation.
+
+## Progress in hundreds (Century stack)
+
+Problem: the progress bar existed only in the official window (a 2,000-wide bar, so +20 barely moved it)
+and training and off-season showed nothing. There is no official target outside the official window and
+we do not invent one.
+
+Design (owner choice among seven mockups; the throwaway mockup is `design/mockups/progress-bar/`, kept
+local): one bar that always means "this hundred". At 100 the bar becomes a full-width **Compact**
+button; tapping it folds the bar into one block in a stack and the bar starts again. Official shows 20
+slots (2,000); training and off-season keep stacking in rows of 10 (a "+N" chip after 40).
+
+- **Which total:** the phase being viewed — official (target 2,000), training, or off-season ("this
+  year"). Only official has a target. Archived years show the official total read-only, already stacked,
+  with no button; a year with no official edition shows no progress element.
+- **Source of truth:** `src/utils/century.js`. Blocks are always `floor(total / 100)`. "Compacted" is
+  display state only (localStorage `pushup.century.<year>.<category>`, not stored in demo mode, no cloud
+  or Firestore change). First load shows everything already stacked; a hundred finished by logging waits
+  for the tap. Undo below a hundred removes the block. Logging is never blocked by a waiting block and
+  extra reps carry to the next hundred.
+- **Motion:** the word tightens in as the button appears; tapping flies the bar into its slot (420 ms).
+  Reduced motion skips the flight. The bar row's height is reserved, so quick-log buttons never move.
+- **Accessibility:** Radix progressbar for the current hundred, Compact is a real button (removed from the
+  accessibility tree when no hundred is ready), block count is a polite live region, stack is one image
+  with a text label.
+- **Visible changes to confirm:** (1) training and off-season now show progress; during training the
+  headline was "Official 0 / 2,000" and is now the training total; (2) with the year breakdown gone from Home (owner cleanup), the official total is only shown while the official phase is running; after it ends Home shows the off-season total and the official result is not shown on Home (decision pending: where it should live); (3) the e2e test id `official-total` is now `progress-total`.
+- **Not built:** auto-compact setting and the alternative button positions (mockup only).

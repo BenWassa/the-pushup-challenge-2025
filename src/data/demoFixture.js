@@ -33,6 +33,17 @@ export const DEMO_FIXTURES = {
       ['2027-01-15', 30],
     ],
   },
+  // Off-season (no 2026 edition): 3:00 pm in Toronto on Friday 6 November 2026. Total: 140.
+  'nov-6-2026': {
+    year: 2026,
+    now: Date.UTC(2026, 10, 6, 20, 0, 0),
+    sets: [
+      ['2026-10-30', 40],
+      ['2026-11-02', 30],
+      ['2026-11-04', 25],
+      ['2026-11-05', 45],
+    ],
+  },
 };
 
 export function getDemoFixture() {

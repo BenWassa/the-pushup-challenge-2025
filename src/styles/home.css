@@ -200,6 +200,9 @@
   font-size: var(--fs-lg);
   font-weight: 650;
 }
+.summary-total .summary-suffix {
+  margin-left: var(--sp-2);
+}
 .streak {
   display: inline-flex;
   align-items: center;
@@ -221,19 +224,158 @@
   color: var(--c-text-muted);
   font-weight: 600;
 }
-.progress {
-  height: 10px;
-  margin-top: var(--sp-3);
+/* Progress in hundreds: one bar for the current hundred, a stack of finished hundreds below. */
+.century-barwrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--tap); /* reserved, so the quick-log buttons never move when the bar grows */
+  margin-top: var(--sp-2);
+}
+.century-bar {
+  position: relative;
+  flex: 1;
+  height: 14px;
   overflow: hidden;
   border-radius: var(--r-pill);
   background: var(--c-surface-raised);
+  transition:
+    height var(--dur) var(--ease),
+    border-radius var(--dur) var(--ease);
 }
-.progress-fill {
+.century-bar.is-full {
+  height: var(--tap);
+  border-radius: var(--r-md);
+  box-shadow:
+    0 0 0 2px var(--c-red-soft),
+    0 0 0 1px var(--c-red-text) inset;
+}
+.century-fill {
   display: block;
   height: 100%;
   border-radius: inherit;
   background: var(--c-red);
   transition: width var(--dur) var(--ease);
+}
+/* Compact: the full bar itself is the button */
+.century .century-compact {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  opacity: 1;
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+.century .century-compact:disabled {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.century .century-compact:hover:not(:disabled) {
+  background: transparent;
+}
+.century .century-compact:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.century-compact span {
+  display: inline-block;
+  letter-spacing: 0.04em;
+}
+/* The word compacts: letters start spread and tighten as the button appears. */
+@keyframes century-tighten {
+  from {
+    letter-spacing: 0.45em;
+    opacity: 0;
+  }
+  to {
+    letter-spacing: 0.04em;
+    opacity: 1;
+  }
+}
+.century-compact.is-ready span {
+  animation: century-tighten 420ms var(--ease) both;
+}
+.century .century-compact:active:not(:disabled) span {
+  animation: none;
+  letter-spacing: -0.02em;
+  transform: scale(0.94);
+}
+.century-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--sp-3);
+  min-height: var(--tap);
+}
+.century-caption,
+.century-count {
+  margin: 0;
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.century-caption b {
+  color: var(--c-text);
+}
+.century-count {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.century-blocks {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 5px;
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.century-blocks li {
+  aspect-ratio: 1;
+  border: 1px solid var(--c-line-strong);
+  border-radius: 5px;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.century-blocks li.is-on {
+  border-color: transparent;
+  background: var(--c-red);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.25) inset;
+}
+.century-blocks li.is-next {
+  border: 1px dashed var(--c-red-text);
+}
+.century-blocks li.is-landing {
+  opacity: 0;
+}
+.century-blocks li.century-more {
+  display: grid;
+  place-items: center;
+  aspect-ratio: auto;
+  border: 0;
+  color: var(--c-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+.century-flyer {
+  position: absolute;
+  z-index: 2;
+  background: var(--c-red);
+  pointer-events: none;
+}
+.century {
+  position: relative;
 }
 
 /* C. Quick logging: 2×2, equal size */
