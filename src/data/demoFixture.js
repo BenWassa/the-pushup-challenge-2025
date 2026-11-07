@@ -46,8 +46,13 @@ export const DEMO_FIXTURES = {
   },
 };
 
+export function findDemoFixture(name) {
+  return name && Object.hasOwn(DEMO_FIXTURES, name) ? DEMO_FIXTURES[name] : null;
+}
+
+// `?fixture=` wins over the `VITE_DEMO_FIXTURE` env default (used by `npm run dev:demo`).
 export function getDemoFixture() {
   if (typeof window === 'undefined') return null;
-  const name = new URLSearchParams(window.location.search).get('fixture');
-  return name && Object.hasOwn(DEMO_FIXTURES, name) ? DEMO_FIXTURES[name] : null;
+  const fromQuery = new URLSearchParams(window.location.search).get('fixture');
+  return findDemoFixture(fromQuery) || findDemoFixture(import.meta.env?.VITE_DEMO_FIXTURE);
 }

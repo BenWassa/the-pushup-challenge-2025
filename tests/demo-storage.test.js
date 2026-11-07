@@ -28,3 +28,12 @@ test('seeded history is never future-dated, so today counts before noon', () => 
   assert.ok(alex.logs.every((log) => log.timestamp <= morning.getTime()));
   assert.equal(new Date(alex.logs.at(-1).timestamp).getDate(), 13);
 });
+
+test('named demo fixtures resolve; unknown names do not', async () => {
+  const { findDemoFixture, getDemoFixture } = await import('../src/data/demoFixture.js');
+  assert.equal(findDemoFixture('feb-10-2027').year, 2027);
+  assert.equal(findDemoFixture('nope'), null);
+  assert.equal(findDemoFixture(undefined), null);
+  assert.equal(findDemoFixture('toString'), null);
+  assert.equal(getDemoFixture(), null); // no window outside the browser
+});
