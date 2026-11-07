@@ -464,4 +464,8 @@
   button:active:not(:disabled) {
     transform: none;
   }
+  /* A near-zero duration on an infinite loop would flicker; switch the loop off outright. */
+  .century-bar.is-full.is-ready {
+    animation: none;
+  }
 }
