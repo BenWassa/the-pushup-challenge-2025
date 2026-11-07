@@ -241,6 +241,17 @@
     0 0 0 2px var(--c-red-soft),
     0 0 0 1px var(--c-red-text) inset;
 }
+/* Ready to compact: a slow breath on the ring says "tap me" without a label change. */
+@keyframes century-ready {
+  50% {
+    box-shadow:
+      0 0 0 5px var(--c-red-soft),
+      0 0 0 1px var(--c-red-text) inset;
+  }
+}
+.century-bar.is-full.is-ready {
+  animation: century-ready 2400ms ease-in-out infinite;
+}
 .century-fill {
   display: block;
   height: 100%;
@@ -294,7 +305,8 @@
   }
 }
 .century-compact.is-ready span {
-  animation: century-tighten 420ms var(--ease) both;
+  /* wait for the bar to finish filling before the word appears */
+  animation: century-tighten 420ms var(--ease) 140ms both;
 }
 .century .century-compact:active:not(:disabled) span {
   animation: none;
@@ -312,22 +324,44 @@
 /* Bricks, not squares: a hundred must not read as a day in the 30-day grid below */
 .century-blocks li {
   aspect-ratio: 1.8;
-  border: 1px solid var(--c-line-strong);
   border-radius: 4px;
+  box-shadow: var(--cell-empty-ring);
   transition:
     background-color var(--dur) var(--ease),
-    border-color var(--dur) var(--ease);
+    box-shadow var(--dur) var(--ease);
 }
 .century-blocks li.is-on {
-  border-color: transparent;
   background: var(--c-red);
   box-shadow: 0 1px 0 rgb(255 255 255 / 0.25) inset;
 }
 .century-blocks li.is-next {
   border: 1px dashed var(--c-red-text);
+  box-shadow: none;
 }
 .century-blocks li.is-landing {
   opacity: 0;
+}
+/* The block lands: a quick flatten and release, plus one ring that fades out. */
+@keyframes century-seat {
+  0% {
+    transform: scaleY(0.78);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.25) inset,
+      0 0 0 0 var(--c-red-soft);
+  }
+  45% {
+    transform: scaleY(1.04);
+  }
+  100% {
+    transform: scaleY(1);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.25) inset,
+      0 0 0 7px transparent;
+  }
+}
+.century-blocks li.is-seated {
+  transform-origin: bottom;
+  animation: century-seat 380ms var(--ease);
 }
 .century-blocks li.century-more {
   display: grid;
@@ -429,5 +463,9 @@
   }
   button:active:not(:disabled) {
     transform: none;
+  }
+  /* A near-zero duration on an infinite loop would flicker; switch the loop off outright. */
+  .century-bar.is-full.is-ready {
+    animation: none;
   }
 }

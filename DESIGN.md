@@ -35,7 +35,7 @@ quiet History button on the same row. Keep the section on the page background:
 no raised sheet, contrasting fill, border, shadow, extra padding or edge bleed.
 Logging remains the visual focus.
 
-Today uses a red outline, never a dot. Omit weekday/date labels, alignment blanks,
+Days with no activity use the same unfilled outline as an empty block in the century stack (token `--cell-empty-ring` in tokens.css), so zero reads as empty, not as a dim fill. Today uses a red outline, never a dot. Omit weekday/date labels, alignment blanks,
 legend, selected-day details and the year breakdown from Home. History retains
 month names, browsing and day/set details. Preserve keyboard navigation and date
 names/counts for assistive technology. January's previous-year activity is read-only

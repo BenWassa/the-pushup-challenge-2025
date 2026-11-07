@@ -25,6 +25,7 @@ Requires Node.js 22. Install dependencies with `npm ci`, then:
 
 ```sh
 npm run dev             # Local Vite development
+npm run dev:demo        # Local development with fictional in-memory data (no Firebase, no sign-in)
 npm run lint            # Source formatting and lint
 npm test                # Native unit/regression tests
 npm run build           # Non-destructive production output to dist/
@@ -33,7 +34,18 @@ npm run test:integration  # Isolated Firebase emulator + Playwright browser test
 
 The integration command additionally needs Java 21 and Playwright Chromium (`npx playwright install --with-deps chromium`). It uses Firebase project `demo-pushup-2027` and local emulators only; never substitute a production project for automated tests. `npm run test:rules` runs the isolated Firestore rules tests alone.
 
-Visit `/the-pushup-challenge-2025/?mode=demo` for an entirely fictional in-memory demo. Demo activity resets on reload and cannot reach production Firestore.
+### Local testing with mock data
+
+`npm run dev:demo` starts the dev server in demo mode: an entirely fictional, in-memory user with sample sets. It needs no Firebase configuration or sign-in, never reads `.env.local` Firebase values, and cannot reach production Firestore. Activity resets on reload. Open `http://localhost:5173/the-pushup-challenge-2025/` and tap **Start Demo**.
+
+Pin the clock and data to a known day with a fixture, either from the environment or per page load (the URL wins):
+
+```sh
+VITE_DEMO_FIXTURE=feb-10-2027 npm run dev:demo   # default fixture for this server
+# or: /the-pushup-challenge-2025/?mode=demo&fixture=jan-15-2027
+```
+
+In the demo you can also switch presets from **Settings → Sample data** (it reloads with `?fixture=`; choose _Live clock_ for the real date). Fixtures live in `src/data/demoFixture.js`: `feb-10-2027` (mid-challenge, 445 reps), `jan-15-2027` (training phase), `nov-6-2026` (off-season), `feb-3-2027` (day one, nothing logged) and `feb-26-2027` (challenge complete, 2,016 reps). Without a fixture, the demo uses the real clock and a couple of recent sets. `?mode=demo` also works on any dev, preview or deployed build.
 
 ## Cloud configuration and release boundaries
 

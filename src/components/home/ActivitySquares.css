@@ -120,12 +120,12 @@
 
 .as-future .as-square {
   background: transparent;
-  box-shadow: inset 0 0 0 1px var(--c-line-strong);
+  box-shadow: var(--cell-empty-ring);
 }
 
 .as-upcoming-swatch {
   background: transparent;
-  box-shadow: inset 0 0 0 1px var(--c-line-strong);
+  box-shadow: var(--cell-empty-ring);
 }
 
 .as-cell[aria-current='date'] .as-square {
@@ -275,7 +275,8 @@
   font-size: inherit;
 }
 .home .as-heat-0 {
-  background: oklch(0.28 0.009 25);
+  background: transparent;
+  box-shadow: var(--cell-empty-ring);
 }
 
 .home .as-root .as-grid {
@@ -307,5 +308,5 @@
 }
 .as-unavailable .as-square {
   background: transparent;
-  box-shadow: inset 0 0 0 1px var(--c-line-strong);
+  box-shadow: var(--cell-empty-ring);
 }
