@@ -245,6 +245,9 @@ footer a {
 .error p {
   margin: var(--sp-1) 0;
 }
+.notice button {
+  margin-top: var(--sp-2);
+}
 .error {
   border-color: var(--c-red);
   background: var(--c-red-soft);

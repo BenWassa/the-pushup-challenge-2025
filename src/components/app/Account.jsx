@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { DEMO_FIXTURES, LIVE_FIXTURE, getDemoFixtureName } from '../../data/demoFixture';
 
 export default function Account({ auth, challenge, busy }) {
   const [zone, setZone] = useState(challenge.timeZone);
@@ -67,6 +68,29 @@ export default function Account({ auth, challenge, busy }) {
       {auth.isDemoMode ? (
         <div className="notice">
           <p>Demo: memory only; resets on reload. No Firebase reads or writes.</p>
+          <label>
+            Sample data
+            <select
+              value={getDemoFixtureName() || LIVE_FIXTURE}
+              disabled={busy}
+              onChange={(event) => {
+                const url = new URL(window.location.href);
+                url.searchParams.set('fixture', event.target.value);
+                window.location.assign(url);
+              }}
+            >
+              <option value={LIVE_FIXTURE}>Live clock</option>
+              {Object.entries(DEMO_FIXTURES).map(([name, preset]) => (
+                <option key={name} value={name}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="quiet">
+            {DEMO_FIXTURES[getDemoFixtureName()]?.description ??
+              'Today’s date and a couple of recent sets.'}
+          </p>
           <button disabled={busy} onClick={() => window.location.reload()}>
             Reset demo
           </button>

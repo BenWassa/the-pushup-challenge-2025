@@ -45,7 +45,7 @@ VITE_DEMO_FIXTURE=feb-10-2027 npm run dev:demo   # default fixture for this serv
 # or: /the-pushup-challenge-2025/?mode=demo&fixture=jan-15-2027
 ```
 
-Fixtures live in `src/data/demoFixture.js`: `feb-10-2027` (official phase, 445 reps), `jan-15-2027` (training phase) and `nov-6-2026` (off-season). Without a fixture, the demo uses the real clock and a couple of recent sets. `?mode=demo` also works on any dev, preview or deployed build.
+In the demo you can also switch presets from **Settings → Sample data** (it reloads with `?fixture=`; choose _Live clock_ for the real date). Fixtures live in `src/data/demoFixture.js`: `feb-10-2027` (mid-challenge, 445 reps), `jan-15-2027` (training phase), `nov-6-2026` (off-season), `feb-3-2027` (day one, nothing logged) and `feb-26-2027` (challenge complete, 2,016 reps). Without a fixture, the demo uses the real clock and a couple of recent sets. `?mode=demo` also works on any dev, preview or deployed build.
 
 ## Cloud configuration and release boundaries
 

@@ -37,3 +37,22 @@ test('named demo fixtures resolve; unknown names do not', async () => {
   assert.equal(findDemoFixture('toString'), null);
   assert.equal(getDemoFixture(), null); // no window outside the browser
 });
+
+test('every demo preset has a label and valid sets; new presets total what they claim', async () => {
+  const { DEMO_FIXTURES } = await import('../src/data/demoFixture.js');
+  for (const [name, preset] of Object.entries(DEMO_FIXTURES)) {
+    assert.ok(preset.label && preset.description, name);
+    assert.ok(Number.isFinite(preset.now), name);
+    assert.ok(
+      preset.sets.every(([date, amount]) => /^\d{4}-\d{2}-\d{2}$/.test(date) && amount > 0)
+    );
+  }
+  const total = (name) => DEMO_FIXTURES[name].sets.reduce((sum, [, amount]) => sum + amount, 0);
+  assert.equal(total('feb-3-2027'), 0);
+  assert.equal(total('feb-26-2027'), 2016);
+  assert.ok(
+    DEMO_FIXTURES['feb-26-2027'].sets.every(
+      ([date]) => date >= '2027-02-03' && date <= '2027-02-26'
+    )
+  );
+});
