@@ -44,6 +44,7 @@ export default function CenturyProgress({
   const fillRef = useRef(null);
   const slotRefs = useRef([]);
   const [landing, setLanding] = useState(null);
+  const [seated, setSeated] = useState(null);
   // null = not decided yet: follow the totals (everything already stacked) until they are loaded.
   const [stored, setStored] = useState(() =>
     persist && canCompact ? readStored(storageKey) : null
@@ -83,16 +84,37 @@ export default function CenturyProgress({
       flyer.setAttribute('aria-hidden', 'true');
       root.append(flyer);
       setLanding(index);
-      const animation = flyer.animate(
+      const from = place(fill.getBoundingClientRect());
+      const to = place(slot.getBoundingClientRect());
+      const radius = [{ borderRadius: '12px' }, { borderRadius: '4px' }];
+      // Two beats on one block: it squeezes sideways to brick width first (ease-out), then drops
+      // onto the stack (ease-in, so it arrives with weight). Different curves per axis give the
+      // path a natural arc without any bounce.
+      flyer.animate(
         [
-          { ...place(fill.getBoundingClientRect()), borderRadius: '12px' },
-          { ...place(slot.getBoundingClientRect()), borderRadius: '5px' },
+          { left: from.left, width: from.width },
+          { left: to.left, width: to.width },
         ],
-        { duration: 420, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'forwards' }
+        { duration: 340, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' }
       );
+      flyer.animate(
+        [
+          { top: from.top, height: from.height },
+          { top: to.top, height: to.height },
+        ],
+        { duration: 380, delay: 80, easing: 'cubic-bezier(0.55, 0, 0.9, 0.45)', fill: 'both' }
+      );
+      const animation = flyer.animate(radius, {
+        duration: 460,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        fill: 'forwards',
+      });
       const done = () => {
         flyer.remove();
         setLanding(null);
+        setSeated(index);
+        // Quiet confirmation on phones that support it; iOS ignores this.
+        if (typeof navigator.vibrate === 'function') navigator.vibrate(12);
       };
       animation.onfinish = done;
       animation.oncancel = done;
@@ -117,7 +139,9 @@ export default function CenturyProgress({
       </p>
       <div className="century-barwrap">
         <Progress.Root
-          className={full ? 'century-bar is-full' : 'century-bar'}
+          className={
+            full ? (ready ? 'century-bar is-full is-ready' : 'century-bar is-full') : 'century-bar'
+          }
           aria-label={`${label} progress to the next 100`}
           value={state.barValue}
           max={CENTURY}
@@ -177,7 +201,14 @@ export default function CenturyProgress({
                 ref={(node) => {
                   slotRefs.current[index] = node;
                 }}
-                className={landing === index ? `${className} is-landing` : className}
+                className={
+                  landing === index
+                    ? `${className} is-landing`
+                    : seated === index
+                      ? `${className} is-seated`
+                      : className
+                }
+                onAnimationEnd={() => setSeated((current) => (current === index ? null : current))}
               />
             );
           })}
